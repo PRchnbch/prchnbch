@@ -1,0 +1,551 @@
+\documentclass[12pt,a4paper]{book}
+
+%------ Packages -------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[inner=4cm,outer=2.5cm,top=3cm,bottom=3cm]{geometry}
+\usepackage{titlesec}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathrsfs, bm, bbm, nicefrac}
+\usepackage[dvipsnames, table]{xcolor}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{enumitem} %to set itemize globally
+\usepackage{blkarray}
+\usepackage{makecell}
+\usepackage{arydshln}
+\usepackage[backend = biber, style = alphabetic, maxnames = 6, maxalphanames = 4, minalphanames = 3, giveninits=true]{biblatex}
+\addbibresource{literature.bib}
+\usepackage{imakeidx}
+\usepackage{algorithmic}
+\usepackage[vlined, ruled, algochapter]{algorithm2e}
+\usepackage[titles]{tocloft} %for spacing in table of content
+\setlength{\cftbeforepartskip}{1.7em}
+%\setlength{\cftaftertoctitleskip}{2em}
+\setlength{\cftbeforechapskip}{0.9em} %for spacing between chapters in table of content
+
+
+\usepackage{fancyhdr}
+\setlength{\headheight}{15.2pt}
+\pagestyle{fancy}
+
+\usepackage{tikz}
+\usetikzlibrary{cd}
+\usetikzlibrary{backgrounds, shapes, positioning}
+\usetikzlibrary{decorations.pathmorphing}
+
+\usepackage[hidelinks]{hyperref} %colorlinks=true; [hidelinks] hides all colours
+%urlcolor     = blue, %Colour for external hyperlinks
+%linkcolor    = blue, %Colour of internal links
+%citecolor   = red %Colour of citations
+
+%or perhaps
+
+%linkcolor={red!50!black},
+%citecolor={blue!50!black},
+%urlcolor={blue!80!black}
+
+\usepackage[toc]{glossaries}
+\makeglossaries
+\makeindex[intoc]
+
+
+
+%------ Makros -------------------------
+\newcommand{\CC}{\mathbb C}
+\newcommand{\FF}{\mathbb F}
+\newcommand{\KK}{\mathbb K}
+\newcommand{\NN}{\mathbb N}
+\newcommand{\PP}{\mathbb P}
+\newcommand{\QQ}{\mathbb Q}
+\newcommand{\RR}{\mathbb R}
+\newcommand{\ZZ}{\mathbb Z}
+
+\newcommand{\imag}{\mathfrak{i}}
+\newcommand{\ones}{\mathbbm 1}
+\newcommand{\eps}{\epsilon}
+\newcommand{\veps}{\varepsilon}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+\newcommand{\Abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\norm}[1]{\lVert#1\rVert}
+\newcommand{\Norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\T}{^{\mathsf{T}}} %for transpose of a matrix
+\newcommand{\HT}{^{\dagger}} %for Hermitian transpose of a matrix
+\newcommand{\adj}{^{\ast}} %adjoint of a linear map
+
+\newcommand{\Ascr}{\mathscr{A}}
+\newcommand{\Cscr}{\mathscr{C}}
+\newcommand{\Iscr}{\mathscr{I}}
+\newcommand{\Jscr}{\mathscr{J}}
+\newcommand{\Wscr}{\mathscr{W}}
+\newcommand{\Rscr}{\mathscr{R}}
+
+\newcommand{\Xfrak}{\mathfrak{X}} %for character group
+\newcommand{\pfrak}{\mathfrak{p}}
+\newcommand{\qfrak}{\mathfrak{q}}
+
+\newcommand{\Acal}{\mathcal{A}}
+\newcommand{\Gcal}{\mathcal{G}}
+\newcommand{\ical}{\mathcal{i}} % for ideals
+\newcommand{\Ical}{\mathcal{I}} % for ideals
+\newcommand{\Mcal}{\mathcal{M}}
+\newcommand{\Ncal}{\mathcal{N}}
+\newcommand{\Pcal}{\mathcal{P}}
+\newcommand{\Scal}{\mathcal{S}}
+\newcommand{\Unipotent}{\mathfrak{U}}
+
+\newcommand{\Aset}{\mathcal{A}}
+\newcommand{\Col}{\mathscr{C}}
+
+\newcommand{\ot}{\otimes}
+\newcommand{\onePerp}{\ones^{\perp}_m}
+\newcommand{\Mg}{\mathcal{M}^{\mathtt{g}}}
+\newcommand{\MgT}{\mathcal{M}^{\mathtt{g}}_{\otimes}}
+\newcommand{\MT}{\mathcal{M}^{\otimes}}
+\newcommand{\MTK}{\mathcal{M}^{\otimes}_{\mathbb{K}}}
+\newcommand{\Mll}{\mathcal{M}^{\mathtt{\ell \ell}}}
+\newcommand{\MGar}{\mathcal{M}_{\Gcal}^{\to}}
+\newcommand{\MGcar}{\mathcal{M}_{(\Gcal, c)}^{\to}}
+\newcommand{\Mud}{\mathcal{M}^{\mathrm{ud}}}
+\newcommand{\GSL}{G_{\SL}}
+\newcommand{\GSLpm}{G_{\SL}^{\pm}}
+\newcommand{\ASL}{\mathcal{A}_{\SL}}
+\newcommand{\ASLpm}{\mathcal{A}_{\SL}^{\pm}}
+\newcommand{\AG}{\mathcal{A}(\Gcal)}
+\newcommand{\AGc}{\mathcal{A}(\Gcal, c)}
+\newcommand{\Gc}{(\Gcal, c)}
+
+\newcommand{\defnSymbol}{$\diamondsuit$}
+\newcommand{\exSymbol}{$\diamondsuit$}
+\newcommand{\remSymbol}{$\triangledown$}
+
+\definecolor{forest}{RGB}{11,128,35}
+\newcommand{\PR}[1]{\textcolor{forest}{\huge#1}}
+\newcommand{\red}[1]{\textcolor{red}{\huge#1}}
+
+\newcommand{\ci}{{\perp\!\!\!\perp}} %symbol for conditional independence
+
+
+%------ MathOperators -------------------------
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\chol}{chol} %for Cholesky decomposition
+\DeclareMathOperator{\PD}{PD}
+\DeclareMathOperator{\End}{End}
+\DeclareMathOperator{\GL}{GL}
+\DeclareMathOperator{\SL}{SL}
+\DeclareMathOperator{\Bor}{B}
+\DeclareMathOperator{\Un}{U}
+\DeclareMathOperator{\SU}{SU}
+\DeclareMathOperator{\Orth}{O}
+\DeclareMathOperator{\SO}{SO}
+\DeclareMathOperator{\GT}{GT}
+\DeclareMathOperator{\ST}{ST}
+%\DeclareMathOperator{\Herm}{Herm}
+\DeclareMathOperator{\Lie}{Lie}
+\DeclareMathOperator{\Sym}{Sym}
+\DeclareMathOperator{\aff}{aff}
+\DeclareMathOperator{\conv}{conv}
+\DeclareMathOperator{\capac}{cap}
+\DeclareMathOperator{\spec}{spec}
+\DeclareMathOperator{\poly}{poly}
+\DeclareMathOperator{\rk}{rank}
+\DeclareMathOperator{\im}{im}
+\DeclareMathOperator{\vect}{vec}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\ds}{ds} %distance to doubly stochastic
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\Span}{span}
+\DeclareMathOperator{\rsp}{rowspan}
+\DeclareMathOperator{\mlt}{mlt}
+\DeclareMathOperator{\cp}{cp} %for cut-and-paste rank
+\DeclareMathOperator{\KL}{KL} %for Kullback-divergence
+\DeclareMathOperator{\ch}{ch} %set of children
+\DeclareMathOperator{\pa}{pa} %set of parents
+\DeclareMathOperator{\prc}{prc} %parent relationship colour
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\Id}{I} %for identity matrix
+\DeclareMathOperator{\Zar}{Z}
+\DeclareMathOperator{\relint}{relint}
+\DeclareMathOperator{\interior}{int}
+\DeclareMathOperator{\new}{new}
+\DeclareMathOperator{\Ad}{Ad}
+\DeclareMathOperator{\ad}{ad}
+
+
+%------ Theorem Environments -------------------------
+\theoremstyle{theorem}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{prop}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{cor}[theorem]{Corollary}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{question}[theorem]{Question}
+\newtheorem{compprob}[theorem]{Computational Problem}
+
+\theoremstyle{definition}
+\newtheorem{defn}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{setting}[theorem]{Setting}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+
+%------ For Headers and Footers -------------------------
+\fancypagestyle{empty}{
+	\fancyhf{}
+	\renewcommand{\headrulewidth}{0pt}
+	\renewcommand{\footrulewidth}{0pt}
+}
+
+\fancypagestyle{plain}{
+	\fancyhf{}
+	\cfoot{\thepage}
+	\renewcommand{\headrulewidth}{0pt}
+	\renewcommand{\footrulewidth}{0pt}
+}
+
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[RE]{ \nouppercase{\leftmark} }
+\fancyhead[LO]{ \nouppercase{\rightmark} }
+
+
+%------ Further Settings -------------------------
+\titleformat{\chapter}[display]{\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing{\chapter}{0pt}{0pt}{30pt}
+\titleformat{\section}{\Large\bfseries}{\thesection}{10pt}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{8pt}{}
+\setitemize{itemsep=1pt} %global itemsep
+ 
+%\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+%\renewcommand{\algorithmicensure}{\textbf{Output:}}
+%\setcounter{secnumdepth}{1}   %determine depth for section numbering
+%\setcounter{tocdepth}{3}          %determine depth for appearance in table oif content
+
+%For Algorithms
+\SetKwInOut{Input}{Input} 
+\SetKwInOut{Output}{Output}
+\SetKwComment{Comment}{/* }{ */}
+
+%for TiKZ figures
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{\node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
+\newcommand*\squared[1]{\tikz[baseline=(char.base)]{\node[shape=rectangle,draw,inner sep=1.5pt] (char) {#1};}}
+\newcommand*\triangled[1]{\tikz[baseline=(char.base)]{\node[shape=regular polygon,draw,regular polygon sides = 3,inner sep=-0.3pt] (char) {#1};}}
+\newcommand*\pentagoned[1]{\tikz[baseline=(char.base)]{\node[shape=regular polygon,draw,regular polygon sides = 5,inner sep=-0.1pt] (char) {#1};}}
+
+
+%------ GlossaryEntries -------------------------
+%TODO
+\newglossaryentry{muG}{name=\ensuremath{\mu_G},description={moment map for an action of the group $G$}}
+\newglossaryentry{pa}{name=\ensuremath{\pa(i)},description={set of parents of a vertex $i$}}
+\newglossaryentry{ch}{name=\ensuremath{\ch(i)},description={set of children of a vertex $i$}}
+\newglossaryentry{MGar}{name=\ensuremath{\MGar},description={directed Gaussian graphical model given by a DAG $\Gcal$}}
+\newglossaryentry{MGcar}{name=\ensuremath{\MGcar},description={restricted DAG (RDAG) model given by the coloured DAG $\Gc$}}
+\newglossaryentry{Gc}{name=\ensuremath{\Gc},description={coloured DAG}}
+\newglossaryentry{Ypa}{name=\ensuremath{Y^{(pa(i))}},description={the sub-matrix of $Y$ with rows indexed by the parents of $i$}}
+\newglossaryentry{YiAndPa}{name=\ensuremath{Y^{(i \cup \pa(i))}},description={the sub-matrix of $Y$ with rows indexed by node $i$ and its parents}}
+
+
+
+
+%------ Begin of Document -------------------------
+
+\begin{document}
+
+
+%------ Frontmatter -------------------------
+\frontmatter
+
+
+%------ Titlepage -------------------------
+%TODO add logos(?) of ERC, TU and BMS, use the template given by
+%add ORCID!!
+%title: Invariant Theory in Computational Complexity and Algebraic Statistics
+
+\thispagestyle{empty}
+
+
+\begin{center}
+	{\Huge \textbf{Invariant Theory in
+			\\ \vspace{5pt}
+			Computational Complexity
+			\\ \vspace{15pt}
+			and Algebraic Statistics}}
+	
+	\vspace{2cm}
+	
+	
+	{\sffamily \large
+	vorgelegt von\\
+	M.\hspace{4pt}Sc.\\
+	\vspace{5pt}
+	\textbf{\Large Philipp Reichenbach}\\
+	\vspace{7pt}
+	ORCID: 0000-0002-5722-5505}
+	
+	\vspace{1.7cm}
+	
+	{\large
+	von der Fakultät II -- Mathematik und Naturwissenschaften\\ \vspace{3pt}
+	der Technischen Universität Berlin\\ \vspace{5pt}
+	zur Erlangung des akademischen Grades}
+	
+	\vspace{0.6cm}
+	
+	\textbf{\Large \sffamily Doktor der Naturwissenschaften\\
+	\vspace{7pt}
+	Dr.\hspace{4pt}rer.\hspace{4pt}nat.}
+	
+	\vspace{0.7cm}
+	
+	{\large vorgelegte Dissertation}
+\end{center}
+
+\vspace{1.7cm}
+
+{\large
+\textbf{Promotionsausschuss:}
+
+\vspace{0.5cm}
+
+\begin{tabular}{ll}
+	Vorsitzender: & Prof. Dr. TBA \\
+	Gutachter: & Prof. Dr. Peter Bürgisser  \\
+	Gutachter: & Prof. Dr. Jan Draisma \\
+\end{tabular}
+
+\vspace{0.5cm}
+
+\textbf{Tag der wissenschaftlichen Aussprache:} 08.06.2023}
+
+\vspace{2cm}
+\begin{center}
+	{\large Berlin 2023}
+\end{center}
+
+
+\cleardoublepage
+
+\vspace*{6cm}
+
+\begin{center}
+
+{\large\emph{``Mit dem Wissen wächst der Zweifel''}}\\
+\bigskip
+Johann Wolfgang von Goethe
+\end{center}
+
+\cleardoublepage
+
+%And the first lesson of all was the basic trust \emph{that} he could learn. It is shocking to find how many people do not believe they can learn...''
+
+%TODO
+%"wise" words ;)
+%e.g. "Das Leben ist zu kostbar, um es dem Schicksal zu überlassen." von Deus X. Machina
+% "Wissen ist Nacht." Prof. Dr. Abdul Nachtigaller
+% "Mit dem Wissen wächst der Zweifel" von Goethe
+% "Und jedem Anfang wohnt ein Zauber inne." von Hermann Hesse --> maybe for chapter on Gaussian Group Models
+% "Das Ziel ist dies: mich immer dahin zu stellen, wo ich am besten dienen kann, wo meine Art, meine Eigenschaften und Gaben den besten Boden, das größte Wirkungsfeld finden. Es gibt kein anderes Ziel." von Hesse (Quelle: Narziß und Goldmund)
+% Prolog auf S. 111 in Dune (Über das Lernen):
+%Many have marked the speed with which Muad'Dib learned the necessities of Arrakis. The Bene Gesserit, of course, know the basis of this speed. For the others, we can say that Muad'Dib learned rapidly because his first training was in \emph{how} to learn. And the first lesson of all was the basic trust \emph{that} he could learn. It is shocking to find how many people do not believe they can learn...''
+
+% Introductory chapters
+\chapter*{Preface}
+
+
+
+\section*{Deutsche Einleitung}
+
+TODO %todo
+
+\newpage
+\section*{Acknowledgments}
+
+TODO
+
+%TODO make an extra page for ERC funding?? 
+
+%Peter; 
+%co-authors (Anna, Kathlen, Carlos, Visu, Cole, Greg, Eloise, Giorgio);
+%ERC for funding
+%(Peter +) Bernd Sturmfels and Mathias Drton + TES organizers;
+%research group members, further people for discussions in particular Michael and Harold
+%BMS in general (Fridays, Career Events, Wine and Cheese) and BMS mentor Prof. Liesen; all those we thanked in the four papers + anonymous referees; 
+%friends and family;
+
+%TODO acknowledgments, list of publications, thank the ERC, deutsche einleitung, english indtroduction
+
+\newpage
+\section*{Authorship}
+
+TODO
+
+%introduction written by myself, Equation~\eqref{eq:Dictionary} taken from \cite{SiagaPaper}
+
+%todo
+
+%chapter 3 written by myself but highly influenced by the existing literature, especially GargOliveira, Grdaflow, and also a bit intro from FR21
+
+\tableofcontents
+\addtocontents{toc}{\vskip-18pt} %decrease space between title of table of content and next item
+
+
+
+%------ Mainmatter ------------------------
+\mainmatter
+
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Introduction}
+\chapter*{Introduction}
+\input{Introduction}
+
+
+
+
+
+%------ Part I: Invariant Theory ------------------------
+\part{Invariant Theory}\label{part:InvariantTheory}
+
+\chapter{Algebraic Group Actions} \label{ch:AlgebraicGroupActions}
+%todo change name??
+
+\input{AlgebraicGroups}
+%content: linear algebraic groups and their representations; tori, unipotent, Levi decomposition into reductive and unipotent radical, (linearly) reductive; torus actions via weights; reductive vs self-adjoint; matrix Lie groups?; stability notions and quotients; digression: many instances of NCM and OCI problem??
+
+
+
+\chapter{Criteria for Stability Notions}\label{ch:CriteriaForStability}
+
+\input{CriteriaStability}
+%content: numerical Mumford?, Hilbert-Mumford, Kempf-Ness, moment maps and moment polytopes, convexity theorems;
+%King's criterion for quivers and its specialization to the Kronecker quiver
+%Popov criterion!
+
+
+
+%------ Part II: Computational Complexity ------------------------
+\part{Computational Complexity}\label{part:CompComplexity}
+
+
+
+%------ Chapter: Computational Invariant Theory ------------------------
+
+\chapter{Computational Invariant Theory} \label{ch:CompInvariantTheory}
+
+\input{CompInvariantTheory}
+
+%chapter "Computational Invariant Theory"
+	%section on Computational Problems: many instances of NCM and OCI problem, also moment polytope membership problem; outline connection to many different areas/sciences; present overview on literature?
+	%section "Scaling Algorithms" with a focus on gradflow paper
+	%Section "Weight Margin and Gap as Complexity Paramters": present quantitative Kempf-Ness via weight margin --> or in Kempf-Ness section??; open question via gap; state some computational complexity results from gradflow; discuss role of gap
+	%Section "Diameter as Complexity Parameter"??
+
+
+%------ Chapter: Bounds on Weight Margin and Gap ------------------------
+
+\chapter{Bounds on Weight Margin and Gap} \label{ch:BoundsMarginGap}
+
+\input{BoundsMarginGap}
+
+%chapter "Bounds on Weight Margin and Gap"
+	%section "Free sets of weights"; include freeness for left right action? (should be permutation matrices); include "Freeness for tensors"
+	%explain proof method (always do weigth margin bound, and directly proof freeness afterwards)
+	%section "Tensors" (subsections: local dimension two(qubits), 3-tensors, d-tensors, padding the results)
+	%section "Homogeneous Polynomials"
+	%section "Quivers" (subsections: upper bounds from paper; large lower bound for gap by Cole and Visu)
+	
+
+
+%------ Chapter: Bounds on the Diameter ------------------------
+
+\chapter{Bounds on the Diameter} \label{ch:BoundsDiameter}
+
+\input{BoundsDiameter}
+	
+%Chapter "Bounds on the Diameter" ??
+
+%TODO find appropriate chapters
+
+%--------- old thoughts ----------------------
+
+%e.g. "Complexity Parameter (Weight) Margin and Gap" --> motivate them via (geodesic) convex optimization; elementary properties as in Section 4.1 of weight margin paper; proof techniques for bounds? (or in later chapter? --> maybe decide using what is own contribution and what was known)
+
+%"Bounds on weight margin and gap" --> tensors; homog polynomials; quiver reps; mention general bounds from gradflow paper
+
+%add that for a free vector we have: T semistable implies G semistable (see discussion with Levent from September 28)
+%freeness for left right action (should be permutation matrices)
+
+
+%------ Part III: Algebraic Statistics ------------------------
+\part{Algebraic Statistics}\label{part:AlgebraicStatistics}
+
+
+%------ Chapter: Maximum Likelihood Estimation ------------------------
+\chapter{Maximum Likelihood Estimation}\label{ch:MLestimation}
+
+\input{MLestimation}
+%introduce ML estimation and statistical models in general; introduce ML thresholds in general; introduce ITS and flip-flop?
+%introduce exponential families??
+%mention important models: discrete models, Gaussian models, RCON models, DAG models
+%examples of MLEs and ML thresholds for: independence model and full Gaussian model
+
+%------ Chapter: Log-Linear Models ------------------------
+\chapter{Log-linear Models}\label{ch:LogLinearModels}
+
+\input{LogLinearModels}
+
+%------ Chapter: Gaussian Models ------------------------
+\chapter{Gaussian Models via Symmetrization}\label{ch:GaussianModels}
+
+\input{GaussianModels}
+
+
+%------ Chapter: Gaussian Group Models ------------------------
+\chapter{Gaussian Group Models}\label{ch:GaussianGroupModels}
+
+%TODO include further nice properties/discussions about Gaussian group models
+%for this: go through all notes and through the papers by Visu and Harm (and Michael)
+%"about extended MLEs" -> careful there seem to be mistakes in Rem 4.14 of GaussianPpaper and/or in my notes, also nice fact(!): If $G$ is Zariski-closed + self-adjoint, then $\McalG$ is Euclidean closed in PD_m
+%add nice discussion about "Stabilizer and likelihood" (project with Greg et.al.)
+%show that reductive Gaussian group model is geodesically convex. Leave converse as open problem. (I.e., if $\Mcal$ is geodesically convex, does there exist a reductive group $G$ such that $\Mcal = \Mg_G$?)
+
+\input{GaussianGroupModels}
+
+
+
+%------ Chapter: Gaussian Group Models ------------------------
+\chapter{Restricted DAG Models}\label{ch:RDAGs}
+
+\input{RDAGs}
+
+
+%------ Appendix -------------------------
+%\appendix
+%\chapter{First Appendix}
+
+
+%------ Backmatter -------------------------
+\backmatter
+% bibliography, list of symbols, index, listoffigures(?), listoftables(?)
+
+%------ Bibliography -------------------------
+\nocite{latexWikibooks} %todo
+\printbibliography[heading = bibintoc]
+
+\printglossary[title=List of Symbols]
+
+\printindex
+
+	
+\end{document}
+
+
+
+
+
+

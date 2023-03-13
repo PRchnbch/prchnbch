@@ -1,0 +1,293 @@
+
+
+%todo get rid of ``Contents'' in the haeders!!
+
+\begin{center}
+	%\textit{``Die Mathematik ist das Instrument, welches die Vermittlung bewirkt\\zwischen Theorie und Praxis, zwischen Denken und Beobachten:\\sie baut die verbindende Brücke und gestaltet sie immer tragfähiger.''}
+	\emph{``Das Instrument, welches die Vermittlung bewirkt zwischen Theorie und Praxis, zwischen Denken und Beobachten, ist die Mathematik;\\sie baut die verbindende Brücke und gestaltet sie immer tragfähiger.''}
+	\\ \bigskip
+	David Hilbert\footnote{in ``Naturerkennen und Logik'' (speech from 8th September 1930), see \cite[p.~385]{HilbertGesammelte}}
+\end{center}
+
+\vspace{0.5cm}
+
+Groups are amongst the most fundamental, organizing objects of mathematics, and appear all over the sciences. From a geometrical perspective, groups provide a framework to encode symmetries and they are often studied themselves via actions on spaces. %that allow to \emph{represent} the groups.
+Invariant theory studies actions of algebraic groups on algebraic varieties, and functions on the variety that remain invariant under this action. It is a branch of algebra that is classically intertwined with computation, but also led to great contributions in mathematics and to applications beyond.
+
+A prime example are Hilbert landmark papers \cite{Hilbert1890, Hilbert1893} on classical invariant theory. There he proved seminal results of modern algebra and algebraic geometry; most prominently, his Basis Theorem and the Nullstellensatz. However, the initial objective of Hilbert's papers was a finiteness theorem on the ring of invariants, and to provide an algorithm for computing a generating system. For this, Hilbert introduced in \cite{Hilbert1893} an invariant-theoretic key concept called the \emph{null cone}. It consists of all unstable vectors, that is, vectors that cannot be distinguished from zero by invariants. Unstable vectors and further notions of stability play an important role in Geometric Invariant Theory \cite{MumfordGITbook} for constructing and studying quotient spaces. Strikingly, there are also many applications beyond algebra itself as we outline below.
+
+In recent years the null cone enjoyed a computational revival.
+The problem of testing null cone membership (NCM, see Problem~\ref{comp:NCM}) has been intensively studied, leading to polynomial time algorithms in several important cases. There are algebraic/symbolic methods for testing NCM, as well as optimization algorithms through ``approximate'' formulations of NCM: the Norm Minimization Problem~\ref{comp:NormMinim} and the Scaling Problem~\ref{comp:Scaling}. Thanks to the general abstract setting of invariant theory, these three problems have manifold applications in mathematics, physics, computer science and statistics; thereby connecting seemingly unrelated (computational) problems. This unified framework and its applications serve as a starting point and motivation of the thesis.
+
+%Thanks to the general abstract setting of invariant theory, these three problems have diverse instantiations, thereby connecting seemingly unrelated (computational) problems.
+%As a consequence, this unified framework has manifold applications in mathematics, physics, computer science and statistics; and it is the starting point of this thesis.
+
+\bigskip
+
+The objectives of this thesis are twofold. On one side, we study the \emph{computational complexity} of geodesic convex optimization methods for solving the above three computational problems. On the other hand, we \emph{build a bridge} between invariant theory and \emph{algebraic statistics}, which establishes novel relations to maximum likelihood estimation.
+
+\bigskip
+
+Regarding computational complexity, a prominent example of NCM arises for the so-called operator scaling action\footnote{also called left-right action}, where a product of special linear groups acts on (tuples of) matrices. The NCM problem for this action relates to non-rational identity testing, a non-commutative analogue of the famous polynomial identity testing problem. Remarkably, the approach through the NCM problem leads to, both algebraic \cite{derksen2017polynomial, ivanyos2017constructive} and numeric \cite{allen2018operator, garg2016deterministic}, deterministic polynomial time algorithms for non-rational identity testing!\footnote{In contrast, it remains a major open problem to solve polynomial identity testing in deterministic polynomial time.} However, neither of the current methods is known to run in polynomial time for tensor scaling, the higher dimensional analogue where one acts on (tuples of) tensors. In fact, the main results in Part~\ref{part:CompComplexity} prove that this is another example of the ``unwritten law'' that tensors are (computationally) ``more challenging'' than matrices.
+
+More precisely, we present the results of \cite{WeightMargin} which give exponentially bad behaved bounds for complexity parameters of current geodesic convex optimization methods \cite{burgisser2020interior, allen2018operator, absil2008optimization, BoumalBook}. First, a parameter capturing the \emph{required precision} for deciding NCM via optimization methods is shown to be exponentially small for tensor scaling. Second, in the high-precision regime the \emph{diameter}, which can be interpreted as the bit-complexity of an approximate minimizer, may be exponentially large for tensor scaling.
+In contrast, these complexity parameters are known to be only polynomially small (precision) respectively polynomially large (diameter) for operator scaling.
+Altogether, these bounds exclude polynomial time algorithms for NCM, Norm Minimization and the Scaling Problem via current geodesic methods.
+
+It should be noted that the latter are geodesic analogues of first and second order methods. However, in general, first and second order methods do not even suffice for commutative groups, where the computational problems are convex in the usual sense. Instead, ellipsoid or interior-point algorithms are required to ensure polynomial time \cite{singh2014entropy, straszak2019computing, burgisser2020interior}.
+Therefore, our results highly motivate the search for new sophisticated, e.g., interior-point like, methods in the regime of geodesic convex optimization. We point out that the very recent works \cite{HiraiInterior, HaroldMichaelInterior} rigorously study self-concordant functions on manifolds and \cite{HaroldMichaelInterior} even gives (the main stage of) an interior point method.
+However, applying this algorithm to the Scaling problem still yields a complexity that depends \emph{linearly} on a diameter bound \cite[Theorem~1.7]{HaroldMichaelInterior}. Hence, the exponential diameter for tensor scaling excludes polynomial running time, making further research necessary \cite[Outlook]{HaroldMichaelInterior}.
+
+\bigskip
+
+The part on algebraic statistics focuses on novel relations between invariant theory and maximum likelihood estimation (ML estimation), established in \cite{SiagaPaper} and further studies in \cite{DiscretePaper, RDAG}. In particular, we add ML estimation to the list of applications of the above computational problems.
+ML estimation is a common approach to parameter estimation. That is, given a statistical model and some data, one seeks a probability distribution in the model that ``best'' fits the data. ML estimation chooses a distribution under which it is \emph{most likely} to observe the given data. Hereby, ``most likely'' is encoded by maximizing a likelihood function, and a maximizer of that function is called a maximum likelihood estimate (MLE). Important questions arising in ML estimation are, for example: when does an MLE exist (uniquely)? How often do we have to sample data for almost sure existence of an MLE? How can we compute an MLE?
+
+In this thesis we tackle these questions through invariant theory. This is achieved by providing a dictionary between stability notions under a group action and ML estimation on a corresponding model. For example, certain torus actions relate to \emph{log-linear models}, while the operator and the tensor scaling action correspond to so-called \emph{matrix} and \emph{tensor normal models}, respectively. We always link several notions as in
+\begin{equation}\label{eq:Dictionary}
+	\left\{ \begin{matrix}
+		\text{unstable} \\ 
+		\text{semistable} \\ 
+		\text{polystable} \\ 
+		\text{stable} 
+	\end{matrix} \right\} 
+	\qquad \longleftrightarrow \qquad 
+	\left\{ \begin{matrix}
+		\text{likelihood unbounded from above} \\ 
+		\text{likelihood bounded from above} \\ 
+		\text{MLE exists} \\ 
+		\text{MLE exists uniquely} 
+	\end{matrix} \right\} 
+\end{equation}
+ to each other, and for some models we even obtain a full list of equivalences.
+These connections allow for three main applications.
+
+First, they may be used to recover known results in statistics or even to obtain new characterizations through invariant theory. Second, they yield algorithmic consequences. Namely, we show that norm minimization under a certain group action relates to maximizing the likelihood function over a respective model. Thus, one can use algorithms from invariant theory in ML estimation. Moreover, complexity results, in particular those from the thesis' part on complexity, carry over to statistics.
+Third, one can translate problems from statistics to invariant theory, and vice versa. 
+This has already been crucially used to compute maximum likelihood (ML) thresholds for matrix normal models \cite{DM21MatrixNormal} and for tensor normal models \cite{DMW22TensorNormal}. These thresholds capture how often one should at least sample typically. Highly simplified speaking, the papers \cite{DM21MatrixNormal, DMW22TensorNormal} translated the problem on ML thresholds via \eqref{eq:Dictionary} to a problem in terms of stability notions. Then they solved the latter using invariant-theoretic techniques and translated the result back. 
+
+\bigskip
+
+As a summary, invariant theory embraces the thesis' main contributions on computational complexity and algebraic statistics. A prominent link is provided through the three computational problems NCM, Norm Minimization and Scaling. Moreover, important group actions such as torus actions as well as operator and tensor scaling action play a prominent role throughout the thesis.
+
+
+
+%start: something general about invariant theory, computations and applications/influence
+%Hilbert's papers: invariant ring fin generated, many important theorems for modern algebra and algebraic geometry; but also for finiteness theorem: concept of null cone fundamental for his proof 
+%now recent flurry on null cone membership and its optimization variants: many applications, several breakthroughs. This is starting point of this thesis
+%
+%\cite{Hilbert1890, Hilbert1893}, computations, has driven math, especially algebra (fundamental theorems), introduced the null cone
+%
+%start with roots of computational invariant theory??, and stability notions??
+
+%then go to (OCI) NCM and its ``approximate'' versions Norm minimization and Scaling; these have many applications in mathematics, physics, computer science and statistics. This serves as a main motivation!
+%
+%What links everything: Invariant theory. the three comp problems (NCM, Norm Minim, Scaling); several important actions: torus actions, operator scaling action, tensor scaling action, matrix and array...
+%
+%now, approach of this thesis is twofold: one side discusses complex hardness results of recent geodesically convex methods for these problems; upshot: tensors are difficult matrices are easy;
+%highly motivates the search for new sophisticated methods e.g., interior-point like methods (perhaps stress that current methods also do not suffice in the commutative case);
+%also says how difficult approximation approach for computing MLEs is
+%
+%other side are novel relations to ML estimation: we \emph{build a bridge} between invariant theory and algebraic statistics
+%that have been established for first time, some motivation on ML estimation; state some interesting questions --> we tackle them through invariant theory by providing a dictionary between some (sometimes all) notions as in:
+%
+%
+%
+%namely, have three main applications: recover new or known results and characterizations; specifically: tackle question on ML thresholds, mention \cite{DM21MatrixNormal, DMW22TensorNormal}; norm minimizers give MLE and therefore have algorithmic consequences: can use scaling algorithms from each field in the other, NCM decides whether likelihood is bounded from above;
+%
+%perhaps note: statistics goes beyond usual (reductive) setting of invariant theory
+%
+%...todo
+%
+%then content: as indicated by the title, thesis consists of three parts;
+%first part on invariant theory provides the necessary background for the main results later;
+%second part is computational complexity;
+%third part is algebraic statistics (more precisely maximum likelihood estimation)
+%
+%\bigskip
+%
+%Our results are intended to stimulate further research to deepen the connection between the fields.
+%
+%We see that algorithms in invariant theory can be used in maximum likelihood estimation, and vice versa. 
+%
+%some historic remarks: actually operator scaling versus flip flop was starting point, i.e., very algorithmic view; then came strong/full correspondence for matrix normal models; then generalized to Gaussian group models with G Zariski closed and self-adjoint
+
+
+
+
+%------ Notation and Conventions ------------------------
+\phantomsection
+\addcontentsline{toc}{section}{Organization}
+\section*{Organization}
+
+As suggested by its title, the thesis consists of three parts. Part~\ref{part:InvariantTheory}, containing Chapters~\ref{ch:AlgebraicGroupActions} and~\ref{ch:CriteriaForStability},  collects the required prerequisites from \emph{invariant theory}. In Part~\ref{part:CompComplexity} (Chapters~\ref{ch:CompInvariantTheory}~--~\ref{ch:BoundsDiameter}) we present the results on \emph{computational complexity}. Finally, Part~\ref{part:AlgebraicStatistics} (Chapters~\ref{ch:MLestimation}~--~\ref{ch:RDAGs}) contains the content regarding \emph{algebraic statistics}. In the following we give short descriptions of each chapter.
+
+\bigskip
+
+Chapter~\ref{ch:AlgebraicGroupActions} presents the necessary background on algebraic groups, matrix Lie groups and the representation theory of these groups. In particular, it defines the concept of (topological) stability notions.
+
+Chapter~\ref{ch:CriteriaForStability} collects criteria to test stability notions: the Hilbert-Mumford Criterion, King's Criterion for actions on quivers, Popov's Criterion for solvable groups and, of particular importance for this thesis, the Kempf-Ness Theorem.
+
+\bigskip
+
+Chapter~\ref{ch:CompInvariantTheory} gives an introduction to computational invariant theory and its manifold applications. This gives us the opportunity to embed and locate the contributions of this thesis in the research area. We introduce the three computational problems of main interest: Null Cone Membership (NCM)~\ref{comp:NCM}, Norm Minimization~\ref{comp:NormMinim} and the Scaling Problem~\ref{comp:Scaling}. Furthermore, we discuss known algorithms for these problems and their computational complexity. The latter serves as a preparation of the next two chapters.
+
+Chapter~\ref{ch:BoundsMarginGap} treats the precision parameters \emph{weight margin} and \emph{gap} to solve NCM via optimization methods. We prove (exponentially) small bounds on these parameters for tensor scaling, polynomial scaling and quiver actions, cf. \cite{WeightMargin}.
+
+Chapter~\ref{ch:BoundsDiameter} presents the main result from \cite{WeightMargin} on the \emph{diameter}: it can be exponentially large for tensor scaling. We discuss its implications, related literature, and mention the main proof ideas.\footnote{All main proof ideas for the diameter bound are due to my co-author Cole Franks. For brevity, we refrain from including all details in this thesis.}
+
+\bigskip
+
+Chapter~\ref{ch:MLestimation} gives a general introduction to maximum likelihood (ML) estimation, focusing on discrete models and on Gaussian models. It prepares the following four chapters.
+
+Chapter~\ref{ch:LogLinearModels} presents results from \cite{DiscretePaper}: we link toric invariant theory to ML estimation for \emph{log-linear models}, a huge class of discrete models. In particular, norm minimizers under the action yield the MLE and we obtain a dictionary between some notions in \eqref{eq:Dictionary}.
+
+Chapter~\ref{ch:GaussianModels} sets the stage for the final two chapters. It shows that \emph{any} Gaussian model, that is closed under positive scalars, admits relations to invariant theory which we call the weak correspondence, \cite{RDAG}. The latter provides a dictionary between some notions of \eqref{eq:Dictionary} and shows that norm minimizers give rise to an MLE, and any MLE is obtained this way. The assumptions notably go \emph{beyond} the setting of groups.
+
+Chapter~\ref{ch:GaussianGroupModels} is based on \cite{SiagaPaper} and studies the new concept of \emph{Gaussian group models}. These are Gaussian models induced by a group (action). The group structure allows to extend the results from Chapter~\ref{ch:GaussianModels}. In particular, the weak correspondence can be strengthened to an (almost) complete dictionary for two types of models. The first class are Gaussian group models given by a Zariski closed self-adjoint group, and the second consists of Gaussian graphical models on transitive directed acyclic graphs (TDAGs).
+
+Chapter~\ref{ch:RDAGs} presents the work \cite{RDAG}: it studies symmetries in Gaussian graphical models on directed acyclic graphs (DAGs). The symmetries are given by a graph colouring and the respective models are called \emph{restricted DAG (RDAG) models}. We characterize ML estimation for these models, bound their ML thresholds and compare them to their undirected analogues. The theory was initially inspired by the results of Chapter~\ref{ch:GaussianGroupModels}. Indeed, we can extend the weak correspondence from Chapter~\ref{ch:GaussianModels} to a full dictionary, and we discuss connections to Gaussian group models from Chapter~\ref{ch:GaussianGroupModels}.
+
+
+
+
+
+%------ Notation and Conventions ------------------------
+\phantomsection
+\addcontentsline{toc}{section}{Notation and Conventions}
+\section*{Notation and Conventions}
+
+
+We always work over the real or over the complex numbers. Often we do so in parallel and in that case $\KK \in \{\RR, \CC\}$ denotes the ground field. Its group of units is $\KK^\times$.
+For a $\KK$-vector space $V$, the ring of $\KK$-linear endomorphisms is denoted $\End(V)$ and its group of units, i.e., the group of $\KK$-linear automorphisms is denoted by $\GL(V)$.
+Vectors in $\KK^m$ are usually viewed as \emph{column} vectors. The space of $m_1 \times m_2$ matrices with entries in $\KK$ is denoted by $\KK^{m_1 \times m_2}$. Similarly, $\KK^{m_1} \otimes_\KK \cdots \otimes_\KK \KK^{m_d}$ is the space of tensors of order $d$. Often, we suppress the field over which we are tensoring.
+
+As an important convention, we equip\footnote{ if not stated otherwise} the spaces of (column) vectors, of matrices and of tensors with their standard Euclidean/Hermitian inner product and its induced norm. In particular, $\KK^{m_1 \times m_2}$ is equipped with the trace inner product, which induces the Frobenius norm. Furthermore, we follow the convention of \cite{GradflowArXiv} that for $\KK = \CC$ an inner product is $\CC$-linear in the \emph{second}(!) component, and semilinear in the first.
+
+All algebraic groups considered in this thesis are affine, and the same usually applies to varieties. We stress that we work with the $\KK$-points of algebraic groups (and varieties). This requires some caution when $\KK = \RR$ and occasionally we have to consult results from real algebraic geometry. All rational representations of algebraic groups are assumed to be finite-dimensional.
+
+We stress that the \emph{default topology} in this thesis (even in algebraic geometric settings) is the Euclidean topology. We explicitly indicate the Zariski topology, e.g., by writing ``Zariski closed''. Accordingly, the Euclidean closure of a set $S$ is denoted $\overline{S}$, while its Zariski closure is $\overline{S}^{\Zar}$.
+
+Manifolds and Lie groups are always considered to be smooth.
+
+When working with Gaussian distributions, we stress that we always assume the mean to be zero and known. Furthermore, by convention we work with the \emph{concentration matrix}\footnote{also called \emph{precision matrix}}, i.e., the inverse of the covariance matrix.
+
+\bigskip
+
+Let us briefly collect further frequently used notation. A detailed list of symbols is provided at the end of the thesis.
+
+We denote the set $\{1,2,\ldots,m\}$ by $[m]$. For $i \in [m]$, the $i^{th}$ canonical unit vector in $\KK^m$ (with $i^{th}$ entry one, and all other entries zero)  is denoted $e_i$. Similarly, $E_{ij} \in \KK^{m_1 \times m_2}$ is the matrix with entry one at position $(i,j)$ and all other entries are zero. The all-ones vector is $\ones_m \in \KK^m$. Moreover, for $i \in [m]$ we set
+	\[ \eps_i := e_i - \frac{1}{m} \ones_m \, .\]
+
+For a matrix $M \in \KK^{m_1 \times m_2}$, its transpose is $M\T$ and its Hermitian transpose is $M\HT$. If $M$ is square, its determinant is $\det(M)$ and $\tr(M)$ is the trace of $M$.
+
+Finally, we use the following useful notation, which is quite common in statistics. For a tensor $v = (v_{ijk}) \in (\CC^{m})^{\ot 3}$ define the ``slice sums''
+	\[ v_{i,j,+} := \sum_{k=1}^m v_{ijk}, \quad v_{i,+,+} := \sum_{j,k =1}^m v_{ijk}, \quad v_{+,+,+} := \sum_{i,j,k=1}^m v_{ijk}, \quad \text{ etc. } \]
+Similarly, for a vector $x \in \KK^m$, $x_+$ denotes the sum over all entries of $x$, and for a matrix $M \in \KK^{m_1 \times m_2}$, $M_{i,+}$ is the $i^{th}$ row sum, $M_{+,j}$ the $j^{th}$ column sum, and $M_{+,+}$ the sum over all entries of $M$.
+Of course, this notation can also be extended to tensors of order $d \geq 4$.
+
+
+
+%vectors are usually column vectors
+%
+%convention: always standard Euclidean norms and inner products (if not stated otherwise); in particular, matrices equipped with Frobenius inner product and Frobenius norm; if $\KK = \CC$ then assume that \emph{second} entry is $\CC$-linear, and first is semi-linear wrt complex conjugation
+%
+%algebraic groups are affine, same for varieties; we work with the $\KK$-points!! then one needs to be careful over $\RR$
+%
+%default topology is the \emph{Euclidean} topology; Zariski topology is explicitly mentioned
+%
+%notation for Zariski closure and Euclidean closure 
+%
+%all reps are finite dimensional
+%
+%manifolds are always smooth
+%
+%work with concentration matrices, assume the mean is zero and known
+
+
+
+%\vspace{1cm}
+%
+%{\large \textbf{Some Notation:}}
+%
+%%todo refer to full symbol list
+%
+%\begin{itemize}\itemsep 0pt %todo
+%	\item $[m]$
+%	\item $e_i$
+%	\item $\ones_m$
+%	\item $\eps_i$
+%	\item $\Id_m$
+%	\item $E_{ij}$
+%	\item $g \cdot v$ action is usually indicated by $g \cdot v$ etc.
+%	\item $\Un_m$ group of $m \times m$ unitary matrices
+%	\item $\PD_m(\RR)$ cone of symmetric positive definite matrices
+%	\item $\PD_m(\CC)$ cone of Hermitian positive definite matrices
+%	\item $\mu_G$ and $\mu_T$ moment map with respect to action of $G$ resp. $T$
+%	\item $\Delta_{G}(v)$ moment polytope of $v$; $\Delta_{T}(v)$ weight polytope of $v$
+%\end{itemize}
+
+%
+%$[m]$, $(\cdot)\HT$, $(\cdot)\T$, $\KK$, $\KK^{m_1 \times m_2}$, $\KK^{m_1} \otimes_\KK \cdots \otimes_\KK \KK^{m_d}$
+%(often suppress $\KK$ if it is clear over which field we are tensoring);
+%
+%$\det(\cdot), \KK^\times, \tr(\cdot)$, 
+%
+%$\Id_m$ is identity matrix while $\id$ usually denotes the identity in a group (or the identity morphism)
+%
+%do $e_i$, $\eps_i$ and $E_{ij}$
+%
+%$\GL(V)$ and $\End(V)$
+%
+%$\Sym_m(\KK) = \{ X \in \KK^{m \times m} \mid X\HT  = X \}$ space of symmetric resp Hermitian matrices. 
+
+
+
+%\begin{itemize}\itemsep 0pt
+%	\item $[m]$
+%	\item $\KK \in \{\RR, \CC\}$ (in statistics part usually work in parallel over $\RR$ and $\CC$)
+%	\item $\KK^\times$
+%	\item $\KK^m$
+%	\item $e_i$
+%	\item $\ones_m$
+%	\item $\eps_i$
+%	\item $\KK^{m_1 \times m_2}$
+%	\item $\Id_m$
+%	\item $E_{ij}$
+%	\item $(\cdot)\HT$ denotes the Hermitian transpose, which is the transpose $(\cdot)\T$ if $\KK=\RR$
+%	\item $\det(\cdot)$
+%	\item $\tr(\cdot)$
+%	\item $\KK^{m_1} \otimes_\KK \cdots \otimes_\KK \KK^{m_d}$ (often suppress $\KK$ if it is clear over which field we are tensoring);
+%	\item for a tensor $v \in (\CC^{m})^{\ot 3}$ define 
+%	\[ v_{i,j,+} := \sum_{k=1}^m v_{ijk}, \quad v_{i,+,+} := \sum_{j,k =1}^m v_{ijk}, \quad v_{+++} := \sum_{i,j,k=1}^m v_{ijk}, \text{ etc. } \]
+%	Similarly, define this for vectors, matrices and $d$-tensors ($d \geq 4$)
+%	\item $\pi_{m,d}$ is natural representation of $\SL_m(\CC)^d$ on $(\CC^m)^{\otimes d}$
+%	\item $\Omega(\pi)$ is set of weights of representation $\pi$
+%	\item $g \cdot v$ action is usually indicated by $g \cdot v$ etc.
+%	\item $\GT_m(\KK)$ group of invertible diagonal matrices
+%	\item $\ST_m(\KK)$ group of invertible diagonal matrices of determinant one
+%	\item $\Un_m$ group of $m \times m$ unitary matrices
+%	\item $\PD_m(\RR)$ cone of symmetric positive definite matrices
+%	\item $\PD_m(\CC)$ cone of Hermitian positive definite matrices
+%	\item $\mu_G$ and $\mu_T$ moment map with respect to action of $G$ resp. $T$
+%	\item $\Delta_{G}(v)$ moment polytope of $v$; $\Delta_{T}(v)$ weight polytope of $v$
+%\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

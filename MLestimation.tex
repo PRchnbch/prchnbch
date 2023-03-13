@@ -1,0 +1,491 @@
+
+\index{maximum likelihood estimation|(}
+
+
+The task of parameter estimation is ubiquitous in statistics. That is, given a statistical model and observed data, one seeks the parameters of a probability distribution which ``best'' explains the data and is contained in the model.
+There are many different concepts of parameter estimation, see e.g., \cite{JaynesBook, LehmannCasellaBook, rice2006mathematical}.
+In this thesis we focus on the approach of maximum likelihood estimation \index{ML estimation| see {maximum likelihood estimation} } (ML estimation), which was popularized by Ronald Fisher in the early 20th century. ML estimation is built on an intuitive idea and the ML estimator enjoys several asymptotic properties \cite{CramerMathematical, AsymptoticStatistics}.
+As a consequence, it is frequently used in practice \cite{CramerEconometric, MillarBook, SeveriniBook, WardBook}.
+
+This chapter provides the necessary background on ML estimation through the lens of algebraic statistics, and thereby it prepares Chapters~\ref{ch:LogLinearModels}--\ref{ch:RDAGs}.
+For further information on ML estimation in the context of algebraic statistics the reader is referred to the textbooks \cite{LecturesAlgebraicStatistics, ASCB, SullivantBook}.
+
+\paragraph{Organization and Assumptions.}
+Section~\ref{sec:ParametricStatisticalModels} provides a brief, general introduction to ML estimation. Afterwards, this is specified for two widely used classes of models: discrete models in Section~\ref{sec:DiscreteModels} and Gaussian models in Section~\ref{sec:GaussianModelsMLestimation}. The former prepares Chapter~\ref{ch:LogLinearModels} while the latter is needed in Chapters~\ref{ch:GaussianModels},~\ref{ch:GaussianGroupModels} and~\ref{ch:RDAGs}.
+
+We assume some familiarity with probability theory, e.g., the amount of \cite[Chapter~2]{SullivantBook} certainly suffices.
+
+
+
+
+\section{Parametric Statistical Models}\label{sec:ParametricStatisticalModels}
+
+This general introduction on maximum likelihood (ML) estimation closely follows \cite[Chapter~5]{SullivantBook}.
+Its purpose is to illustrate that Sections~\ref{sec:DiscreteModels} and~\ref{sec:GaussianModelsMLestimation} follow the same concept. Let us start with the definition of a statistical model, which is fundamental for any theory of parameter estimation.
+
+\begin{defn}[Parametric Statistical Model] \label{defn:StatisticalModel}
+	\index{statistical model!parametric}
+	A collection
+		\[ \Pcal_{\Mcal} := \big\lbrace P_\Psi \mid \Psi \in \mathcal{M} \big\rbrace \]
+	of probability distributions on a fixed sample space $\Scal$, parametrized by a set $\Mcal \subseteq \RR^d$, is called a \emph{parametric statistical model}. We assume that each $P_{\Psi}$ admits a density function $p_{\Psi}$ with respect to a fixed measure $\nu$ on $\Scal$.
+	\hfill\defnSymbol
+\end{defn}
+
+The notation of the parameter set $\Mcal$ is suggestive: in Sections~\ref{sec:DiscreteModels} and~\ref{sec:GaussianModelsMLestimation} we directly regard the respective parameter sets as statistical models.\footnote{This is justified as the models considered in this thesis are identifiable in the sense that the map $\Mcal \to \Pcal_\Mcal, \; \Psi \mapsto P_{\Psi}$ is bijective.}
+
+Now, given observed data $D$, the problem of \emph{parameter estimation} is to determine a joint probability distribution from $\Pcal_\Mcal$ explaining the data $D$. 
+Intuitively, the idea of ML estimation is to search for the probability distribution in $\Pcal_{\Mcal}$ under which it is \emph{most likely} to observe the data $D$.
+Formally, we always assume that $D = (D_1, \ldots, D_n)$ is a tuple of $n$ samples that are independent identically distributed (i.i.d.) according to some unknown $P_{\Psi} \in \Pcal_\Mcal$.
+Then the \emph{likelihood function}\index{likelihood function}, given data $D$, is
+	\begin{equation}\label{eq:LikelihoodGeneral}
+		L_D \colon \Mcal \to \RR, \quad \L_D(\Psi) = \prod_{i=1}^n p_\Psi(D_i) \,
+	\end{equation}
+and captures how likely it is to witness the data $D$ under the probability distribution $P_{\Psi}$. Often, it is convenient to consider the \emph{log-likelihood function}\index{log-likelihood function}
+	\begin{equation}\label{eq:LogLikelihoodGeneral}
+		\ell_Y(\Psi) := \log \big( L_D(\Psi) \big) = \sum_{i=1}^n \log \big(p_\Psi(Y_i) \big) .
+	\end{equation}
+The task of ML estimation is to maximize the (log-)likelihood function.
+
+\begin{defn}[Maximum Likelihood Estimator (MLE)]
+	\index{maximum likelihood estimator}\index{MLE| see {maximum likelihood estimator} }
+	Let $\Pcal_{\Mcal}$ be a parametric statistical model with observed data $D$. If $\hat{\Psi} \in \Mcal$ satisfies
+		\[ \ell_D(\hat{\Psi}) = \sup_{\Psi \in \Mcal} \ell_D(\Psi) \]
+	we call $\hat{\Psi}$ a \emph{maximum likelihood estimator} (MLE) given data $D$.
+	\hfill\defnSymbol
+\end{defn}
+
+The next concept captures how observed data interacts with the parameters of a model.
+
+\begin{defn}[Sufficient Statistics] \label{defn:SufficientStatistic}
+	Let $\Pcal_\Mcal$ be a statistical model.
+	We call a function $X$ a \emph{sufficient statistics}\index{sufficient statistics} for $\Pcal_\Mcal$, if for any $\Psi \in \Mcal$ and i.i.d. samples $D_1,\ldots,D_n \sim P_{\Psi}$
+	the joint density of $D = (D_1,\ldots,D_n)$ can be written as
+		\begin{equation}\label{eq:SufficientStatistics}
+			 \prod_{i=1}^n p_{\Psi}(D_i) = f(D) g\big( X(D), \Psi \big) ,
+		\end{equation}
+	where $f$ and $g$ are non-negative measurable functions.\footnote{The identity is a trivial sufficient statistics. However, we are interested in sufficient statistics that yield a proper reduction, i.e., that different data tuples may have the same value under $X$.}
+	\hfill\defnSymbol
+\end{defn}
+
+Note that the left hand side in Equation~\eqref{eq:SufficientStatistics} is $L_{D}(\Psi)$ and hence the log-likelihood is $\ell_D(\Psi) = \log(f(D)) + \log\big( g(X(D),\Psi) \big)$. We see that ML estimation in a model $\Pcal_\Mcal$ only depends on a sufficient statistics.
+
+Following \cite[Equation~(1.2)]{ExponentialTransformationModels}, we define a concept involving a group action.
+
+\begin{defn}[Transformation Family] \label{defn:TransformationFamily}
+	Let $\Pcal_{\Mcal}$ be a statistical model on a sample space $\Scal$. We call $\Pcal_\Mcal$ a \emph{transformation family}\index{transformation family} if there is a group $G$, consisting of automorphisms of $\Scal$, that acts transitively on $\Pcal_\Mcal$ via $(g \cdot P)(A) := P(g^{-1}(A))$, where $P \in \Pcal_\Mcal$ and $A$ is a measurable event.
+	\hfill\defnSymbol
+\end{defn}
+
+\medskip
+
+Finally, we mention some interesting, natural questions that arise when studying ML estimation:
+\begin{enumerate}
+	\item\label{item:MLEcases} Is the log-likelihood $\ell_D$ bounded from above? Does an MLE given data $D$ exist? If an MLE exists, is it unique?
+	\item\label{item:MLEcomputation} How can we compute an MLE?
+	\item\label{item:MLthresholds} Which sample sizes $n$ guarantee (almost surely) an affirmative answer to the questions from Item~\ref{item:MLEcases}?
+\end{enumerate}
+Interestingly, we see in Chapters~\ref{ch:LogLinearModels}--\ref{ch:RDAGs} that we can study these questions for several important models through the lens of invariant theory. As a preparation, we focus on discrete models and Gaussian models in the upcoming two sections.
+
+
+
+\section{Discrete Models}\label{sec:DiscreteModels}
+
+In the following we describe ML estimation for models consisting of discrete probability distributions. The presentation is mainly based on \cite[Section~2]{DiscretePaper}.
+
+We consider the sample space $\Scal = [m] = \{1,2,\ldots,m\}$ of $m$ states, which we endow with the counting measure. Then a probability distribution on $\Scal = [m]$ is uniquely determined by its density\footnote{usually called \emph{probability mass function} in the discrete case} $p = (p_1,\ldots,p_m)$, where $p_j$ denotes the probability that the $j^{th}$ state occurs. 
+Such a density is a point in the $(m-1)$-dimensional probability simplex:
+	\[ \Delta_{m-1} := \left\{ p \in \RR_{\geq 0}^m \mid p_+ = \sum_{j = 1}^m p_j =1 \right\} . \]
+Using densities as parameters and identifying a model $\Pcal_\Mcal$ of probability distributions on $\Scal$ with its parameter set leads to the following.
+	
+\begin{defn}[Discrete Model]
+	\index{discrete model}\index{statistical model!discrete}
+	A \emph{discrete model}\index{discrete model} $\Mcal$ of distributions with $m$ states is a subset $\Mcal \subseteq \Delta_{m-1}$.
+	\hfill\defnSymbol
+\end{defn}
+
+Given a tuple $D = (D_1,\ldots,D_n)$ of i.i.d. samples, the likelihood from ~\eqref{eq:LikelihoodGeneral} can be written as
+	$L_D(p) = \prod_j p_{j}^{u_j},$
+where $u_j := \{ i \in [n] \mid D_i = j \}$ is the number of times that the $j^{th}$ state occurs. We see that the \emph{vector of counts}\index{vector of counts} $u := (u_1,\ldots,u_m) \in \ZZ^{m}_{\geq 0}$ is a sufficient statistic for any discrete model, compare Definition~\ref{defn:SufficientStatistic}.\footnote{Here, choose $f \equiv 1$ and $g(p,u) := \prod_j p_{j}^{u_j}$.}
+Therefore, we are allowed to regard the vector of counts $u$ as data for discrete models and will do so from now on.
+Note that the sample size is recovered via $n = u_+ =~\sum_{j=1}^m u_j$. Moreover, a vector of counts induces an \emph{empirical distribution}\index{empirical distribution} $\bar{u}=~\frac{1}{n}u \in \Delta_{m-1}$.
+
+Now, given a discrete model $\Mcal \subseteq \Delta_{m-1}$ and a vector of counts $u \in \ZZ^m_{\geq 0}$,
+the (log-)likelihood function\footnote{Strictly speaking we would have to multiply the right hand side of \eqref{eq:LikelihoodDiscreteAndLog} with the multinomial coefficient $\binom{n}{u}$. However, this does not change the MLE or any other interesting properties of ML estimation.}
+becomes
+\begin{equation}\label{eq:LikelihoodDiscreteAndLog} %formerly eq:likelihoodiscrete
+	L_u(p) =  p_1^{u_1} \cdots p_m^{u_m} \quad \text{ respectively } \quad
+	\ell_u(p) = \sum_{i=1}^{m} u_i \log(p_i) .
+\end{equation}
+We use the convention $0^0 = 1$, so that the likelihood is always defined on $\Delta_{m-1}$.
+This allows MLEs on the relative boundary of $\Delta_{m-1}$, if some entries of $u$ are zero.
+Furthermore, following \cite[Section~4.2.3]{LauritzenBook} we define the concept of extended models and MLEs, which are used in our study of log-linear models, Chapter~\ref{ch:LogLinearModels}.
+
+\begin{defn}[Extended MLE] \label{defn:ExtendedMLE}
+	Given a discrete model $\Mcal \subseteq \Delta_{m-1}$ and $u \in \ZZ^m_{\geq 0}$. The extended model of $\Mcal$ is its Euclidean closure $\overline{\Mcal} \subseteq \Delta_{m-1}$ in $\RR^m$. By compactness of $\overline{\Mcal}$ and continuity of the likelihood $L_u$, $\overline{\Mcal}$ admits an MLE $\hat{p}$ given $u$, which we call an \emph{extended MLE}\index{MLE!extended} of $\Mcal$ given $u$.
+	\hfill\defnSymbol
+\end{defn}
+
+Next, we link the log-likelihood to the \emph{Kullback-Leibler (KL) divergence}\index{Kullback Leibler divergence}\index{KL divergence|see {Kullback Leibler divergence}}.
+The KL divergence from $q \in \RR_{\geq 0}^m$ to $p \in \RR_{\geq 0}^m$ is
+\[\mathrm{KL}(p\|q) = \sum_{j=1}^m p_j \log \frac{p_j}{q_j}.\]
+In view of our convention $0^0 = 1$, we also use $0 \log(0/q_j) = 0$ (even, if $q_j$ is zero).
+Although the KL divergence is not a metric,\footnote{The KL divergence is \emph{not} symmetric.}
+for $p,q \in \Delta_{m-1}$ it satisfies $\KL(p\|q)\geq 0$, and $\KL(p\|q)=0$ if and only if $p=q$.
+
+The log-likelihood~\eqref{eq:LikelihoodDiscreteAndLog} given $u$ can be written, up to additive constant, as
+	\begin{equation}\label{eq:LogLikelihoodDiscreteKL}
+		\ell_u(p) - \sum_{j=1}^m \log(\bar{u}_j) = -n \sum_{j=1}^m \bar{u}_j \log \frac{\bar{u}_j}{p_j} = -n \, \KL(\bar{u} \|p).
+	\end{equation}
+Therefore, maximizing the log-likelihood is equivalent to minimizing the KL divergence to the empirical distribution $\bar{u}$.
+In particular, an MLE $\hat{p}$ given $u$ is a point that minimizes, over the model $\Mcal$, the KL divergence to the empirical distribution $\bar{u}$. We use this viewpoint in Section~\ref{sec:ScalingLogLinear}.
+
+We end this section with two examples of discrete models.
+
+\begin{example}[Saturated discrete model] \label{ex:FullDiscreteModel}
+	\index{discrete model!saturated}
+	Consider the model $\Mcal = \Delta_{m-1}$ and a vector of counts $u \in \ZZ_{\geq 0}^m$. There is a unique MLE $\hat{p}$ given $u$. By the mentioned properties of the KL-divergence, it is the empirical distribution: $\hat{p} = \bar{u}$.
+	\hfill\exSymbol
+\end{example}
+
+\begin{example}[Independence Model] \label{ex:IndependenceModel}
+	Consider $\Delta_{m_1 m_2 - 1} \subseteq \RR^{m_1 \times m_2}$. Then
+		\begin{equation*}
+			\begin{split}
+				\Mcal_{X \ci Y} &= \big\{ \alpha\T \beta \mid \alpha \in \Delta_{m_1 - 1}, \, \beta\in \Delta_{m_2 - 1} \big\} \\
+				&= \big\{ p=(p_{ij}) \in \Delta_{m_1m_2 - 1} \mid \rk(p) = 1  \big\}
+			\end{split}
+		\end{equation*}
+	is the model of independence of two discrete random variables with $m_1$ respectively $m_2$ states. Note that given $p \in \Mcal_{X \ci Y}$, one finds $\alpha = (p_{i,+})_i$ and $\beta = (p_{+,j})_j$ as the marginal distributions. 
+	
+	Let $u \in \ZZ_{\geq 0}^{m_1 \times m_2}$ be a table of counts obtained from $n = u_{++}$ i.i.d. samples. Then there is a unique MLE $\hat{p}$ given $u$. It is determined by the table marginals: $\hat{p}_{ij} = u_{i,+} u_{+,j} / n^2$, see \cite[Proposition~5.3.8]{SullivantBook}. We recover this knowledge in Example~\ref{ex:indep2} using the theory of Chapter~\ref{ch:LogLinearModels}.
+	\hfill\exSymbol
+\end{example}
+
+Further important examples are discrete graphical models \cite{LauritzenBook, SullivantBook} and log-linear models \cite{LecturesAlgebraicStatistics, SullivantBook}. We study the latter class in Chapter~\ref{ch:LogLinearModels}.
+
+
+
+\section{Gaussian Models}\label{sec:GaussianModelsMLestimation}
+
+In this section we study ML estimation for Gaussian models. We focus on the necessary prerequisites for Chapters~\ref{ch:GaussianModels}--\ref{ch:RDAGs}. In particular, we define maximum likelihood thresholds, consider several examples of Gaussian models and study ML estimation for models given by a directed acyclic graph in detail. The presentation is based on \cite{SiagaPaper, RDAG}.
+
+We work in parallel over the real and complex numbers: $\KK \in \{\RR, \CC\}$. The cone of symmetric respectively Hermitian positive definite matrices is denoted $\PD_m(\RR)$ respectively $\PD_m(\CC)$. Recall that $(\cdot)\HT$ denotes the Hermitian transpose, which is just the transpose $(\cdot)\T$ if $\KK = \RR$.
+We note that complex Gaussian models have been studied in \cite{ComplexGraphicalModelsBook, goodman1963complexGaussian} and they are especially interesting for physics applications. Moreover, when relating ML estimation to invariant theory in Chapters~\ref{ch:GaussianGroupModels} and~\ref{ch:RDAGs} it is natural from the invariant theory perspective to consider complex Gaussian models.
+
+\bigskip
+
+Let us start by recalling the multivariate Gaussian distribution.
+Consider the sample space $\Scal = \KK^m$ endowed with the Lebesgue measure. We denote by $\Ncal(b,\Sigma)$ the multivariate Gaussian distribution\footnote{If we want to stress that it is $m$-dimensional, we write in $\Ncal_m(b,\Sigma)$.} with mean $b \in \KK^m$ and covariance matrix $\Sigma \in \PD_m(\KK)$. Its density at $y \in \KK^m$ is
+\begin{equation}\label{eq:GaussianDensity}
+	\begin{split}
+	%p_{\Psi}(y) &= f(\Sigma)  \\
+	p_{\Sigma}(y) &= \begin{cases}
+		\det(2\pi \Sigma)^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (y-b)\HT \Sigma^{-1} (y-b) \right) & \quad\text{if} \quad \KK = \RR\\[5pt]
+		\det(\pi \Sigma)^{-1} \exp \left( -\frac{1}{2} (y-b)\HT \Sigma^{-1} (y-b) \right) & \quad\text{if} \quad \KK = \CC\\
+	\end{cases}	
+	\end{split}
+\end{equation}
+compare \cite{wooding1956multivariate} or \cite[Theorem~3.1]{goodman1963complexGaussian} for the complex case. The Gaussian distribution enjoys many nice properties. We shall need the following later on.
+
+\begin{lemma}\label{lem:AffineLinearTransformationOfGaussian}
+	If $Y \sim \Ncal_m(b,\Sigma)$ and $g \in \GL_m(\KK)$, then $gY \sim \Ncal_m(g b, g \Sigma g\HT)$. In particular, $gY$ has concentration matrix $(g\HT)^{-1} \Sigma^{-1} g^{-1}$.
+\end{lemma}
+
+Since the exponential and determinant expression in Equation~\eqref{eq:GaussianDensity} involve the inverse of $\Sigma$, it is more convenient to work with the \emph{concentration matrix}\index{concentration matrix}\footnote{also called \emph{precision matrix}} $\Psi = \Sigma^{-1}$. We follow the latter approach in this thesis. Furthermore, we restrict to mean zero Gaussians, which is justified by Remark~\ref{rem:MeanZeroVsGeneralMean} below.
+
+\begin{defn}[Gaussian Model] \label{defn:GaussianModel}
+	\index{Gaussian model}\index{statistical model!Gaussian}
+	A \emph{Gaussian model} is a subset $\Mcal \subseteq \PD_m(\KK)$, which contains the \emph{concentration matrices} of the respective $m$-dimensional multivariate Gaussian distributions of \emph{mean zero}.
+	\hfill\defnSymbol
+\end{defn}
+
+\begin{example}[Independent univariate Gaussians] \label{ex:mUnivariateGaussiansModel}
+	The model
+		\[ \Mcal = \big\{ \Psi \in \PD_m(\KK) \mid \Psi \text{ is diagonal} \big\} = \big\{ \diag(d_1,\ldots,d_m) \mid d_i \in \RR_{>0} \big\} \]
+	consists of all tuples of $m$ independent univariate Gaussians. %thresholds are one, unique MLE iff MLE exists iff all rows are non-zero
+	\hfill\exSymbol
+\end{example}
+
+Now, we turn to ML estimation in a Gaussian model $\Mcal \subseteq \PD_m(\KK)$.
+Given a tuple $Y = (Y_1, \ldots, Y_n) \in (\KK^m)^n$ of i.i.d. samples, the likelihood function \eqref{eq:LikelihoodGeneral} at the concentration matrix $\Psi \in \Mcal$ is, up to a scalar factor,
+	\begin{equation}\label{eq:LikelihoodGaussian}
+		L_Y(\Psi) = \prod_{i=1}^n p_{\Psi^{-1}}(Y_i) = \big( \det(\Psi)^{m} \big)^{c(\KK)} \exp \left( -\frac{1}{2} \sum_{i=1}^n Y_i\HT \Psi Y_i \right),
+	\end{equation}
+where $c(\RR) = 1/2$ and $c(\CC) = 1$.
+Consequently, the log-likelihood function can be written, up to additive and multiplicative constants, for both $\RR$ and $\CC$ as
+\begin{equation}\label{eq:GaussianLogLikelihood}
+	\ell_{Y} (\Psi) = \log \det (\Psi) - \tr (\Psi S_Y), \quad \text{where }\; S_Y := \frac{1}{n} \sum_{i=1}^n Y_i Y_i\HT
+\end{equation}
+is the \emph{sample covariance matrix}\index{sample covariance matrix}, an $m\times m$ positive semi-definite matrix. Equations~\eqref{eq:LikelihoodGaussian} and~\ref{eq:GaussianLogLikelihood} both show that the sample covariance matrix gives rise to a sufficient statistics of $\Mcal$, compare Definition~\ref{defn:SufficientStatistic}. We point out that we view the samples $Y_i$ as column vectors and this canonically identifies $Y$ as a matrix in $\KK^{m \times n} \cong (\KK^m)^n$. There is no harm in switching between these identifications, and we often do so implicitly.
+
+\begin{remark}\label{rem:ExtendedMLEGaussian}
+	One may consider the concept of an extended MLE for Gaussian models, similarly to the discrete case in Definition~\ref{defn:ExtendedMLE}. However, we note that the Gaussian models considered in this thesis are already Euclidean closed in $\PD_m(\KK)$. Furthermore, taking the closure in the cone of positive \emph{semi}-definite matrices does not add anything: the supremum of the likelihood cannot be attained at some rank deficient $\Psi$ as then $L_Y(\Psi) = 0$ by Equation~\eqref{eq:LikelihoodGaussian}.
+	%closure in semi-definite does not add anything: first, no densities; second, L_{\Psi} = 0 for rank deficient matrix
+	\hfill\remSymbol
+\end{remark}
+
+Next, we recall maximum likelihood thresholds for Gaussian models. 
+
+\begin{defn}[ML Thresholds]\label{defn:MLthresholds} %todo why well-defined?, perhaps non-trivial for existence and uniqueness
+	Let $\Mcal \subseteq \PD_m(\KK)$ be a Gaussian model. We define three maximum likelihood thresholds (ML thresholds)\index{maximum likelihood threshold}\index{ML threshold| see {maximum likelihood threshold} }.
+	\begin{itemize}
+		\item[(i)] $\mlt_b(\Mcal)$ is the smallest integer $n_0$, such that for any $n \geq n_0$ the log-likelihood $\ell_Y$ is bounded from above for almost all\footnote{with respect to the Lebesgue measure} $Y \in (\KK^m)^n$.
+		
+		\item[(ii)] $\mlt_e(\Mcal)$ is the smallest integer $n_0$, such that for any $n \geq n_0$ an MLE given $Y \in (\KK^m)^n$ almost surely exists.
+		
+		\item[(iii)] $\mlt_u(\Mcal)$ is the smallest integer $n_0$, such that for any $n \geq n_0$ there exists almost surely a \emph{unique} MLE given $Y \in (\KK^m)^n$.
+		\hfill\defnSymbol
+	\end{itemize}
+\end{defn}
+
+%todo cite dempster??
+\cite{dempster1972covariance}
+
+%todo state inequality $\mlt_b \leq \mlt_e \leq \mlt_u$
+
+The above definition matches those in \cite{DrtonKurikiHoff, DM21MatrixNormal, DMW22TensorNormal}. We see that ML thresholds provide an answer to Question~\ref{item:MLthresholds} raised on page~\pageref{item:MLthresholds}, which concerns sample sizes that (almost surely) guarantee certain properties of the log-likelihood.
+
+\begin{remark}\label{rem:GenericVsAlmostSurely}
+	In algebraic settings the desired properties for ML thresholds often hold for \emph{generic}\index{generic} $Y \in (\KK^m)^n$ in the sense of algebraic geometry. That is, a generic property holds for all $Y \in (\KK^m)^n \backslash Z$ where $Z \subseteq (\KK^m)^n$ is a subvariety of codimension at least one.
+	Since a lower dimensional Zariski closed set of $\KK^{m \times n}$ has Lebesgue measure zero, a generic property also holds almost surely.
+	\hfill\remSymbol
+\end{remark}
+
+Before exploring some examples of Gaussian models we comment on the consequences of our mean zero assumption.
+
+\begin{remark}[Mean Zero Assumption]\label{rem:MeanZeroVsGeneralMean}
+	We stress that we always assume the mean to be \emph{known} and equal to zero.
+	If one allows arbitrary means $b \in \KK^m$, then a Gaussian model is a subset of $\KK^m \times \PD_m(\KK)$. The \emph{sample mean} and \emph{sample covariance matrix} for samples $Y_1,\ldots,Y_n$ are
+		\[ \bar{Y} = \frac{1}{n} \sum_{i=1}^n Y_i \qquad \text{and} \qquad
+		 S_Y = \frac{1}{n} \sum_{i=1}^n \big( Y_i - \bar{Y} \big) \big( Y_i - \bar{Y} \big)\HT . \]
+	They are a sufficient statistics for any Gaussian model, \cite[Theorem~3.4.1]{AndersonBook}, and give the MLE of the saturated model $\KK^m \times \PD_m(\KK)$, \cite[Proposition~5.3.7]{SullivantBook}.
+	
+	Now, consider $\Mcal \subseteq \PD_m(\KK)$.	
+	Then the model $\KK^m \times \Mcal$ \emph{always} has $\bar{Y}$ as the MLE for the mean parameter \cite[Proposition~7.1.9]{SullivantBook}. Moreover, it follows from classical results \cite[Section~3.3]{AndersonBook} that for all three ML thresholds
+		\[ \mlt \big( \KK^m \times \Mcal \big) = \mlt(\Mcal) + 1 , \]
+	compare \cite[Remark~1.1]{DrtonKurikiHoff}.	%todo ask Carlos about it!
+	The latter has to be kept in mind whenever consulting results in the literature that deal with \emph{arbitrary} means.
+	\hfill\remSymbol
+\end{remark}
+
+
+In the following we present several important examples of Gaussian models.
+
+\begin{example}[Saturated Gaussian model] \label{ex:FullGaussianModel}
+	\index{Gaussian model!saturated}
+	Let $Y \in \KK^{m \times n}$ be a sample matrix for the \emph{saturated Gaussian model} $\Mcal = \PD_m(\KK)$.
+	The following is well-known, see e.g., \cite[Theorem~5.1]{LauritzenBook} or \cite[Proposition~5.3.7]{SullivantBook}. The unique maximizer of $\ell_Y$ over $\PD_m(\KK)$ is $\hat{\Psi} = S_Y^{-1}$, if the sample covariance matrix $S_Y$ is invertible. If $S_Y$ is not invertible, the likelihood function is unbounded and the MLE does not exist.
+	One verifies that $S_Y$ is invertible if and only if $Y = \KK^{m \times n}$ has full row rank. The latter cannot hold if $m > n$, and it holds generically	if $m \leq n$.\footnote{If $m \leq n$ then full row rank holds outside the vanishing locus of the maximal minors of $Y$.}
+	Altogether, we deduce
+		\[ \mlt_b \big( \PD_m(\KK) \big) = \mlt_e \big( \PD_m(\KK) \big) = \mlt_u \big( \PD_m(\KK) \big) = m . \]
+	We recover these facts in Examples~\ref{ex:FullModelSelfAdjoint} and~\ref{ex:FullModelAsTDAG} using the theory developed in Chapter~\ref{ch:GaussianGroupModels}.
+	\hfill\exSymbol
+\end{example}
+
+\begin{example}[Matrix and Tensor Normal Models] \label{ex:MatrixTensorNormalModel}
+	\index{matrix normal model|textbf}\index{tensor normal model|textbf}
+	If one samples matrices $\KK^{m_1 \times m_2} \cong \KK^{m_1 m_2}$, or more generally tensors $\KK^{m_1} \otimes \cdots \otimes \KK^{m_d} \cong \KK^{m_1 \cdots m_d}$, then the saturated model $\PD_{m_1 \cdots m_d}(\KK)$ is huge and one needs at least $m_1 \cdots m_d$ many samples for an MLE to exist (almost surely), compare Example~\ref{ex:FullGaussianModel}.
+	To decrease the ML threshold one can presume structural assumptions on the model. A common approach is to consider the \emph{tensor normal model}
+	\begin{equation}\label{eq:TensorNormalModel}
+		\MTK(m_1, \ldots, m_d) := \left\lbrace \Psi_1 \otimes \cdots \otimes \Psi_d \mid \Psi_i \in \PD_{m_i}(\KK) \right\rbrace \subseteq \PD_{m_1 \cdots m_d}(\KK),
+	\end{equation}
+	where $\otimes$ denotes the Kronecker product of matrices, see Definition~\ref{defn:KroneckerProduct}.
+	For $d=2$ the model $\MTK(m_1, m_2)$ is called the \emph{matrix normal model}, which we study in further detail in Section~\ref{sec:MatrixNormalModels}.
+	
+	Recently, there has been a flurry of new results on ML estimation. For matrix normal models, the paper \cite{DrtonKurikiHoff} gave new characterizations of ML estimation and new bounds on ML thresholds. By crucially using the relations between invariant theory and ML estimation presented in Section~\ref{sec:SelfAdjointMgG}, \cite{DM21MatrixNormal} and \cite{DMW22TensorNormal} completely characterized all ML thresholds for matrix respectively tensor normal models. Furthermore, \cite{OptimalSampleComplexity} provide results on almost optimal sample complexity in tensor normal models.
+	\hfill\exSymbol
+\end{example}
+
+\begin{example}[Undirected Gaussian graphical model] \label{ex:UndirectedGraphicalModelIntro}
+	Let $\Gcal = (I,E)$ be an undirected graph with vertex set $I = [m]$. Then
+		\[ \Mud_{\Gcal} := \big\{ \Psi  \in \PD_m(\KK) \mid \Psi_{ij} = \Psi_{ji} = 0 \;\text{ whenever }\;
+		\begin{tikzcd}[cramped, sep=small]	(i \ar[r, no head] & j) \end{tikzcd}\notin E \big\}  \]
+	is the \emph{undirected Gaussian graphical model}\footnote{also called \emph{covariance selection model}}
+	given by $\Gcal$.
+	In words, the undirected edges describe the off-diagonal support pattern of the concentration matrices in the model.
+	Statistically, if $X \sim \Ncal_m(0,\Sigma)$ then for the concentration matrix $\Psi = \Sigma^{-1}$ the condition $\Psi_{ij} = 0$ is equivalent the conditional independence $X_i \ci X_j | X_{[m]\backslash \{i,j\}}$, \cite[Proposition~5.2]{LauritzenBook} or \cite[Proposition~6.3.2]{SullivantBook}. This generalizes for distributions in $\Mud_{\Gcal}$ via so-called Markov properties\footnote{We remark that pairwise, local and global Markov property are equivalent for multivariate Gaussians \cite[Section 13.1]{SullivantBook}.}
+	given by the undirected graph $\Gcal$, see \cite{LauritzenBook}, and \cite[Chapter~13]{SullivantBook} for details.
+	
+	Regarding ML estimation, it is well-known that $\mlt_e(\Mud_\Gcal) = \mlt_u(\Mud_\Gcal)$ and a unique MLE exists if the sample covariance matrix $S_Y$ is invertible. In this case, the MLE $\hat{\Psi} \in \Mud_{\Gcal}$ is given by $\hat{\Psi}_{ij} = (S_Y^{-1})_{ij}$ whenever $i=j$ or $\begin{tikzcd}[cramped, sep=small]	(i \ar[r, no head] & j) \end{tikzcd} \in E$, \cite[Theorem~5.3]{LauritzenBook}. In particular, $\mlt_e(\Mud_\Gcal) \leq m$. However, in general $\mlt_e(\Mud_\Gcal)$ can be strictly smaller. We refer to \cite{blekherman2019maximum, buhl1993existence, gross2018maximum, uhler2012geometry} for further results on ML thresholds.
+	
+	For applications and further details on undirected Gaussian graphical models we refer to \cite{LauritzenBook, SullivantBook} and for the complex case to \cite{ComplexGraphicalModelsBook}.
+	\hfill\exSymbol
+\end{example}
+
+
+
+%Extended Example on DAG models
+\subsubsection{Extended Example: DAG models}
+
+In the following we introduce Gaussian graphical models given by directed acyclic graphs and study ML estimation for these models. This prepares our studies in Section~\ref{sec:TDAGs} and Chapter~\ref{ch:RDAGs}. In particular, we generalize Theorem~\ref{thm:LinearIndependenceDAG} to the setting of so-called RDAG models, Theorem~\ref{thm:RDAGMLestimationLinDependence}. The presentation closely follows \cite{RDAG} and \cite[Section~5]{SiagaPaper}.
+	
+A \emph{directed graph}\index{directed graph} is a tuple $\Gcal = (I, E)$, where $I$ is a finite set of vertices and $E \subseteq I \times I$ is a set of directed edges. Here $(j, i) \in E$ means that $\Gcal$ has a directed edge starting at vertex $j$ and pointing towards $i$. Instead of $(j,i) \in E$ we usually write $j \to i$ and similarly $j \not\to i$ means $(j,i) \notin E$. Note that, if not specified otherwise, the vertex set $I$ of $\Gcal$ is $[m] = \{1,2,\ldots,m\}$.
+
+A directed graph $\Gcal = (I, E)$ is called \emph{acyclic}\index{directed acyclic graph}, if $\Gcal$ does not contain any cycle, i.e., $\Gcal$ does not contain a directed path
+	\begin{tikzcd}[cramped, sep=small]
+		i_0 \ar[r] & i_1 \ar[r] & \cdots \ar[r] & i_k
+	\end{tikzcd}
+with $i_0 = i_k$. In particular, $\Gcal$ does not contain any loop: $i \not\to i$ for all $i \in I$. From now on we abbreviate \emph{directed acyclic graph} to \emph{DAG}\index{DAG| see {directed acyclic graph} }. The set of \emph{parents} and the set of \emph{children} of a vertex $i$ are, respectively,
+	\[ \gls{pa} := \{ j \in I \mid j \to i \text{ in } \Gcal\} \qquad \text{and} \qquad
+	\gls{ch} := \{ k \in I \mid i \to k \text{ in } \Gcal \}. \]
+
+\begin{defn}[DAG model]\label{defn:DAGmodel}
+	A \emph{DAG model}\index{DAG model} \gls{MGar} given by a DAG $\Gcal$ is a Gaussian model defined by the linear structural equation 
+		\begin{equation}\label{eq:DAGLinearEquation} %formerly known as eqn:lsem
+			y = \Lambda y + \veps, \qquad \text{i.e.,} \qquad y_i = \sum_{j \in \pa(i)} \lambda_{ij} y_j + \varepsilon_i,
+		\end{equation} 
+	where $y \in \KK^m$, $\lambda_{ij}=0$ for $j \not\to i$ in $\Gcal$, and $\veps \sim \Ncal(0,\Omega)$ with $\Omega \in \PD_m(\KK)$ diagonal.
+	Since $\Gcal$ is acyclic, the matrix $\Lambda \in \KK^{m \times m}$ is nilpotent and hence $(\Id_m - \Lambda)$ is invertible.
+	Solving Equation~\eqref{eq:DAGLinearEquation} for $y$ gives $y = (\Id_m - \Lambda)^{-1} \veps$.
+	By Lemma~\ref{lem:AffineLinearTransformationOfGaussian}, $y$ is multivariate Gaussian with mean zero and concentration matrix
+	\begin{equation}\label{eq:DAGmodelConcentration} %formerly known as "eq:graphmodel"
+		\Psi = (\Id_m - \Lambda)\HT \Omega^{-1} (\Id_m - \Lambda),
+	\end{equation}
+	i.e., $\MGar \subseteq \PD_m(\KK)$ is the set of all concentration matrices of this form.
+	\hfill\defnSymbol
+\end{defn}
+
+The coefficient $\lambda_{ij}$ is a \emph{regression coefficient}\index{regression coeffiecient}, the effect of parent~$j$ on child~$i$.
+Similarly to Example~\ref{ex:UndirectedGraphicalModelIntro}, the model $\MGar$ encodes conditional independence: a node is independent of its non-descendants after conditioning on its parents, see \cite[Chapter~13]{SullivantBook} or \cite{verma1990causal}. 
+
+We note that DAG models are also called \emph{Gaussian Bayesian networks} and they are a special case of linear structural equation models \cite{drton2018algebraic}, \cite[Section~16.2]{SullivantBook}. DAG models have been applied to cell signalling~\cite{sachs2005causal}, gene interactions~\cite{friedman2000using}, causal inference~\cite{pearl2009causality}, and many other contexts.
+
+\begin{remark}[based on {\cite[Remark~1.2]{RDAG}}] \label{rem:ParentsOlderThanChildren}
+	Throughout this thesis, we choose an ordering on the vertices of $\Gcal$ so that $\Lambda$ is strictly upper triangular. That is, if $j \to i$ is an edge in $\Gcal$ then $j > i$.
+	Such an ordering is possible as $\Gcal$ is acyclic. Thinking of a vertex label as its age, the ordering ensures that parents are older than their children.
+	\hfill\remSymbol
+\end{remark}
+
+Next, we relate undirected models from Example~\ref{ex:UndirectedGraphicalModelIntro} to DAG models. For this, we need the following definition.
+
+\begin{defn}[Unshielded collider] \label{defn:UnshieldedCollider}
+	An \emph{unshielded collider}\index{unshielded collider} of a directed graph $\Gcal$ is a subgraph $j \to i \leftarrow k$ with \emph{no} edge between $j$ and $k$.
+	\hfill\defnSymbol
+\end{defn}
+
+Given a DAG $\Gcal$, we denote by $\Gcal^u$ the corresponding undirected graph, which is obtained by forgetting the direction of each edge in $\Gcal$.
+The following theorem is the Gaussian special case of~\cite[Theorem~3.1]{andersson1997markov} respectively~\cite[Theorem~5.6]{frydenberg1990chain}. We give a proof in Section~\ref{sec:RDAGvsRCON}.
+
+\begin{theorem}[{\cite[Theorem~3.7]{RDAG}}]
+	\label{thm:DAGCONeqChapter6}
+	Let $\Gcal$ be a DAG. The DAG model $\MGar$ is equal to the undirected Gaussian graphical model $\Mud_{\Gcal^u}$ on $\Gcal^u$ if and only if $\Gcal$ has no unshielded colliders.
+\end{theorem}
+
+
+Now, we characterize ML estimation for DAG models. To do so, we prove a lemma that will also be used in Chapter~\ref{ch:RDAGs}.
+
+\begin{lemma}[{\cite[Lemma~4.10]{RDAG}}]\label{lem:MinimumOfMinusLogLikelihoodRDAG}
+	Fix $\alpha > 0$ and, for $\gamma \geq 0$, consider the family of functions
+	\[ f_{\gamma} \colon \RR_{>0} \to \RR, \quad x \mapsto \alpha \log(x) + \frac{\gamma}{x}.\]
+	\begin{itemize}\itemsep 3pt
+		\item[(i)] If $\gamma = 0$, then $f_\gamma$ is neither bounded from below nor bounded from above.
+		
+		\item[(ii)] If $\gamma > 0$, then $f_{\gamma}$ attains a global minimum at $x_0 = \frac{\gamma}{\alpha}$ with function value $f_{\gamma}(\frac{\gamma}{\alpha}) = \alpha(\log(\gamma) - \log(\alpha) + 1)$. 
+		
+		\item[(iii)] Given $\gamma_1 \geq \gamma_2 > 0$, we have $f_{\gamma_1}(\frac{\gamma_1}{\alpha}) \geq f_{\gamma_2}(\frac{\gamma_2}{\alpha})$ at the global minima.
+	\end{itemize}
+\end{lemma}
+
+\begin{proof}
+	Part (i) follows from the properties of the logarithm. To prove part~(ii), one computes $f_{\gamma}'(x) = \frac{\alpha}{x} - \frac{\gamma}{x^2}$ for $x > 0$. For $x>0$ we have
+	\[ f'_{\gamma}(x) = 0  \quad \Leftrightarrow \quad
+	\frac{\alpha}{x} = \frac{\gamma}{x^2} \quad \Leftrightarrow \quad
+	\alpha x = \gamma \quad \Leftrightarrow \quad
+	x = \frac{\gamma}{\alpha}.\]
+	Thus $x_0 := \frac{\gamma}{\alpha}$ is the only possible local extremum of $f_\gamma$. For $x>0$,
+	\[ f'_{\gamma}(x) > 0  \quad \Leftrightarrow \quad
+	\frac{\alpha}{x} > \frac{\gamma}{x^2} \quad \Leftrightarrow \quad
+	\alpha x > \gamma \quad \Leftrightarrow \quad
+	x > \frac{\gamma}{\alpha}.\]
+	and similarly one has $f'_{\gamma}(x) < 0$ if and only if $x < \frac{\gamma}{\alpha} = x_0$. Therefore, $x_0$ is a global minimum of $f_\gamma$. One directly verifies the function value for $f_{\gamma}(x_0)$, and so part~(iii) follows from the monotonicity of the logarithm.
+\end{proof}
+
+
+Now, we characterize ML estimation for DAG models via linear independence conditions on the sample matrix. Let $\Gcal$ be a DAG with vertex set  $I = [m]$ and let $Y \in \KK^{m \times n}$ be a sample matrix, encoding the $n$ samples which are the columns $Y_1, \ldots, Y_n$ of $Y$. For $i \in [m]$ we denote by $Y^{(i)}$ the $i^{th}$ row of $Y$, by \gls{Ypa} the sub-matrix of $Y$ with rows indexed by the parents of $i$ in $\Gcal$, and by \gls{YiAndPa} the sub-matrix of $Y$ with rows indexed by vertex $i$ and its parents.
+
+Let us compute the log-likelihood $\ell_Y$ at some $\Psi \in \MGar$. To do so, write $\Psi = (\Id_m - \Lambda)\HT \Omega^{-1} (\Id_m - \Lambda)$ as in \eqref{eq:DAGmodelConcentration}. We denote the entries of $\Omega$ by $\omega_{ii}$ and those of $\Lambda$ by $\lambda_{ij}$. First, note that $\det(\Id_m - \Lambda) = 1$ and hence $\log(\det(\Psi)) = - \log(\det(\Omega))$. Moreover, since $\Omega^{-1} \in \PD_m(\KK)$ we can consider its square root $\Omega^{-1/2} \in \PD_m(\KK)$. Setting $A:= \Omega^{-1/2} (\Id_m - \Lambda)$, we have $\Psi = A\HT A$ and
+\begin{align*}
+	\tr(\Psi S_Y) &= \frac{1}{n} \sum_{j=1}^n \tr \big( \Psi Y_j Y_j\HT \big)
+	= \frac{1}{n} \sum_{j=1}^n \tr \big( (A Y_j) (A Y_j)\HT \big) = \frac{1}{n} \| A Y\|^2 \\
+	&= \frac{1}{n} \| \Omega^{-1/2} (\Id_m - \Lambda) Y\|^2
+	= \frac{1}{n} \sum_{i=1}^m \Big\| \omega_{ii}^{-1/2} \Big( Y^{(i)} - \sum_{j \in \pa(i)} \lambda_{ij} Y^{(j)} \Big)  \Big\|^2.
+\end{align*}
+Altogether, with Equation~\eqref{eq:GaussianLogLikelihood} we conclude that for $\Psi \in \MGar$
+\begin{equation}\label{eq:LogLikelihoodDAG}
+	\ell_Y(\Psi) = - \sum_{i=1}^m \left( \log \omega_{ii} + \frac{1}{n \omega_{ii}} \Big\| Y^{(i)} - \sum_{j \in \pa(i)} \lambda_{ij} Y^{(j)}  \Big\|^2 \right) .
+\end{equation}
+
+The next result follows from this equation, which views ML estimation for a DAG model as a collection of several uncoupled regression problems. Although there does not seem to be a classical reference for this result, it is very likely known to experts and contained implicitly in the literature.
+
+\begin{theorem}[{\cite[Theorem~4.9]{RDAG}}]\label{thm:LinearIndependenceDAG}
+	Consider the DAG model on $\Gcal$, with $m$ nodes, and fix a sample matrix $Y \in \KK^{m \times n}$. The following possibilities characterize maximum likelihood estimation given $Y$:
+	\[ \begin{matrix} \text{(a)} & \ell_Y \text{ unbounded from above}  & \Leftrightarrow & \exists \, i \in [m] \colon &  Y^{(i)} \in \Span \big\lbrace Y^{(j)} : j \in \pa(i)  \big\rbrace \\ 
+		\text{(b)} & \text{MLE exists}  & \Leftrightarrow & \forall \, i \in [m] \colon & Y^{(i)} \notin \Span \big\lbrace Y^{(j)} : j \in \pa(i)  \big\rbrace \\ 
+		\text{(c)} & \text{MLE exists uniquely} & \Leftrightarrow & \forall \, i \in [m] \colon & Y^{(i \cup \pa(i))} \text{ has full row rank}. \\ \end{matrix} \] 
+\end{theorem}
+
+\begin{remark}[based on {\cite[Remark~5.4]{SiagaPaper}}] \label{rem:LinearHullEmptySet}
+	We use the convention that the linear hull of the empty set is the zero vector space. So if a vertex $i$ does not have parents in $\Gcal$, then $ Y^{(i)} \notin \Span \big\lbrace Y^{(j)} : j \in \pa(i)  \big\rbrace$ translates to $Y^{(i)} \neq 0$.
+	\hfill\remSymbol
+\end{remark}
+
+\begin{proof}[Proof of Theorem~\ref{thm:LinearIndependenceDAG}]
+	We use the notation that was introduced to obtain Equation~\eqref{eq:LogLikelihoodDAG} for $\ell_Y(\Psi)$. Note that each of the entries $\omega_{ii}$ and $\lambda_{ij}$ appears in exactly one of the $m$ summands in \eqref{eq:LogLikelihoodDAG}. Thus, to maximize the log-likelihood, or equivalently, to minimize the negative log-likelihood, we can minimize each summand
+		\begin{equation}\label{eq:LinearIndependenceDAGithSummand}
+			\log \omega_{ii} + \frac{1}{n \omega_{ii}} \Big\| Y^{(i)} - \sum_{j \in \pa(i)} \lambda_{ij} Y^{(j)} \Big\|^2
+		\end{equation}
+	for $i \in [m]$ independently. By Lemma~\ref{lem:MinimumOfMinusLogLikelihoodRDAG}, we can first determine $\hat{\lambda}_{ij} \in \KK$ with
+		\[ \zeta_i := \Big\| Y^{(i)} - \sum_{j \in \pa(i)} \hat{\lambda}_{ij} Y^{(j)} \Big\|^2 =
+		\inf_{\lambda_{ij} \in \KK} \Big\| Y^{(i)} - \sum_{j \in \pa(i)} \lambda_{ij} Y^{(j)} \Big\|^2 .\]
+	Such $\hat{\lambda}_{ij}$ always exist and are determined by
+		\[P_i = \sum_{j \in \pa(i)} \hat{\lambda}_{ij} Y^{(j)}, \]
+	where $P_i$ is the orthogonal projection of $Y^{(i)}$ onto $\Span \{ Y^{(j)} \mid j \in \pa(i) \}$. Note that the $\hat{\lambda}_{ij}$, $j \in \pa(i)$ are unique if and only if $Y^{(\pa(i))}$ has full row rank. To finish the proof we apply Lemma~\ref{lem:MinimumOfMinusLogLikelihoodRDAG} with $\alpha = 1$ and $\gamma = \zeta_i/n$ several times.
+	
+	Let $Y^{(i)} \in \Span \{ Y^{(j)} \mid j \in \pa(i) \}$ for some $i \in [m]$, i.e., $\zeta_i = 0$. Then the summand \eqref{eq:LinearIndependenceDAGithSummand} is not bounded from below, see Lemma~\ref{lem:MinimumOfMinusLogLikelihoodRDAG}(i). Hence, setting $\omega_{kk} = 1$ and $\lambda_{k,l} = 0$ for all $k \in [m]\backslash \{i\}$ and all $l \in \pa(k)$ we see that $-\ell_Y$ is not bounded from below. This proves ``$\Leftarrow$'' of (a).
+	
+	If $Y^{(i)} \notin \Span \{ Y^{(j)} \mid j \in \pa(i) \}$, i.e.,  $\zeta_i > 0$, then $\log(\omega_{ii}) + \zeta_i/(n \omega_{ii})$ has a unique minimizer $\hat{\omega}_{ii} = \zeta_i / n$, compare Lemma~\ref{lem:MinimumOfMinusLogLikelihoodRDAG}(ii). Thus, an MLE given by $\hat{\omega}_{ii}$ and $\hat{\lambda}_{ij}$ exists if $Y^{(i)} \notin \Span \{ Y^{(j)} \mid j \in \pa(i) \}$ for all $i \in [m]$. This shows ``$\Leftarrow$'' of (b) and hence all of parts~(a) and~(b) as their right hand sides are opposites and since MLE existence implies $\ell_{Y}$ is bounded from above.
+	
+	Since the $\hat{\omega}_{ii}$ are uniquely determined (if they exist), an MLE is unique if and only if all $\hat{\lambda}_{ij}$ are unique. We have seen that the latter holds if and only if $Y^{(\pa(i))}$ has full row rank for all $i \in [m]$. In combination with part~(b) we deduce (c).
+\end{proof}
+
+The above theorem will be generalized to so-called RDAG models, see Theorem~\ref{thm:RDAGMLestimationLinDependence}.
+Let us shortly illustrate Theorem~\ref{thm:LinearIndependenceDAG} and Remark~\ref{rem:LinearHullEmptySet}.
+
+\begin{example}\label{ex:DAGLinearDependence}
+	Let $\Gcal$ be the DAG
+	\begin{tikzcd}[cramped, sep=small]
+		\; 2 \ar[r] & 1 & 3 \ar[l]
+	\end{tikzcd}
+	and consider a sample matrix $Y \in \KK^{m \times n}$. By Theorem~\ref{thm:LinearIndependenceDAG}(b), there exists an MLE given $Y$ if and only if $Y^{(2)}, Y^{(3)} \neq 0$ and $Y^{(1)} \notin \Span \{Y^{(2)}, Y^{(3)}\}$. Otherwise, the log-likelihood $\ell_Y$ is not bounded from above. Since $Y = Y^{(1 \cup \pa(1))}$ we have that there exists a unique MLE given $Y$ if and only if $Y$ has full row rank, compare Theorem~\ref{thm:LinearIndependenceDAG}(c).
+	\hfill\exSymbol
+\end{example}
+
+We use Theorem~\ref{thm:LinearIndependenceDAG} to determine the ML thresholds of a DAG model $\MGar$. The result is known in the graphical models literature, see \cite[Section 5.4.1]{LauritzenBook} and \cite[Theorem~1]{drton2019maximum}.
+
+\begin{cor} \label{cor:MLthresholdsDAG}
+	For the model $\MGar$ of a DAG $\Gcal$, we have
+	\[ \mlt_b \big( \MGar \big) = \mlt_e \big( \MGar \big) = \mlt_u \big( \MGar \big) = 1 + \, \max_{i \in [m]} |\pa(i)| . \]
+\end{cor}
+
+\begin{proof}
+	First, assume there is some vertex $i \in [m]$ with $n < 1+ |\pa(i)|$. Then, for a generic $Y \in \KK^{m \times n}$ the parent rows $Y^{(j)}$ , $j \in \pa(i)$ span $\KK^{1 \times n}$ as $n \leq |\pa(i)|$. Thus, $Y^{(i)}$ is in the linear span of the $Y^{(j)}$ , $j \in \pa(i)$ for generic $Y$, so $\ell_Y$ is not bounded from above for generic $Y$, by Theorem~\ref{thm:LinearIndependenceDAG}(a). Hence, we have shown
+		\begin{equation}\label{eq:MLthresholdsDAG1}
+			\mlt_b(\MGar) \geq  1 + \max_{i \in [m]} |\pa(i)| .
+		\end{equation}
+	
+	On the other hand, if $n \geq  1 + \max_{i \in [m]} |\pa(i)|$ then $Y^{(i \cup \pa(i))} \in \KK^{(1+ |\pa(i)|) \times n}$ does not have full row rank if and only if all its maximal minors vanish. Thus, for generic (and hence almost all) $Y$ we have that for all $i \in [m]$ the matrix $Y^{(i \cup \pa(i))}$ has full row rank. By Theorem~\ref{thm:LinearIndependenceDAG}(c), this implies
+		\begin{equation}\label{eq:MLthresholdsDAG2}
+			\mlt_u(\MGar) \leq  1 + \max_{i \in [m]} |\pa(i)|
+		\end{equation}
+	and combining \eqref{eq:MLthresholdsDAG1} and \eqref{eq:MLthresholdsDAG2} yields the claim.
+\end{proof}
+
+
+\index{maximum likelihood estimation|)}
+
+
+
+
+
+
+

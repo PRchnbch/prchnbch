@@ -1,0 +1,196 @@
+
+%TODO double check \eps versus \veps in all files.
+
+This chapter is based on \cite{WeightMargin} and presents the diameter bounds from this paper. These bounds explain the dichotomy for high precision solutions (HP) from Table~\ref{tab:Dichotomy}. Hence, they highly motivate, together with the weight margin and gap bounds from Chapter~\ref{ch:BoundsMarginGap}, the search for new geodesic convex methods.
+
+Since all main proof ideas for the diameter bounds are due to my co-author Cole Franks, the exposition is restricted to the main results, their implications and relations to the literature, and a proof outline.
+
+\paragraph{Organization and Assumptions.}
+In Section~\ref{sec:DiameterComplexity} we state the main results on diameter bounds, and provide a discussion of their implications and relation to the literature. Afterwards, we give a brief proof outline in Section~\ref{sec:DiameterProofOutline}.
+
+The whole chapter uses the assumptions stated in Setting~\ref{set:AssumptionsPart2}; usually applied to the tensor scaling representation $\pi_{m,d}$ from Example~\ref{ex:RepTensorScaling}.
+
+
+
+\section{Main Results and related Literature} \label{sec:DiameterComplexity}
+
+In the following, we discuss the diameter as a complexity parameter and known upper bounds for it. Moreover, we present the main results, i.e., exponential diameter lower bounds for array and tensor scaling, and we discuss their implications and relations to the literature.
+
+We start by recalling Definition~\ref{defn:Diameter}. Given a representation $\pi \colon G \to \GL(V)$ of a reductive group $G$, $v \in V$ and a precision $\veps > 0$, the \emph{diameter}\index{diameter} was defined as
+	\[ D_v(\veps) := \inf \big\{ R > 0 \mid \inf_{g \in B'_R} \|g \cdot v\|^2 \leq \capac_G(v) + \veps \big\}, \]
+where $B'_R := \{ k \exp(H) \mid k \in K, H \in \imag \Lie(K), \|H\|_F \leq R \}$.
+
+Let us illustrate this for the action of $T = \ST_m(\CC)^3$ via $\pi_{m,3}$, i.e., array scaling. Similarly to matrix scaling~\eqref{eq:MatrixScalingCapacity}, for the array $p_{ijk} := |v_{ijk}|^2$, $v \in (\CC^m)^{\ot 3}$, the optimization problem
+\begin{equation}\label{eq:ArrayScalingCapacity}
+	\begin{split}
+		\capac_T(v) = \capac(p) := \inf_{x,y,z \in \RR^m} f_p(x,y,z) := &\inf_{x, y, z \in \RR^m} \; \sum_{i,j,k = 1}^m p_{ijk} \, e^{ (\eps_i, \eps_j, \eps_k) \cdot (x,y, z) } . %\\
+		%= &\inf_{x, y, z \in (\onePerp)^3} \; \sum_{i,j,k = 1}^m \vert v_{ijk} \vert^2 \, e^{ (\eps_i, \eps_j, \eps_k) \cdot (x,y, z) }
+	\end{split}
+\end{equation}
+captures scaling $p$ to tristochastic, compare Section~\ref{sec:CompProblems}.
+Note, that we can also restrict to the infimum over $(\onePerp)^3  = \imag \Lie(T_K)$.
+The diameter $D_v(\veps)$ in this case is the infimum over all $R>0$ such that
+\[ \inf \big\{ f_p(x,y,z) \mid (x,y,z) \in \big( \onePerp \big)^3, \,  \|(x,y,z)\| \leq R \big\} \leq \capac_T(v) + \veps. \]
+Remember, a group element (in particular, an approximate minimizer) is recovered by $t(x,y,z) := \exp\big( \diag(x),\diag(y),\diag(z) \big) \in T$.
+
+\paragraph{Significance of the Diameter.}
+
+The above explanations for array scaling illustrate why one may regard the diameter as a measure for the \emph{bit complexity} of an approximate minimizer.\footnote{This is similar to the notion of bit complexity in \cite{straszak2019computing}.}
+Furthermore, recall that $\|(x,y,z)\|$ measures the distance between $\id = \exp(0)$ and $t(x,y,z)$ in the flat manifold $T/T_K$. This generalizes to the curved manifold $G/K$, so $D_v(\veps)$ captures the distance of an approximate minimizer to the identity.\footnote{The set $B_R := \{ \exp(H) \mid H \in \imag \Lie(K), \|H\|_F \leq R \}$ is a geodesic ball of radius $R$ in $G/K$ about the identity. Since $K$ acts isometrically on $V$, we see that $D_v(\veps)$ indeed captures the distance of an approximate minimizer to the identity.}
+This directly regards it as a complexity parameter as follows.
+
+Guarantees for many iterative algorithms in (geodesic) convex optimization require a bound on the distance $D$ from the starting point to an $\veps$-approximate solution.\footnote{Here, this distance is the diameter $D_v(\veps)$. Indeed, the identity is the natural starting point in $G$ (more precisely, $G/K$) for Norm Minimization~\ref{comp:NormMinim} and Scaling~\ref{comp:Scaling}. Note that a different starting point $\exp(H) \in G/K$ already involves a ``biased'' direction $H \in \imag \Lie(K)$.}
+For example, in the commutative setting the diameter bounds in \cite{singh2014entropy,straszak2019computing} were used to design ellipsoid methods that are tractable even for very large support, and in \cite{burgisser2020interior} they were used to bound the running time of interior point methods. Similarly, diameter bounds were used to bound the running time of geodesic convex optimization methods \cite{allen2018operator, GradflowArXiv}.
+
+Specifically, gradient descent (first order) and trust region\footnote{also called \emph{box-constrained Newton's method}} (second order) methods are iterative algorithms that make progress at each step within a usually small distance, say upper bounded by $\eta$.\footnote{For example, in \cite{GradflowArXiv} the progress of their geodesic first and second order method is controlled by the weight norm $N(\pi)$. Indeed, it bounds the gradient, \cite[Lemma~3.12]{GradflowArXiv}, and gives a smoothness as well as a robustness parameter \cite[Propositions~3.13 and~3.15]{GradflowArXiv}.}
+By nature, this takes at least $D / \eta$ many steps to produce an $\veps$-approximate solution.
+Therefore, a polynomially large diameter is a necessary requirement for gradient descent and trust region methods to provide high precision solutions in polynomial time.
+
+Finally, we remark that cutting plane methods typically use diameter bounds to control the volume of a starting region.
+
+
+
+
+\paragraph{Known Diameter upper Bounds.}
+In Table~\ref{tab:DiameterBounds} we present known diameter upper bounds for matrix, array, operator and tensor scaling. For matrix scaling, we note that  $w_v$ is the ratio between the sum of the entries of the matrix $v$ and its least non-zero entry. The upper bound for operator scaling, which also applies to matrix scaling, is obtained by combining Equation~\eqref{eq:WeightMarginMatrixOperator} with the diameter bound from \cite{GradflowArXiv} (see Theorem~\ref{thm:DiameterViaWeightMargin}).
+Similarly, combining the general weight margin lower bound \eqref{eq:WeightMarginTensor} from \cite[Theorem~6.9]{GradflowArXiv} with Theorem~\ref{thm:DiameterViaWeightMargin} yields the bound for tensor scaling, which also applies to array scaling.
+Another upper bound for array scaling is $\poly(m^{3/2} 2^m, \log (1/\veps)),$ which follows from the general upper bound of \cite{straszak2019computing} on diameter bounds for unconstrained geometric programming. There is also a diameter bound for array scaling in the multimarginal transport context that is polynomial in the input size, but it assumes that the tensor has \emph{no} non-zero entries \cite{lin2022complexity}.
+
+\begin{table}[h]
+	\renewcommand*{\arraystretch}{1.2}
+	\begin{tabular}{ >{\centering\arraybackslash} m{1cm} ||>{\centering\arraybackslash} m{5.9cm} |>{\centering\arraybackslash} m{6.1cm}}
+		$\pi_{m,d} $& $T = \ST_m(\CC)^d \colon$ commutative & $G = \SL_m(\CC)^d \colon$ non-commutative \\ 
+		\hline \hline
+		$d=2$ & \textbf{matrix scaling:} $O(m \log(w_v / \veps))$ \cite{cohen2017matrix} & \textbf{operator scaling:} $O \big( m^{3/2}, \poly\log(1/ \veps) \big)$ \cite{GradflowArXiv} \\ 
+		\hline 
+		$d=3$ & \textbf{array scaling:} $\poly \big( m^{3/2} 2^m, \log (1/\veps) \big)$ \cite{straszak2019computing} & \textbf{tensor scaling:} $O \big( m^{3m} \poly\log (1/\veps)  \big)$ \cite{GradflowArXiv}
+	\end{tabular}
+	\caption{(Simplified) Diameter upper bounds for $\pi_{m,d}$. In the non-commutative case, we suppressed $\poly\log(1/ \capac_G(v))$, compare Theorem~\ref{thm:DiameterViaWeightMargin}.} \label{tab:DiameterBounds}
+\end{table}
+
+We point out that Table~\ref{tab:DiameterBounds} captures the dichotomy for solving norm minimization with high precision (HP) as presented in Table~\ref{tab:Dichotomy}.
+
+
+\paragraph{Main Results.}
+
+Given the upper bounds for $d = 3$ in Table~\ref{tab:DiameterBounds}, one is led to ask whether the exponential behaviour in $m$ is too pessimistic or actually required. The following two theorems confirm the latter in the high precision regime, i.e., for $\veps$ being exponentially small in some polynomial in $m$.
+
+For the commutative case, recall the definition of $f_p(x,y,z)$ and $\capac(p)$ from Equation~\eqref{eq:ArrayScalingCapacity}. We stress that the following theorem is in terms of $p \in (\RR_{\geq 0}^m)^{\ot 3}$ (which corresponds to $\big( |v_{ijk}|^2 \big)_{ijk}$, and not in terms of $v \in (\CC^m)^{\ot 3}$.
+
+\begin{theorem}[Diameter Bound for Array Scaling, {\cite[Theorem~1.1]{WeightMargin}}] \label{thm:diameterCommutative}  %formerly thm:diameter 
+	\ \\
+	There is an absolute constant $C > 0$ and an array $p \in (\RR_{\geq 0}^m)^{\ot 3}$ with $O(m)$ non-zero entries, each of bit-complexity $O(m)$, that satisfies the following property. For all $0 < \veps \leq  \exp(- C m^2 \log m)$ and $(x,y,z) \in \RR^{3m}$, if
+		\[ f_p(x,y,z) \leq \capac(p) + \veps \]
+	then $\norm{(x,y,z)} = \Omega\left(2^{m/3}\log(1/\veps)\right)$. Moreover, $\capac(p) = 1/2$.
+\end{theorem}
+
+The final equality emphasizes that the difficulties do not lie in an additive vs multiplicative approximation, see Remark~\ref{rem:NormMinimAdditiveVsMultiplicative}. By a simple duplication trick, the same bound holds for $d$-dimensional array scaling with $d \geq 3$, see \cite[Corollary~3.7]{WeightMargin}.
+
+The constructed array $p$ is free, which allows to lift the above theorem to the non-commutative case of tensor scaling. However, due to some required rounding (see Section~\ref{sec:DiameterProofOutline}) the tensor $v$ \emph{depends} on the precision $\veps$.
+
+\begin{theorem}[Diameter Bound for Tensor Scaling, {\cite[Theorem~1.4]{WeightMargin}}] \label{thm:nc-diameter}
+	\ \\
+	For the action of $G = \SL_m(\CC)^3$ via $\pi_{m,3}$, there is a constant $C > 0$ such that the following holds. For all $\veps \leq  \exp(- C m^2 \log m)$, there exists $v = v(\veps) \in (\CC^m)^{\ot 3}$ with $O(m)$ non-zero entries of bit complexity $O(\log m + \log(1/\veps))$ and
+		\[ D_v(\veps) = \Omega\big( 2^{m/3} \log(1/ \veps) \big) . \]
+	Moreover, $1/4 \leq \capac_G(v) \leq 1$ and $1/2 \leq \|v\| \leq 1$.
+\end{theorem} 
+
+Again, the bounds on $\capac_G(v)$ and $\|v\|$ ensure that the difficulties are not caused by requiring an additive approximation, compare Remark~\ref{rem:NormMinimAdditiveVsMultiplicative}.
+A duplication trick analogous to \cite[Corollary~3.7]{WeightMargin} yields the same diameter bound for $d \geq 3$, but for the action of $G = \SL_{m}(\CC)^d$ on tuples of tensors via the representation $\pi_{m,d}^{\oplus m}$, see \cite[Corollary~4.24]{WeightMargin}.
+
+
+
+\paragraph{Implications of the main Results.}
+
+First, considering the diameter bound from \cite{GradflowArXiv} via the weight margin, compare Theorem~\ref{thm:DiameterViaWeightMargin}, the main results show that $\gamma_T(\pi_{m,3})$ cannot be polynomially small in $m$. Instead, the weight margin for array and tensor scaling satisfies $\gamma_T(\pi_{m,3}) = \Omega\big( 2^{-m/3} \big)$.\footnote{We stress that the bound in Theorem~\ref{thm:GapConstantTensor}(b) is better, it also applies to the gap and has a rather short proof. In contrast, the above diameter bounds and Theorem~\ref{thm:DiameterViaWeightMargin} have long, technical proofs and in combination they do not yield a bound on the gap.}
+
+Taking the explanations on the significance of the diameter into account,
+Theorem~\ref{thm:diameterCommutative} shows that gradient descent and trust region methods for $3$-dimensional array scaling with constant (or even polynomial) step size cannot provide high precision solutions in $\poly(m,\log(1/\veps))$ time.
+Therefore, Theorem~\ref{thm:diameterCommutative} explains why ellipsoid and interior point methods are necessary to achieve HP in polynomial time for array scaling.
+
+Analogously, in the non-commutative case Theorem~\ref{thm:nc-diameter} shows that geodesic gradient descent
+and trust region methods with constant step size cannot $\veps$-approximate the capacity in $\poly(m, 1/\veps)$ time for $3$-tensors. In particular, the first and second order method of \cite{GradflowArXiv} cannot solve norm minimization with high precision for tensor scaling in polynomial time.
+
+Furthermore, Theorem~\ref{thm:nc-diameter} also indicates that cutting plane methods as suggested in \cite{rusciano2020riemannian} do not suffice for tensor scaling, as follows.
+Cutting plane methods usually require an exponential bound on the volume of a known region containing an approximate optimizer. This is the case for Rusciano's non-constructive query upper bound for cutting plane methods on manifolds of non-positive curvature \cite{rusciano2020riemannian}. This upper bound is essentially tight due to \cite{hamilton2021no}\footnote{\cite{hamilton2021no} applies to the hyperbolic plane, which is a totally geodesic submanifold of the manifold we consider}.
+However, the volume of a ball in the manifold $\SL_m(\CC)^3/(\SU_m)^3$ grows \emph{exponentially} in the radius, see \cite{gualarnau1999volume}. Therefore, the diameter Theorem~\ref{thm:nc-diameter}, which is exponential in $m$,  shows that an approximate minimizer is only contained in a geodesic ball with volume at least \emph{doubly} exponential in $m$.
+
+Altogether, the provided diameter bounds explain the dichotomy for HP in Table~\ref{tab:Dichotomy}. Moreover, they highly motivate the search for sophisticated (e.g., interior-point like) methods in the geodesic convex setting.
+
+%Therefore, our results highly motivate the search for new sophisticated, e.g., interior-point like, methods in the regime of geodesic convex optimization. We point out that the very recent works \cite{HiraiInterior, HaroldMichaelInterior} rigorously study self-concordant functions on manifolds and \cite{HaroldMichaelInterior} even gives (the main stage of) an interior point method. However, applying this algorithm to the Scaling problem still yields a complexity that depends \emph{linearly} on a diameter bound \cite[Theorem~1.7]{HaroldMichaelInterior}. Hence, the exponential diameter for tensor scaling excludes polynomial running time, making further research necessary \cite[Outlook]{HaroldMichaelInterior}.
+%\footnote{We note that \cite{HaroldMichaelInterior} appeared only very shortly before the submission of this thesis. Therefore, a more detailed discussion cannot be provided.}
+%todo
+
+
+
+\paragraph{Relation to the Literature.}
+
+We remark that \cite{burgisser2020interior} bounds the diameter in the commutative case using the inverse of the so-called \emph{facet gap}, \cite[Definition~1.8]{GradflowArXiv}. The construction for Theorem~\ref{thm:diameterCommutative} has exponentially small facet gap; see Corollary~\ref{cor:facet-fap} below.
+
+Regarding diameter \emph{lower} bounds, it was shown that there is some bounded set $\Gamma \subset \ZZ^m$ in a $\poly(m)$ size ball such that the geometric program with weights given by $\Gamma$ has \emph{no} $\veps$-approximate minimizers of norm $\poly(m, \log 1/\veps)$ \cite{straszak2019computing}. We stress that the specific unconstrained geometric program in the latter result is not array scaling; also compare Remark~\ref{rem:CommutativeDiameter} below. Actually, in \cite[Section 2.1]{straszak2019computing} the authors ask whether there is some $\Gamma$ whose elements are Boolean (up to an additive shift) with a superpolynomial diameter lower bound. As subsets of $\Omega(\pi_{m,d})$ are of this form, we answer their open problem in the affirmative.
+
+Comparing with the upper bounds in Table~\ref{tab:DiameterBounds}, we see that the lower bounds from Theorems~\ref{thm:diameterCommutative} and~\ref{thm:nc-diameter} are tight up to logarithmic factors in the exponent.
+
+It would be interesting to prove a version of Theorem~\ref{thm:nc-diameter} that holds for $\veps$ larger than $2^{-m+1} \geq \gamma_G(\pi_{m,3})$. This would imply that trust region methods cannot solve the null-cone problem for the $3$-tensor action in polynomial time.
+
+
+
+
+\section{Proof Outline} \label{sec:DiameterProofOutline}
+
+In the following we briefly sketch the proof ideas and methods used to obtain Theorems~\ref{thm:diameterCommutative} and~\ref{thm:nc-diameter}. This is based on \cite[Subsections~3.1 and~4.5]{WeightMargin}.
+
+First, we sketch how to construct an array $p \in (\RR_{\geq 0}^m)^{\ot 3}$ in the commutative case, Theorem~\ref{thm:diameterCommutative}.
+Recall the formulation of array scaling as a geometric program in Equation~\eqref{eq:ArrayScalingCapacity}.
+We build both the support $\supp(p) \subseteq \Omega(\pi_{m,3})$ and the entries of $p$ in \cite[Section~3]{WeightMargin} in the following way. We construct a set $\Gamma \subseteq \Omega (\pi_{m,3})$, another weight $\hat{\omega} \in \Omega(\pi_{m,3})$, and an array $q \in (\RR_{\geq 0}^m)^{\ot 3}$ such that:
+\begin{enumerate}
+	\item\label{item:qTristochastic} The set $\Gamma \subseteq \Omega(\pi_{m,3})$ is the support of an array $q \in (\RR_{\geq 0}^m)^{\ot 3}$, and $m q$ is tristochastic, i.e., all slice sums of $q$ are equal to $m^{-1}$.
+	As a consequence, $q_{+++} = 1$ and $\sum_{\omega \in \Gamma} q_{\omega} \omega = 0$, showing that $0 \in \relint(\conv(\Gamma))$.\footnote{This also follows from Hilbert-Mumford for the array scaling action and the tristochastic array $mq$; similar to Corollary~\ref{cor:MatrixScalingKempfNess}.}
+	
+	\item The affine hull of $\Gamma$, should have codimension one\footnote{This will not quite apply in our setting, because $\aff(\Omega(\pi_{m,3}))$ is not full-dimensional. Instead, $\aff (\Gamma)$ will be codimension one in $\aff\big( \Omega(\pi_{m,3}) \big)$.} in $\RR^{3m}.$
+	
+	\item \label{item:FacetGap} The vector $\hat{\omega} \in \Omega(\pi_{m,3})$ is at a very small, positive distance $\eta$ from $\aff (\Gamma)$. Note that this already implies that the \emph{facet gap}\index{facet gap}\footnote{This is a concept from \cite[Definition~1.8]{burgisser2020interior}: the \emph{facet gap} of $\Omega \subseteq \RR^m$ is the largest constant $C >0$ such that $\dist(\omega,\aff(F)) \geq C$ for any facet $F$ of $\conv(\Omega)$ and $\omega \in \Omega \backslash F$.}
+	of $\Gamma \cup \{\hat{\omega}\}$ is small.
+\end{enumerate}
+Finally, we define the entries of $p$ by $p_{\omega} = \frac{1}{2} q_{\omega}$ for $\omega \in \Gamma$, $p_{\hat{\omega}} = \frac{1}{2}$, and $p_\omega = 0$ elsewhere. Assuming we have found $p$ according to this process, we now give some intuition for the diameter bound.
+
+Let $v$ be the projection of $\hat{\omega}$ to the orthogonal complement of $\aff(\Gamma)$. Intuitively, the capacity is only approximately attained by vectors very far in the $-v$ direction. Indeed, first note that $\capac(q)=1$, by the properties from Item~\ref{item:qTristochastic} together with the weighted AM-GM inequality.
+We deduce $\capac(p) = 1/2$, because $\capac(p) \geq \frac{1}{2} \capac(q) = \frac{1}{2}$, and $f_p(- tv/\|v\|) = \frac{1}{2} + e^{ - \eta t}$ tends to $\frac 12$ for $t \to \infty$. However, $f_p( - t v/\|v\|)$ tends to $\frac 12$ slowly if $\eta$ is small: $f_p( - t v/\|v\|) \leq \frac{1}{2} + \veps$ if and only if $t \geq - \eta^{-1} \log (\veps) = \eta^{-1} \log(1/ \veps)$.
+
+To conclude rigorously that the capacity is only approached by vectors very far in the $-v$ direction, we must rule out directions with non-zero components in $\aff(\Gamma)$. For this, we use in \cite{WeightMargin} the assumption that $0$ is rather deep in the relative interior of $\conv(\Gamma)$. If this is the case, then any $\veps$-approximate minimizer must have a bounded component in $\aff(\Gamma)$, for otherwise the contribution to $f_p$ from the elements of $\Gamma$ alone will be larger than $\frac{1}{2} + \veps$.
+
+\begin{remark}[based on {\cite[Subsubsection~1.1.3]{WeightMargin}}]\label{rem:CommutativeDiameter}
+	The structure of the argument bears some similarity to that in \cite{straszak2019computing}, which uses the construction of \cite{alon1997anti}. The main difference is that the set $\Omega(\pi_{m,3})$ in the 3-dimensional array scaling problem consists of weights of very specific structure: up to an additive shift of $-\frac{1}{m} \ones_{3m}$, they are Boolean vectors in $\RR^{3m}$ with exactly one non-zero entry among indices in the intervals $[1,m], [m+1,2m]$ and $[2m + 1, 3m]$.
+	Thus, our construction of $\Gamma$ must consist of weights of this special form and not simply bounded integral vectors as in \cite{straszak2019computing}. This is the main additional technical contribution of our construction.  
+	\hfill\remSymbol
+\end{remark}
+
+We end the commutative case with a consequence on the facet gap from Item~\ref{item:FacetGap}.
+
+\begin{cor}[Facet gap of array scaling, {\cite[Corollary~3.6]{WeightMargin}}] \label{cor:facet-fap}
+	\ \\
+	There is a subset of $\Omega(\pi_{m,3})$ with facet gap $O(2^{- m/3})$.
+\end{cor}
+
+Similarly to lifting bounds from the weight margin to the gap (Chapter~\ref{ch:BoundsMarginGap}), we can lift the diameter bound from the commutative to the non-commutative case, if the construction is free.
+
+\begin{theorem}[based on {\cite[Theorem~4.20]{WeightMargin}}] \label{thm:free-diameter}
+	Let $\pi \colon G \to \GL(V)$ be a representation with assumptions as in Setting~\ref{set:AssumptionsPart2}.
+	Suppose $\mu_{T}(t \cdot v) = \mu_G(t \cdot v)$ for all $t \in T$ (which holds if $\supp(v) \subseteq \Omega(\pi)$ is free). Then for any $R > 0$
+		\begin{equation}\label{eq:LiftDiameter}
+			\inf_{g \in B'_R} \|g \cdot v\|^2 = \inf_{t \in T \cap B'_R} \|t \cdot v\|^2 ,
+		\end{equation}
+	where $B'_R := \big\{ k \exp(H) \mid k \in K, H \in \imag \Lie(K), \|H\|_F \leq R \big\}$.
+\end{theorem}
+
+The above theorem is specifically stated for $\pi_{m,3}$ in \cite{WeightMargin}, but the arguments of the proof hold in general. Equation~\eqref{eq:LiftDiameter} ensures that for a free vector $v$ one can always choose an approximate minimizer of $\capac_G(v)$ in $T$. Since, the array from Theorem~\ref{thm:diameterCommutative} has free support \cite[Lemma~4.21]{WeightMargin} one can deduce Theorem~\ref{thm:nc-diameter}. However, in the latter we need to choose a tensor $v$ such that $p_{ijk} = |v_{ijk}|^2$, which is not solvable over the rationals. Hence, we need some rounding procedure so that the rationals $v_{ijk}$ satisfy $v_{ijk} \approx \sqrt{p_{ijk}}$. Higher precision, i.e., a smaller $\veps$, requires a more precise rounding. Therefore, the tensor $v$ in Theorem~\ref{thm:nc-diameter} depends on the precision $\veps$. The technical details of the rounding procedure are treated in \cite[Lemmas~4.22 and 4~.23]{WeightMargin}.
+
+For a full proof of the non-commutative case we refer to \cite[Section~4.5]{WeightMargin}.
+
+
+
+
+
+
+
+

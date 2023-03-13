@@ -1,0 +1,491 @@
+
+%todo
+
+\begin{center}
+	\emph{``Invariant theory has already been pronounced dead several times,\\and like the phoenix it has been again and again rising from its ashes.''}
+	\\ \bigskip
+	Dieudonné and Carrell in \cite[page~1]{dieudonneCarrell1970}
+\end{center}
+
+
+\bigskip
+\bigskip
+
+This chapter serves as an introduction to computational invariant theory, and its manifold algorithmic methods and applications. 
+Thereby, we embed and locate the contributions of this thesis in the research area.
+We stress that an exhaustive discussion of computational invariant theory is not provided and certainly goes beyond this thesis. Instead, we focus and illustrate those aspects especially needed in later chapters.
+ In particular, we provide the necessary background and motivation for Chapters~\ref{ch:BoundsMarginGap} and~\ref{ch:BoundsDiameter}, which present hardness results for geodesic convex methods in invariant theory. Moreover, the presented computational problems and scaling algorithms connect to the algorithmic aspects of maximum likelihood estimation, see Part~\ref{part:AlgebraicStatistics} on algebraic statistics.
+
+\paragraph{Organization and Assumptions.} In Section~\ref{sec:CompProblems} we outline historical developments, state the computational problems studied in this thesis and some of their applications. Afterwards, we discuss scaling algorithms and comment on their complexity to solve these problems in Section~\ref{sec:ScalingAlgorithms}.
+
+We note that the whole chapter uses the assumptions stated below in Setting~\ref{set:AssumptionsPart2}, which is Setting~\ref{set:MomentMap} over $\CC$ and we additionally fix a maximal torus.
+
+\begin{setting}[Assumptions for Part~\ref{part:CompComplexity}] \label{set:AssumptionsPart2}
+	We work over $\CC$. Let $G \subseteq \GL_N(\CC)$ be a Zariski closed and self-adjoint subgroup,\footnote{Remember from Theorem~\ref{thm:ReductiveGroupActionToSelfAdjoint} that such groups are reductive, and conversely any reductive group is isomorphic to such a group.}
+	set $K:= G \cap \Un_N$ and $\pfrak := \imag \Lie(K) = \Lie \cap \Sym_N(\CC)$.
+	Moreover, fix a maximal torus $T := (G \cap\GT_N(\CC))^\circ$ in $G$ and a maximal compact torus $T_K := T \cap K$ of $K$, compare Proposition~\ref{prop:SelfAdjointProperties}.
+	Consider a rational representation $\pi \colon G \to \GL(V)$ and its differential $\Pi \colon \Lie(G) \to \End(V)$. Equip $V$ with a $K$-invariant inner product. Finally, let
+		\[ \mu_G \colon V\backslash\{0\} \to \imag \Lie(K) \qquad \text{and} \qquad \mu_T \colon V\backslash\{0\} \to \imag \Lie(T_K) \]
+	denote the moment maps for the $G$-action, respectively $T$-action, with respect to this inner product.
+	For a concrete instance see Example~\ref{ex:MomentMapSetting}.
+	\hfill\defnSymbol
+\end{setting}
+
+
+
+\section{Computational Problems and Applications} \label{sec:CompProblems}
+
+Based on \cite{dieudonneCarrell1970, SturmfelsBookInvariant, DerksenKemperBook}, we first give a historical overview on some aspects of computational invariant theory. Thereby, we introduce the main computational problems of interest for this thesis. Afterwards we present several applications and cite related literature, that may be consulted for further details. We end with an extended example on matrix scaling, and short comments on its generalizations, to illustrate how the computational problems translate in these cases.
+
+
+\subsubsection*{History of Computational Problems}
+
+Since its origins in the $19^{th}$ century invariant theory is inseparably linked to computation. In fact, classical invariant theory from that time was mainly motivated by the following fundamental problems, compare \cite[Section~1.5]{kraft1996classical} and \cite[Section~1.3]{SturmfelsBookInvariant}.
+Given a representation $\pi \colon G \to \GL(V)$:
+	\begin{enumerate}
+		\item Find a finite set $f_1,\ldots,f_k$ of generators of the ring of invariants $\CC[V]^G$.
+		
+		\item Determine the algebraic relations, i.e., the syzygies, among $f_1,\ldots,f_k$.\footnote{In \cite{SturmfelsBookInvariant} the following interesting problem is added: give an algorithm that writes any invariant $f \in \CC[V]^G$ as a polynomial in the generators $f_1,\ldots,f_k$.}
+	\end{enumerate}
+Solutions to these problems for concrete actions are usually called the First and Second Fundamental Theorem respectively \cite{kraft1996classical}.
+Many famous mathematicians such as Cayley, Clebsch, Cremona, Gordan and Sylvester contributed to invariant theory in its classical period. The latter culminated in Hilbert's breakthroughs \cite{Hilbert1890, Hilbert1893}, in which he proved that $\CC[V]^G$ is finitely generated\footnote{where $V$ is a finite dimensional representation of a reductive group $G$}
+(Theorem~\ref{thm:HilbertInvariantRing}) and provided a finite algorithm that computes a system of generators. It is noteworthy, that \cite{Hilbert1890, Hilbert1893} made further outstanding contributions to modern algebra: they contain Hilbert's Nullstellensatz, Hilbert's basis theorem and Hilbert's syzygy theorem. However, the computational methods available were, especially with the lack of modern computers, extremely cumbersome and, if at all, only possible to carry out by hand in tiniest examples.
+
+With some of its main problems being solved and the given computational cost of available algorithms, research in invariant theory (almost) fell asleep for decades. A first revival was initiated by the developments on representations of semisimple groups which realized classical invariant theory as a special case, compare \cite{weyl1946classical}. Latest with Mumford's invention of \emph{Geometric Invariant Theory} (GIT) in 1965 invariant theory was again at the forefront of mathematics \cite{MumfordGITbook}. Mumford realized that ideas from  Hilbert's paper \cite{Hilbert1893} combined with modern scheme theory enabled him to construct moduli spaces via so-called GIT quotients. Again, this relates to an interesting computational question. Namely, whether two vectors $v,w \in V$ are identified in the affine GIT quotient gives the following decision problem.
+
+\begin{compprob}[Orbit Closure Intersection (OCI)]
+	\label{comp:OCI} \index{orbit closure intersection problem} \index{OCI problem| see {orbit closure intersection problem} } \ \\
+	Given $\pi \colon G \to \GL(V)$ and $v,w \in V$, decide whether $\overline{G \cdot v}^{\Zar} \cap \overline{G \cdot w}^{\Zar} \neq \emptyset$.
+\end{compprob}
+
+We note that \cite{mulmuley2017geometric} conjectures that OCI is computable in polynomial time for any rational representation of a reductive group $G$.
+An important special case of OCI arises when $w=0$. This translates to deciding whether $v$ is unstable.
+
+\begin{compprob}[Null Cone Membership (NCM)]
+	\label{comp:NCM} \index{null cone membership problem} \index{NCM problem| see {null cone membership problem} }
+	\ \\
+	Given $\pi \colon G \to \GL(V)$ and $v \in V$, decide whether $0 \in \overline{G \cdot v}^{\Zar} = \overline{G \cdot v}$.
+\end{compprob}
+
+In parallel to Mumford's work, Buchberger's algorithm\footnote{The algorithm was first published in Buchberger's PhD thesis from 1965. We provide references to the journal version from 1970 and a translation of Buchberger's thesis from 2006.} \cite{BuchbergerPhDJournal, BuchbergerPhDTranslation}
+to compute Gr\"obner bases gave birth to computational commutative algebra as a research field. Soon, Gr\"obner basis methods fostered many new results in computational invariant theory; the reader is referred to the excellent text books \cite{SturmfelsBookInvariant, DerksenKemperBook} and the references therein. We remark that Sturmfels' book \cite{SturmfelsBookInvariant}, which marries the ideas of classical invariant theory with Gr\"obner basis methods, may serve as an introduction to the topic. It is complemented by the monograph \cite{DerksenKemperBook}, which treats many modern concepts such as Derksen's algorithm, separating invariants and degree bounds for generating invariants.
+
+We point out that modern methods solve the OCI problem for general reductive groups as follows. One computes a system $f_1, \ldots, f_k$ of generators for $\CC[V]^G$ using Derksen's algorithm \cite{derksen1999ComputationOfInvariants} and evaluates them at $v$ and $w$. This decides OCI as invariants separate orbit closures by Theorem~\ref{thm:GeneratingInvariantsSeparate}. However, this approach is in general not computationally efficient or often even infeasible. First, Derksen's algorithm crucially involves the computation of a Gr\"obner basis, which is usually very costly and the basis may be huge. Second, generating invariants can have exponential degree \cite{derksen2020exponential}, and third, it may be difficult to evaluate them (exactly).
+Furthermore, an approach via so-called succinct encodings of generating invariants \cite{mulmuley2017geometric} was disproven recently in \cite{garg2019search}.
+Hence, for general reductive groups it remains open whether the OCI Problem~\ref{comp:OCI} can be decided in polynomial time.
+
+Complementing the symbolic/algebraic methods, recent years have seen intense study on optimization approaches to computational invariant theory. This already enjoyed several success stories, compare Section~\ref{sec:ScalingAlgorithms}. In the following we present two optimization problems which can be used to decide NCM. For this, recall that $0 \in \overline{G \cdot v}$ if and only if $\capac_G(v) = \inf_{g \in G} \| g \cdot v\|^2 = 0$. Therefore, the NCM problem is naturally linked to approximating the capacity of $v$.
+
+\begin{compprob}[Norm Minimization] \label{comp:NormMinim} \index{norm minimization}
+	Given $\pi \colon G \to \GL(V)$, $v \in V$ and a precision $\veps > 0$, determine $g \in G$ such that $\| g \cdot v \|^2 \leq \capac_G(v) + \veps$.
+	%Gradflow version:  $v$ assumed to have positive capacity Determine $g \in G$ such that $\log (\|g \cdot v\|^2) - \log(\capac_G(v)) \leq \veps$.
+\end{compprob}
+
+On the other hand, recall that Kempf-Ness gives the duality (Equation~\eqref{eq:KempfNessDuality})
+	\[ \capac_G(v) = 0 \quad \Leftrightarrow \quad \inf_{g \in G} \| \mu(g \cdot v) \|^2 > 0 . \]
+Therefore, norm minimization and deciding (non)-membership in the null cone are related to scaling the moment map to zero.\footnote{In fact, a result of \cite{GradflowArXiv} made this quantitive, compare Theorem~\ref{thm:NonCommutativeDuality}.}
+
+\begin{compprob}[Scaling] \label{comp:Scaling} \index{scaling problem}
+	Given $\pi \colon G \to \GL(V)$, $v \in V$ with $0 \in \Delta_G(v)$ and a precision $\veps > 0$, determine $g \in G$ such that $\| \mu_G(g \cdot v) \| \leq \veps$.
+\end{compprob}
+
+\begin{remark}\label{rem:CompProblemsOverRR}
+	We note that NCM, Norm minimzation and Scaling in the above formulations may also be considered over $\RR$.\footnote{Actually, the first two problems admit nice relations between the solutions over $\RR$ and those over $\CC$, compare Proposition~\ref{prop:RealVsComplexCapacity}.}
+	In fact, we link these problems over $\KK \in \{\RR, \CC\}$ to maximum likelihood estimation in the part on algebraic statistics, see e.g., Chapters~\ref{ch:LogLinearModels} and~\ref{ch:GaussianGroupModels}. Moreover, NCM and Norm minimization still make sense for non-reductive groups\footnote{However, one needs to be careful: for non-reductive groups the topological null cone and the null cone cut out by invariants do not have to be equal, compare Example~\ref{ex:NonReductiveDifferentNullCones}.}
+	and even beyond the group setting; again there are connections to statistics, see Section~\ref{sec:TDAGs} and Chapters~\ref{ch:GaussianModels}, \ref{ch:RDAGs} respectively.
+	\hfill\remSymbol
+\end{remark}
+
+Finally, we note the following. Another equivalent formulation of the NCM Problem~\ref{comp:NCM} is to decide whether $0 \notin \Delta_{G}(v)$. Therefore, NCM is also a special case of the moment polytope membership problem. It asks whether a given rational vector $p \in \QQ^N$ is contained in the moment polytope $\Delta_G(v)$ \cite[Problem~1.11]{GradflowArXiv}. This problem as well admits a scaling analogue \cite[Problems~1.12]{GradflowArXiv}, and there are many applications, e.g., to Kronecker polytopes and to Horn's problem. We refer to \cite{burgisser2018efficient, GradflowArXiv} for further details.
+
+
+
+
+\subsubsection*{Applications}
+
+We give a brief overview on some applications of the mentioned Computational Problems~\ref{comp:OCI}~--~\ref{comp:Scaling}. The interested reader is encouraged to consult for further details the introductions in \cite{burgisser2017alternating, burgisser2018efficient, GradflowArXiv}, \cite[Section~5]{gargOliveira2018Survey} and the references in these papers.
+
+\textbf{Algebraic Geometry.}
+As already mentioned, the OCI problem plays an important role in the
+construction of moduli spaces via GIT quotients \cite{MumfordGITbook, NewsteadBook, hoskinsLectureModuli}. The NCM problem is of particular interest, since the null cone has to be excluded in the construction of projective GIT quotients.
+
+\textbf{Convex Optimization.}
+If $G$ is a torus, i.e., in the (connected) commutative case, the Norm minimization Problem~\ref{comp:NormMinim} captures unconstrained geometric programming. This huge class of convex optimization problems itself has manifold applications \cite{duffin1967geometric, peterson1976geometric, ecker1980geometric, boyd2007tutorial}. For example, it covers matrix scaling, matrix balancing and array scaling, which arise in scientific computing and optimal transport \cite{cuturi2013sinkhorn, parlett1971balancing}. It also contains commutative polynomial scaling, which recovers Gurvit's polynomial capacity \cite{gurvits2004combinatorial, gurvits2006hyperbolic}.
+
+\textbf{Physics.}
+Especially the tensor scaling setting has important connections to quantum information theory, see e.g., \cite{klyachko2006quantum, sawicki2014convexity, walterPhDthesis, burgisser2018efficient}, and to quantum many-body physics \cite{haroldEtAl2022minimal}.
+
+\textbf{Analysis.}
+The Brascamp Lieb inequalities \cite{brascamp1976best, lieb1990gaussian} are a huge family of inequalities which generalize many important inequalities such as Cauchy Schwarz, Hölder and Brunn-Minkowski. Brascamp Lieb inequalities involve an optimal constant known as the BL constant, which is related to invariant theory through certain semi-invariants of the star quiver \cite[Section~4.1]{garg2018BrascampLieb}. In this case, the NCM Problem~\ref{comp:NCM} translates to deciding whether the BL constant is infinite, while the Scaling Problem~\ref{comp:Scaling} means to approximate the BL constant (given it is finite).
+Via a reduction to operator scaling polynomial time algorithms for both instances are given in \cite{garg2018BrascampLieb}.
+
+\textbf{Computer Science \& Complexity Theory.}
+First, we note that geometric complexity theory, an approach to complexity lower bounds, suggests that the OCI Problem~\ref{comp:OCI} should be in the complexity class $\mathsf{P}$ \cite{mulmuley2017geometric}. In fact, \cite{mulmuley2017geometric} gives an algebraic polynomial time algorithm for OCI if the group is \emph{fixed}.
+Non-rational identity testing, which is a non-commutative analogue of the famous polynomial identity testing (PIT),  arises as the NCM problem for operator scaling.\footnote{The PIT problem is \emph{not} an instance of the NCM problem \cite{makam2021NotAnullcone}.}
+This led to several deterministic polynomial time algorithms \cite{garg2016deterministic, derksen2017polynomial, ivanyos2017constructive, allen2018operator} for non-rational identity testing.
+
+\textbf{Statistics.}
+Of course, one important link of the computational problems to statistics is through matrix scaling. We discuss this relation in detail below. In the commutative case the Lagrange dual of the Scaling Problem~\ref{comp:Scaling} covers discrete entropy maximization \cite{singh2014entropy, straszak2019computing}.\footnote{It is an interesting open problem whether similar connections between the continuous entropy maximization problem (see e.g., \cite{leake2020ContEntropySTOC}) and the non-commutative setting hold; private communication with Jonathan Leake.} %todo cite journal version \cite{leake2022ContEntropyJournal}?
+Moreover, the commutative case connects to maximum likelihood (ML) estimation of log-linear models and iterative proportional scaling\footnote{also known as iterative proportional fitting}
+\cite{DiscretePaper}. The results of \cite{DiscretePaper} are presented in Chapter~\ref{ch:LogLinearModels}.
+The non-commutative setting is tightly related to ML estimation of so-called Gaussian group models \cite{SiagaPaper}. These relations go even beyond the usual setting of reductive groups and are discussed in Chapter~\ref{ch:GaussianGroupModels}.\footnote{Further work was stimulated by these connections \cite{RDAG}, which even goes beyond the case of groups. This is discussed in detail in Chapters~\ref{ch:GaussianModels} and \ref{ch:RDAGs}.}
+Furthermore, connections to operator scaling have been used to obtain results on the sample complexity for Tyler's M estimator \cite{franks2020rigorous}. 
+
+%open question whether continuous entropy maximization fits into this setting as well. (see Jonathans lecture 15, last slide)
+
+
+\subsubsection*{Extended Example: Matrix Scaling}
+
+In the following we illustrate how matrix scaling naturally arises when considering the Computational Problems~\ref{comp:NCM}--\ref{comp:Scaling} for the restriction of $\pi_{m,2}$ to $T := \ST_m(\CC)^2$. Matrix scaling has manifold relations and applications such as optimal transport, bipartite matching and statistics. We refer to the detailed survey \cite{idel2016review}.
+Let us first define what we mean by matrix scaling in the following.\footnote{Instead of scaling to a doubly stochastic matrix one could, more generally, consider scaling for given vectors $r$ and $c$ of row and column sums.}
+
+\begin{defn}\label{defn:MatrixScaling}
+	Let $M \in \RR^{m \times m}$ be a matrix with non-negative entries.
+	\begin{enumerate}
+		\item $M$ is \emph{doubly stochastic}\index{doubly stochastic} if all row and column sums of $M$ are one. The distance of $M$ to doubly stochastic is
+			\begin{equation}\label{eq:DistanceDoublyStochastic}
+				\ds(M) := \sum_{i=1}^m (M_{i,+} - 1)^2 + \sum_{j=1}^m (M_{+,j} - 1)^2.
+			\end{equation}
+		
+		\item $XMY$ is called a \emph{scaling}\index{scaling of a matrix} of $M$ if $X,Y \in \RR^{m \times m}$ are positive definite diagonal matrices.
+		
+		\item $M$ is \emph{scalable}\index{scalable} (to doubly stochastic), if there is a scaling $XMY$ that is doubly stochastic\index{doubly stochastic}.
+		
+		\item $M$ is \emph{approximately scalable}\index{scalable!approximately} (to doubly stochastic), if for every $\veps > 0$ there exists a scaling $XMY$ such that $\ds(XMY)$.
+		\hfill\defnSymbol
+	\end{enumerate}
+\end{defn}
+
+Note that we can parametrize $X$ (and similarly $Y$) as $X = \exp(\diag(x))$, where $x \in \RR^m$. Now, matrix scaling arises via $\pi_{m,2}$ restricted to the torus $T = \ST_m(\CC)^2$.\footnote{On first glance, one might wonder why the left-right action of $\GT_m(\CC)^2$ on $\CC^{m \times m}$ is not used. However, this action is not meaningful for NCM as all matrices are unstable.}
+Indeed, for $v \in \CC^{m \times m}$ the geometric program
+	\begin{equation}\label{eq:MatrixScalingCapacity}
+		\capac_T(v) = \inf_{g,h \in \ST_m(\CC)} \sum_{i,j=1}^m | g_{ii}|^2 |v_{ij}|^2 |h_{jj}|^2
+		= \inf_{x,y \in \RR^m} \, \sum_{i,j=1}^m |v_{ij}|^2 e^{\langle (\eps_i, \eps_j), (x,y) \rangle}
+	\end{equation}
+captures matrix scaling for $M_v := ( |v_{ij}|^2 )_{i,j}$, compare \cite[Programs~I and~II]{rothblum1989scalings}.
+Perhaps, the connection becomes even more apparent when considering the moment map for this action.
+Recall from Equation~\eqref{eq:MatrixScalingMomentmap} in Example~\ref{ex:MomentMapTorus} that
+	\begin{equation}
+		\mu_T(v) = \frac{1}{\|v\|^2} \left( r(M_v) - \frac{\|v\|^2}{m} \ones_m, \, c(M_v) - \frac{\|v\|^2}{m} \ones_m \right),
+	\end{equation}
+where $r(M_v), c(M_v) \in \RR^m$ are the vectors of row respectively column sums of~$M_v$.
+Consequently, $\mu_T(v) = 0$ if and only if the matrix $m \|v\|^{-2} M_v$ is doubly stochastic. 
+This allows to link matrix scaling to conditions from Kempf-Ness, Theorem~\ref{thm:KempfNessAKRS}.
+
+\begin{prop} \label{prop:MatrixScalingMomentMap}
+	Let $v \in \CC^{m \times m}$ and set $M_v := \big( |v_{ij}|^2 \big)_{i,j} \in \RR_{\geq 0}^{m \times m}$. Then
+	\begin{itemize}
+		\item[(i)] $M_v$ is scalable $\quad \Leftrightarrow \quad \exists \, t \in T \colon \; \|\mu_T(t \cdot v)\| = 0$.
+		
+		\item[(ii)] $M_v$ is approximately scalable $\quad \Leftrightarrow \quad \inf_{t \in T} \|\mu_T(t \cdot v)\| = 0$.
+	\end{itemize}
+\end{prop}
+
+\begin{proof}
+	We prove the first part. Item~(ii) follows similarly using continuity of the moment map.
+	First, assume there is some $t \in T = \ST_m(\CC)^2$ with $\mu_{T}(v) = 0$. Writing $t = (g,h)$ one computes that
+		\begin{equation}\label{eq:MtvIsScaling}
+			\big( M_{t \cdot v} \big)_{ij} = | (t \cdot v)_{ij} |^2 = |g_{ii}|^2 |v_{ij}|^2 |h_{jj}|^2 .
+		\end{equation}
+	Therefore, $M_{t \cdot v}$ is a scaling of $M_v$ and so is $m \|t \cdot v\|^{-2} M_{t\cdot v}$. The latter is doubly stochastic as $\mu_T(t \cdot v) = 0$ and we conclude that $M$ is scalable.
+	
+	Conversely, let $X M_v Y$ be a scaling of $M_v$ that is doubly stochastic. Since $X,Y$ are diagonal positive definite matrices we can write $X = \exp(2\diag(x))$ and $Y = \exp(2 \diag(y))$, where $x,y \in \RR^m$. We define the determinant one matrices
+		\[ g := \exp \big( - m^{-1} x_+ \big) \exp\big( \diag(x) \big) \quad \text{ and }\quad  h := \exp \big( - m^{-1} y_+ \big) \exp\big( \diag(y) \big) \]
+	to obtain $t := (g,h) \in T$. Via Equation~\eqref{eq:MtvIsScaling} we compute $M_{t \cdot v} = \lambda X M_v Y$, where $\lambda := \exp \big( - 2 m^{-1} (x_+ + y_+) \big)$. As $X M_v Y$ has row sums equal to one, we get 
+		\[ \| t \cdot v \|^2 = \sum_{i \in [m]} \big(M_{t \cdot v} \big)_{i,+} 
+		= \lambda \sum_{i \in [m]} \big( X M_{v} Y \big)_{i,+} = \lambda m .  \] 
+	Thus, $m \|t\cdot v \|^{-2} M_{t \cdot v} = \lambda^{-1} M_{t \cdot v} = X M_v Y$ which is doubly stochastic and hence $\mu_T(t \cdot v ) = 0$ as desired.
+\end{proof}
+
+As a direct consequence of Kempf-Ness, Theorem~\ref{thm:KempfNessAKRS} parts~(e) and~(f), and Hilbert-Mumford, Theorem~???%todo refer to weight polytope version
+, we obtain the following.
+
+\begin{cor} \label{cor:MatrixScalingKempfNess}
+	Let $v \in \CC^{m \times m}$ and set $M_v := \big( |v_{ij}|^2 \big)_{i,j} \in \RR_{\geq 0}^{m \times m}$. Then
+		\[ \begin{matrix}
+			\text{(i)} & M_v \text{ is scalable} & \Leftrightarrow & v \text{ is } T\text{-polystable} & \Leftrightarrow & 0 \in \relint(\Delta_{T}(v)) \\[5pt]
+			
+			\text{(ii)} & M_v \text{ is approx. scalable} & \Leftrightarrow & v \text{ is } T\text{-semistable} & \Leftrightarrow & 0 \in \Delta_{T}(v)
+		\end{matrix} \]
+\end{cor}
+
+Therefore, the NCM Problem~\ref{comp:NCM} for matrix scaling is deciding whether $M_v$ is not approximately scalable. The Scaling Problem~\ref{comp:Scaling} essentially\footnote{up to a rescaling as in the proof of Proposition~\ref{prop:MatrixScalingMomentMap}} translates to compute a scaling of $M_v$ that is close to a doubly stochastic matrix.
+
+Moreover, we can relate the Hilbert-Mumford characterization to bipartite matching, also compare \cite[Corollary~3.5]{gargOliveira2018Survey}.
+
+\begin{prop}\label{prop:MatrixScalingHilbertMumford}
+	For $v \in \CC^{m \times m}$, $0 \in \Delta_T(v)$ if and only if the bipartite graph given by the zero pattern of $v$ (equivalently, of $M_v$) admits a perfect matching.
+\end{prop}
+
+\begin{proof}
+	First, recall that the weight polytope of $v$ under matrix scaling is given by
+		\[ \Delta_{T}(v) = \conv \big\lbrace (\eps_i, \eps_j) \mid v_{ij} \neq 0 \big\rbrace \subseteq \RR^{2m} . \]
+	Moreover, $v$ induces the bipartite graph $\Gcal_v = (I = [m], J=[m], E)$ with edges $E = \{ (i,j) \in I \times J \mid v_{ij}\neq0\}$. Now, assume $\Gcal_v$ has a perfect matching, i.e., there is a permutation $\sigma \in \mathfrak{S}_m$ such that $(i, \sigma(i)) \in E$. Using $\sum_i \eps_i = 0_m$, we deduce
+		\[ (0_m, 0_m) = \sum_{i \in [m]} \frac{1}{m} (\eps_i, \eps_{\sigma(i)}) \in \Delta_{T}(v). \]
+		
+	Conversely, assume $\Gcal_v$ does not admit a perfect matching. By Hall's marriage theorem \cite{HallMarriage}, there is a set $W \subseteq I$ such that its neighbour set
+		\[N(W) := \big\{ j \in J \mid \exists \, i \in I \colon \; (i,j) \in E \big\} \quad
+		\text{ obeys } \quad k := |W| >|N(W)| =: l. \]
+	Without loss of generality, let $W = [k]$ and $N(W) = [l]$, i.e., $v$ is of the form
+		\[ \begin{pmatrix}
+			A & 0_{k, m-l} \\ B & C
+		\end{pmatrix}, \quad \text{where } A \in \CC^{k \times l} \text{ and } C \in \CC^{(m-k) \times (m-l)}.\]
+	Consider $a,b \in \ZZ^m$ defined by $a_i = -(m-k)$ for $i \in [k]$ and $a_i = k$ for $i > k$; respectively by $b_j = (m-l)$ for $j \in [l]$ and $b_j = -l$ for $j > l$.  By construction, $a_+ = \sum_i a_i = \langle a, \ones_m \rangle = 0$ and $b_+ = 0$. Therefore, we compute that
+		\[ \langle (a,b), (\eps_i, \eps_j) \rangle = \langle a, \eps_i \rangle + \langle b, \eps_j \rangle
+		= \langle a, e_i \rangle + \langle b, e_j \rangle = a_i + b_j \, . \]
+	Furthermore, we have that $a_i + b_j > 0$ whenever $v_{ij} \neq 0$, since $k-l > 0$ and $k + m - l > 0$. Altogether, $(a,b)$ defines a hyperplane in $\RR^{2m}$ which separates $0$ from $\Delta_T(v)$. Hence, $0 \notin \Delta_T(v)$ which ends the proof. Still, we point out that $(a,b)$ defines a character of $T = \ST_m(\CC)^2$ that sends $v$ in the limit to zero.\footnote{This construction is also used to characterize instability for operator scaling, compare \cite[Proof of Theorem~2.1, part one]{BurginDraisma}.}
+\end{proof}
+
+Combining the characterizations of semistability via Hilbert-Mumford and Kempf-Ness we recover the known link between matrix scaling and bipartite matching, see e.g., \cite{rothblum1989scalings}.
+
+\begin{theorem}
+	A non-negative $M \in \RR^{m \times m}$ is approximately scalable if and only if the bipartite graph given by $M$ admits a perfect matching.
+\end{theorem}
+
+
+\subsubsection*{Array, Operator and Tensor Scaling}
+
+We briefly outline that the above results on matrix scaling generalize to array, operator and tensor scaling.
+
+Three-dimensional array scaling (i.e., the action of $\ST_m(\CC)^3$ via $\pi_{m,3}$) translates to scaling the non-negative tensor $p = (|v_{ijk}|^2) \in (\RR_{\geq 0})^{\otimes 3}$ to tristochastic\index{tristochastic}. The latter means that all slice sums are one, i.e., $p_{i,+,+} = p_{+,j,+} = p_{+,+,k} = 1$ for all $i,j,k \in [m]$. This generalizes to $d$-dimensional array scaling. However, we note that array scaling does \emph{not} relate to $d$-partite hypergraph matching. Indeed, the latter is $\mathsf{NP}$-hard, while NCM for array scaling is solvable in polynomial time.
+
+Operator Scaling (i.e., $\pi_{m,2}$) relates to scaling a completely positive map to ``doubly stochastic'', meaning the two quantum marginals are the identity matrix, \cite{gurvits2004classical}, \cite{garg2016deterministic}, \cite[Section~2.2]{gargOliveira2018Survey}. It has many applications such as non-rational identity testing \cite{garg2016deterministic} and ML estimation for matrix normal models, Section~\ref{sec:MatrixNormalModels}. Deciding NCM admits a representation-theoretic translation via so-called shrunk subspaces\footnote{We note that the recent preprint \cite{franks2022shrunk} gives an alternating minimization procedure to find a shrunk subspace, if existent, in deterministic polynomial time.}, \cite{King} (see Section~\ref{sec:King}) and \cite{BurginDraisma} (Theorem~\ref{thm:nullconeLeftRight}).
+
+Similar to operator scaling, tensor scaling (i.e., $\pi_{m,d}$ for $d \geq 3$) translates to scaling all quantum marginals to the identity, see \cite{burgisser2017alternating} and \cite[Section~2.3]{gargOliveira2018Survey}. It has manifold applications such as geometric complexity theory, quantum information theory and ML estimation of tensor normal models, Chapter~\ref{ch:GaussianGroupModels}.
+
+
+
+
+\section{Scaling Algorithms} \label{sec:ScalingAlgorithms}
+
+We discuss several scaling algorithms and their complexity for solving (some of) the Computational Problems~\ref{comp:NCM}-\ref{comp:Scaling} for specific group actions. More precisely, we discuss Sinkhorn scaling and  operator scaling as well as convex optimization for the commutative and geodesic convex methods for the non-commutative case. Furthermore, we comment on related algebraic methods.
+
+We highlight that this subsection prepares and connects to other chapters as follows. Sinkhorn scaling and convex optimization methods are related to the study of log-linear models, compare Section~\ref{sec:ScalingLogLinear}. Similarly, we revisit operator scaling and geodesic convex optimization for ML estimation in Gaussian group models, especially in Section~\ref{sec:SelfAdjointMgG} and Subsection~\ref{subsec:FlipFlopVsOperatorScaling}. Moreover, the detailed discussion of geodesic convex methods and results of \cite{GradflowArXiv} motivates Chapters~\ref{ch:BoundsMarginGap} and~\ref{ch:BoundsDiameter}, which present barriers for geodesic convex methods.
+
+\subsubsection*{Sinkhorn Scaling}
+
+For a non-negative matrix $M$ consider matrix scaling in the approximate sense, i.e., computing a scaling $XMY$ with $\ds(XMY) \leq \veps$, compare Definition~\ref{defn:MatrixScaling}.
+The matrices $X$ and $Y$, if they exist, can be found by a simple and fast alternating minimization approach. This method was introduced in  \cite{sinkhornClassical1964} and is known as \emph{Sinkhorn's algorithm}, see Algorithm~\ref{algo:SinkhornClassical}. We note that it admits a natural generalization \cite{sinkhorn1967concerning} to scale row and column sums to arbitrary marginal vectors.
+
+
+\begin{algorithm}[h]
+	\caption{Sinkhorn Scaling} \label{algo:SinkhornClassical}
+	\SetAlgoLined
+	\Input{Non-negative matrix $M \in \RR^{m \times m}$, a number of iterations $N$, a precision $\veps > 0$}
+	\Output{Either returns ``$M$ is not scalable''; or outputs $X$ and $Y$ such that the scaling $XMY$ satisfies $\ds(XMY) \leq \veps$}
+	\BlankLine
+	\If{$M$ has a zero row or a zero column}{\Return{$M$ is not scalable.}}
+	Initialize $X=Y=\Id_m$\;
+	\For{$k = 1$ \KwTo $N$}{
+		\eIf{$\ds(XMY) \leq \veps$}{
+			\Return{$X$ and $Y$}
+		}{
+			For $i \in [m]$, set $r_i := (XMY)_{i,+}$\;
+			$X \gets \diag \big( r_1^{-1}, \ldots, r_m^{-1} \big)X$ \Comment*[r]{scale the rows}
+			For $j \in [m]$, set $c_j := (XMY)_{+,j}$\;
+			$Y \gets \diag \big( c_1^{-1}, \ldots, c_m^{-1} \big)Y$ \Comment*[r]{scale the columns}
+		}
+	}
+	\Return{$M$ is not scalable.}
+\end{algorithm}
+
+The work \cite{linial2000deterministic} gave the following complexity analysis of Sinkhorn's algorithm, also compare \cite[Theorem~2.6]{gargOliveira2018Survey}.
+
+\begin{theorem}
+	Let $M \in \QQ^{m \times m}$ be a non-negative matrix with entries of bit complexity at most $b$, and let $T = O(m(b + \log(m))\veps^{-1})$. Then Algorithm~\ref{algo:SinkhornClassical} on input $(M, T, \veps)$ works correctly.
+\end{theorem}
+
+We remark that Sinkhorn's algorithm is frequently used in practice, e.g., for quickly approximating the solution to optimal transport problems \cite{cuturi2013sinkhorn}.
+Recently, \cite{haroldEtAL2021Quantum} provided a quantum implementation of Sinkhorn's algorithm.
+%and \cite{haroldEtAL2022Improved} investigates quantum lower and upper bounds for second-order methods.
+
+As discussed in Section~\ref{sec:CompProblems}, matrix scaling is captured by the action of $T := \ST_m(\CC)^2$ via $\pi_{m,2}$. Similarly to Algorithm~\ref{algo:OperatorScaling} below, the connection via Proposition~\ref{prop:MatrixScalingMomentMap} allows for a normalized\footnote{to ensure the determinant one condition}
+version of Algorithm~\ref{algo:SinkhornClassical} over $\CC$, which solves the Scaling Problem~\ref{comp:Scaling} for $\pi_{m,2} |_{T}$.
+
+Finally, we note that Sinkhorn scaling also generalizes to $d$-dimensional array scaling. There is a simple and fast alternating minimization algorithm that produces $\veps$-tristochastic scalings in time $O(1/\veps^2)$ \cite{altschuler2022polynomial,lin2022complexity}.
+
+\subsubsection*{Operator Scaling}
+
+The left-right action of $\SL_{m_1}(\CC) \times \SL_{m_2}(\CC)$ on $(\CC^{m_1 \times m_2})^n$ captures operator scaling\footnote{Remember that $\pi_{m,2}^{\oplus n}$ is operator scaling for the equidimensional case $m = m_1 = m_2$.}
+from \cite{gurvits2004classical}.
+Algebraic and optimization-based algorithms have, independently and nearly concurrently, resulted in polynomial time algorithms for NCM \cite{garg2016deterministic, ivanyos2017constructive} and even for OCI \cite{allen2018operator, derksen2018algorithms}. The optimization approaches in \cite{garg2016deterministic, allen2018operator} also yield polynomial time algorithms for Norm minimization~\ref{comp:NormMinim} and Scaling Probelm~\ref{comp:Scaling}. However, they do not work over fields in arbitrary characteristic like the algebraic methods in \cite{ivanyos2017constructive, derksen2018algorithms}.
+We stress that so far neither the algebraic nor the optimization approach solve NCM for $3$-tensor scaling in polynomial time.
+
+In \cite{gurvits2004classical} Gurvits' suggested, similar to Sinkhorn's algorithm, an alternating minimization method for operator scaling, also compare \cite[Section~2.2]{gargOliveira2018Survey}.  In Algorithm~\ref{algo:OperatorScaling} we present a normalized version of Gurvits' algorithm to solve the Scaling Problem~\ref{comp:Scaling} for the left-right action. We compare this algorithm in Subsection~\ref{subsec:FlipFlopVsOperatorScaling} to the flip-flop algorithm from statistics.
+
+\begin{algorithm}[h]
+	\caption{Alternating Minimization for Operator Scaling} \label{algo:OperatorScaling}
+	\SetAlgoLined
+	\Input{$Y \in (\CC^{m_1 \times m_2})^n$, a number of iterations $N$, a precision $\veps > 0$}
+	\Output{Either returns ``$Y$ is unstable'', or outputs $g \in \SL_{m_1}(\CC) \times \SL_{m_2}(\CC)$ with $\| \mu(g \cdot Y) \| \leq \veps$}
+	\BlankLine
+	\If{$\sum_{i=1}^n Y_i Y_i\HT$ or $\sum_{i=1}^n Y_i\HT Y_i$ is singular}{\Return{$Y$ is unstable.}}
+	Initialize $g_1 = g_2 = \Id_m$\;
+	\For{$k = 1$ \KwTo $N$}{
+		\eIf{$\| \mu_G( g \cdot Y) \| \leq \veps$}{
+			\Return{$g$}
+		}{
+			$\varrho_1 \gets \sum_i (g \cdot Y)_i (g \cdot Y)_i\HT$ \Comment*[r]{1st quanum marginal}
+			$g_1 \gets \det(\varrho_1)^{1/(2 m_1)} \varrho_1^{-1/2} g_1$ \Comment*[r]{scale 1st quanum marginal}
+			$\varrho_2 \gets \left( \sum_i (g \cdot Y)_i\HT (g \cdot Y)_i \right)\T$ \Comment*[r]{2nd quanum marginal}
+			$g_2 \gets \det(\varrho_2)^{1/(2 m_2)} \varrho_2^{-1/2} g_2$ \Comment*[r]{scale 2nd quanum marginal}
+		}
+	}
+	\Return{$Y$ is unstable.}
+\end{algorithm}
+
+\begin{remark}\label{rem:OperatorScaling}
+	One can verify with Equation~\eqref{eq:MomentMapLeftRight} that, after scaling the first quantum marginal in Algorithm~\ref{algo:OperatorScaling}, the moment map at $g \cdot Y$ is zero in the first component. Similarly, scaling the second quantum marginal results in a zero second component of $\mu_G$ at $g \cdot Y$, but this may violate the first component of $\mu_G(g \cdot Y)$ being zero. Therefore, operator scaling, and similarly other alternating minimization methods in computational invariant theory, can be seen as a \emph{``block-coordinate gradient descent method''} \cite[page~12]{GradflowArXiv}.
+	\hfill\remSymbol
+\end{remark}
+
+The formulation of Algorithm~\ref{algo:OperatorScaling} is based on \cite{burgisser2017alternating}, which generalizes the alternating minimization approaches for matrix and operator scaling to tensor scaling. For fixed $d \geq 3$, this yields a $\poly(m, 1/\veps)$ time algorithm for the Scaling Problem~\ref{comp:Scaling} \cite[Theorem~1]{burgisser2017alternating} and an $\exp(m\log(m))$ time algorithm for NCM \cite[Theorem~3.8]{burgisser2017alternating}.\footnote{Theorems\ref{thm:tensor-gap} and~\ref{thm:GapConstantTensor} certify that deciding NCM for $\pi_{m,d}$, $d \geq 3$, requires \emph{exponential} precision. Therefore, NCM cannot be solved in polynomial time by the methods in \cite{burgisser2017alternating}.}
+On the other hand, deciding NCM for operator scaling only requires $\veps = (\poly(m_1,m_2))^{-1}$ precision \cite{gurvits2004classical}, so Algorithm~\ref{algo:OperatorScaling} solves NCM in polynomial time.
+
+
+\subsubsection*{Commutative Case}
+We shortly comment on algorithms in the case that $G = T$ is a torus, also compare \cite[Subsection~1.4.1]{GradflowArXiv}. Since a vector $v$ is in the null cone if and only if $0 \notin \Delta_T(v)$,\footnote{Recall that the proof of Theorem~??? %todo cite Hilbert Mumford weight polytope
+was essentially due to Farkas' Lemma - a version of linear programming duality.}
+one can solve NCM in polynomial time via linear programming \cite{karmarkar1984new}. Moreover, remember that Norm minimization is unconstrained geometric programming, which admits a convex optimization formulation. Thus, one can use ellipsoid methods, implicitly in \cite{gurvits2004combinatorial, singh2014entropy, straszak2019computing}, and interior point methods \cite{burgisser2020interior} to obtain polynomial time algorithms for the Computational Problems~\ref{comp:NCM}--\ref{comp:Scaling}.
+Actually, the recent paper \cite{dogan2021torus} provides polynomial time algorithms for the OCI Problem~\ref{comp:OCI}, orbit closure containment and even for orbit equality. These results are obtained by combining linear programming with algebraic methods. Interestingly, efficient optimization approaches to decide OCI seem to be intimately connected with the abc-conjecture ??? . %todo cite new paper!
+
+
+
+\subsubsection*{Geodesic Convex Optimization}
+
+Given the success of optimization techniques for the commutative case and the geodesic convex structure in the non-commutative case, it is natural to aim for developing similar geodesic convex methods that solve Problems~\ref{comp:NCM}--\ref{comp:Scaling} for general reductive groups $G$.
+
+Currently, the only implementable algorithms for Riemannian geodesic convex optimization are analogues of gradient descent (first order) and trust region methods\footnote{also called \emph{box constrained Newton's method}} (second order)
+\cite{absil2008optimization, bacak2014convex, zhang2016first, allen2018operator, BoumalBook}. In particular, there are no efficiently implementable geodesic convex counterparts to the interior point or cutting plane methods available.
+Of special interest for computational invariant theory is the paper \cite{allen2018operator}. It provides geodesic second order methods specifically designed for operator scaling. These yield polynomial running time algorithms for OCI, NCM, norm minimization and scaling (Computational Problems~\ref{comp:OCI}--\ref{comp:Scaling}).
+
+The second order method of \cite{allen2018operator} was generalized to arbitrary reductive groups $G$ in \cite[Algorithm~5.1]{GradflowArXiv}. The latter paper also presents a gradient descent method for general reductive $G$, which can be seen as a generalization of alternating minimization methods, compare Remark~\ref{rem:OperatorScaling}. In the following we focus on \cite{GradflowArXiv}, %\footnote{We point out that \cite{GradflowArXiv} has been published in a very condensed form \cite{GradflowFOCS}. However, we always refer to the full version \cite{GradflowArXiv}.}
+since it unifies existing optimization approaches in computational invariant theory, recovers polynomial running time for Computational Problems~\ref{comp:NCM}--\ref{comp:Scaling} in many settings, but also adds several new cases.\footnote{In particular, \cite{GradflowArXiv} recovers polynomial running time for matrix scaling, simultaneous conjugation, operator scaling and $\GL$-actions on quiver, while it adds the new cases of $\SL$-actions on quivers with \emph{fixed} number of vertices, and the tensor scaling action of $\SL_m(\CC) \times \SL_m(\CC) \times \SL_k(\CC)$ on $(\CC^m)^{\otimes 2} \otimes \CC^k$ for \emph{fixed} $k$. Besides, it also recovers certain polynomial running times for moment polytope membership, e.g., for Horn's problem.}
+However, \cite{GradflowArXiv} cannot ensure polynomial time algorithms for tensor scaling.\footnote{In fact, the results in Chapters~\ref{ch:BoundsMarginGap} and~\ref{ch:BoundsDiameter} highly suggest that sophisticated methods, such as geodesic interior point, are necessary to ensure polynomial running time.}
+
+A very important technical contribution of \cite{GradflowArXiv} is to identify key complexity parameters called weight norm and weight margin. They are used to bound the running time of the first and second order method, to state a quantitative version of Kempf-Ness and to bound the diameter of an approximate minimizer. We outline this in the following.
+
+\begin{defn}\label{defn:WeightNormAndMargin}
+	Consider $\pi \colon G \to \GL(V)$ with Lie algebra representation $\Pi$.
+	\begin{enumerate}
+		\item \cite[Definition~3.10]{GradflowArXiv} The \emph{weight norm}\index{weight norm} of $\pi$ is
+			\[ N(\pi) := \max \{ \|\Pi(H)\|_{\text{op}} \mid H \in \imag \Lie(K), \|H\|_F = 1  \}, \]
+		where $\| \cdot \|_{\text{op}}$ is the usual operator norm on $\End(V)$.\footnote{See \cite[Proposition~3.11]{GradflowArXiv} for a different characterization of $N(\pi)$.}
+		
+		\item \cite[Definition~3.18]{GradflowArXiv} The \emph{weight margin}\index{weight margin} of $\pi$ is
+			\[ \gamma_T(\pi) := \min \big\{ \dist(0, \conv(\Gamma)) \mid \Gamma \subseteq \Omega(\pi), \, 0 \notin \conv(\Gamma) \big\} , \]
+		where $\dist(0, \conv(\Gamma)) := \min \{\|x\| \mid x \in \conv(\Gamma)\}$ is the distance from zero to the polytope $\conv(\Gamma)$. \hfill\defnSymbol
+	\end{enumerate}
+\end{defn}
+
+In \cite[Section~6]{GradflowArXiv} many lower bounds on weight norm and weight margin are given. We remark that the weight norm $N(\pi)$ is large \cite[Lemma~6.1 and Example~6.3]{GradflowArXiv}). Therefore, the crucial parameter for running time is the weight margin $\gamma_T(\pi)$, and we report on the bounds from \cite{GradflowArXiv} in Section~\ref{sec:GapMainResults}.
+
+\begin{remark}\label{rem:NormMinimAdditiveVsMultiplicative}
+	Before we state the quantitative version of Kempf-Ness and the diameter bound we note the following.
+	\begin{itemize}
+		\item[(i)] In \cite{GradflowArXiv} the capacity of $v$ is defined as $\inf_{g \in G} \|g \cdot v \|$, while in this thesis it is the square of the latter: $\capac_G(v)  = \inf_{g \in G} \| g \cdot v \|^2$.
+		
+		\item[(ii)] Norm minimization \cite[Problem~1.10]{GradflowArXiv} is formulated via \emph{multiplicative} approximation: given $v \in V$ with $\capac_G(v) > 0$ and $\veps > 0$, compute $g \in G$ such that
+			\begin{equation}\label{eq:MultNormMinimization}
+				\log \big( \|g \cdot v\| \big) - \frac{1}{2} \log \big( \capac_G(v) \big) \leq \veps .
+			\end{equation}
+	\end{itemize}
+	For $v \in V$ with $\capac_G(v) > 0$ the solutions between the additive and the multiplicative norm minimization are related as follows.
+	If $g \in G$ solves Computational Problem~\ref{comp:NormMinim}, then using $\log(1+x) \leq x$ we see that it satisfies
+		\[ \log \left( \frac{\|g \cdot v\|^2}{\capac_G(v)} \right) \leq \log \left( 1 + \frac{\veps}{\capac_G(v)} \right) \leq \frac{\veps}{\capac_G(v)} . \]
+	Hence, $g$ is solves Equation~\eqref{eq:MultNormMinimization} for precision $(2\capac_G(v))^{-1} \veps$.
+	On the other hand, if $h \in G$ solves Equation~\eqref{eq:MultNormMinimization} for $0<\veps \leq 1/2$, then
+		\[ \frac{\|h \cdot v\|^2}{\capac_G(v)} \leq \exp(2 \veps) \leq 1 + 4\veps , \]
+	where we used $\exp(x) \leq 1 + 2x$ for $0 \leq x \leq 1$. Thus, $h$ solves Computational Problem~\ref{comp:NormMinim} for precision $4 \capac_G(v) \veps$. %todo shorten, i.e., skip the details of the argument??
+	\hfill\remSymbol
+\end{remark}
+
+\begin{theorem}[Quantitative Kempf-Ness, {\cite[Theorem~1.17]{GradflowArXiv}}] \label{thm:NonCommutativeDuality} \ \\
+	Let $\pi \colon G \to \GL(V)$ be a rational representation and take $v \in V \backslash \{0\}$. Then
+		\begin{equation}\label{eq:NonCommutativeDuality}
+			1 - \frac{\|\mu_G(v)\|_F}{\gamma_{T}(\pi)} \leq \frac{\capac_G(v)}{\|v\|^2} \leq 1 - \frac{\|\mu_G(v)\|_F^2}{4 N(\pi)^2} .
+		\end{equation}
+\end{theorem}
+
+Note that Equation ~\eqref{eq:NonCommutativeDuality} is indeed a quantitative version of and recovers Kempf-Ness, Theorem~\ref{thm:KempfNessAKRS}(a). An important application of the above theorem is that it connects solutions of norm minimization to those of scaling and vice versa \cite[Corollary~1.18]{GradflowArXiv}.
+
+Next, we define the diameter. It captures how far a solution for Norm minimization Problem~\ref{comp:NormMinim} is away from the identity in $G/K$.
+
+\begin{defn}[Diameter, {\cite[Definition~4.18]{WeightMargin}}] \label{defn:Diameter}
+	Given $\pi \colon G \to \GL(V)$, $v \in V$ and a precision $\veps > 0$. We define the \emph{diameter}\index{diameter} as
+		\[ D_v(\veps) := \inf \big\{ R > 0 \mid \inf_{g \in B'_R} \|g \cdot v\|^2 \leq \capac_G(v) + \veps \big\}, \]
+	where $B'_R := \{ k \exp(H) \mid k \in K, H \in \imag \Lie(K), \|H\|_F \leq R \}$.\footnote{The set $B_R := \{ \exp(H) \mid H \in \imag \Lie(K), \|H\|_F \leq R \}$ is a geodesic ball of radius $R$ in $G/K$ about the identity. Since $K$ acts isometrically on $V$, we see that $D_v(\veps)$ indeed captures the distance of an approximate minimizer to the identity.}
+	\hfill\defnSymbol
+\end{defn} %todo here (chapter 3) and in chapter 5: change H to X to be consistent with 1.2
+
+The following (simplified) diameter bound is obtained from \cite{GradflowArXiv}.
+
+\begin{theorem}\label{thm:DiameterViaWeightMargin}
+	Consider $\pi \colon G \to \GL(V)$, where as usual $G \subseteq \GL_N(\CC)$ Zariski closed and self-adjoint. Let $v \in V$ with $\capac_G(v) > 0$. Then
+		\begin{equation}\label{eq:DiameterBoundGradflow}
+			D_v(\veps) \leq \gamma_{T}(\pi)^{-1} \sqrt{N} \log(N) \poly \log \big( (\varepsilon \capac_G(v))^{-1} \big) .
+		\end{equation}
+\end{theorem}
+
+\begin{proof}
+	The proof of \cite[Proposition~5.5]{GradflowArXiv} gives a diameter bound for multiplicative approximation (Equation~\eqref{eq:MultNormMinimization}):
+		
+		\[ D \leq \sqrt{N} \log \big(\kappa^2 (1+ C \veps^{-1}) \big),
+		\; \text{where } \quad \kappa = 2N \left( \frac{\|v\|^2}{2 \capac_G(v) \veps} \right)^{\gamma_T(\pi)^{-1}} \]
+	and $C = \log ( \|v\| \capac_G(v)^{-1/2})$.
+	We note that $\kappa$ bounds the so-called regularizer, and the concrete value for $\kappa$ is taken from \cite[Proposition~5.6]{GradflowArXiv}. Consequently, $\gamma_{T}(\pi)^{-1} N \poly\big( \log(1/\varepsilon) \big)$ is a diameter bound for Equation~\eqref{eq:MultNormMinimization}. By Remark~\ref{rem:NormMinimAdditiveVsMultiplicative}, it suffices to replace $\veps$ by $(\capac_G(v))^{-1} \veps$ to obtain a bound for $D_v(\veps)$, i.e., for additive approximation.
+	%$D_v(\veps) \lesssim \gamma_{T}(\pi)^{-1} N \poly\big( \log(1/\varepsilon) \big)$ this is for mult approx
+	%$D_v(\veps) \lesssim \gamma_{T}(\pi)^{-1} N \poly\big( \log[(\varepsilon \capac_G(v))^{-1}]  \big)$ this is for add approx
+\end{proof}
+
+We end with a dichotomy regarding running times for the representation $\pi_{m,d}$. This motivated the work \cite{WeightMargin} which is presented in Chapters~\ref{ch:BoundsMarginGap} and~\ref{ch:BoundsDiameter}. For this, we remark that it is desirable to solve the Norm minimization Problem~\ref{comp:NormMinim} for $\pi_{m,d}$ efficiently with \emph{high precision}\index{high precision} (HP)\index{HP| see {high precision} }. That is, solving it in $\poly(m, d, \log(1/\veps))$ time. The state of the art regarding NCM and HP for $\pi_{m,d}$ is given in Table~\ref{tab:Dichotomy}.
+
+\begin{table}[h]
+	\renewcommand*{\arraystretch}{1.2}
+	\begin{tabular}{ >{\centering\arraybackslash} m{1cm} ||>{\centering\arraybackslash} m{5.9cm} |>{\centering\arraybackslash} m{6.1cm}}
+		$\pi_{m,d} $& $T = \ST_m(\CC)^d \colon$ commutative & $G = \SL_m(\CC)^d \colon$ non-commutative \\ 
+		\hline \hline
+		$d=2$ & \textbf{matrix scaling:} {\color{ForestGreen}HP}, {\color{ForestGreen}NCM} (trust region, ellipsoid, IPM) & \textbf{operator scaling:} {\color{ForestGreen}HP}, {\color{ForestGreen}NCM} (via trust region) \\ 
+		\hline 
+		$d=3$ & \makecell{ \textbf{array scaling:} {\color{ForestGreen}HP}, {\color{ForestGreen}NCM} \\ (via IPM and ellipsoid;\\ \emph{not} via trust region) }& \makecell{\textbf{tensor scaling:} {\color{red}HP}, {\color{red}NCM} \\ (no IPM available) }
+	\end{tabular}
+	\caption{Dichotomy for $\pi_{m,d}$ between $d=2$ and $d=3$. Green indicates polynomial running time, while red means no  polynomial time. IPM is a shortcut for interior point method.} \label{tab:Dichotomy}
+\end{table}
+
+This raises the following questions. Can we explain the dichotomy between $d=2$ and $d=3$ given in Table~\ref{tab:Dichotomy}? More specifically:
+\begin{itemize}
+	\item Why do gradient descent and trust region methods do not seem to yield polynomial time for HP and NCM when $d=3$?
+	
+	\item Are known algorithms actually good enough for tensor scaling and only the complexity analysis lacks to show this? Or do we need new algorithmic approaches?
+\end{itemize}
+
+To answer these questions we investigate for NCM bounds on the precision parameters weight margin and gap in Chapter~\ref{ch:BoundsMarginGap}. Regarding HP we provide exponentially large lower bounds on the diameter for $\pi_{m,3}$ in Chapter~\ref{ch:BoundsDiameter}. These are the main results of \cite{WeightMargin}.\footnote{These hardness results align with similar results for the algebraic approach: degree lower bounds for invariant polynomials for the $3$-tensor action pose significant challenges \cite{derksen2020exponential}.}
+They highly suggest that new algorithmic approaches\footnote{e.g., interior point like methods} for geodesic convex optimization are necessary to ensure polynomial time for HP and NCM in the case of tensor scaling.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

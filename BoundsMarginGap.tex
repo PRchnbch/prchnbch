@@ -1,0 +1,1470 @@
+
+%todo search for "\id" (change to "\ones"); \T; check "\varepsilon"; "\Lie" to search for imaginary numbers; "\ref" to check whether it needs a prefix or \eqref; check all "i.e." and "e.g.", check \mathfrak for "\mathfrak{W}"; search for \Omega (to eliminate \Omega_{m,d})
+
+%todo refer to Weights and Roots when recalling stuff, e.g., when recallin \Omega(\pi_{m,d})
+
+%chapter "Bounds on Weight Margin and Gap"
+
+
+The material in this chapter is based on \cite{WeightMargin} and contains all upper bounds on weight margin and gap from that paper. We give such upper bounds for tensor scaling, polynomial scaling and $\SL$~actions on a certain family of quivers.
+In the tensor scaling case, these exponentially small bounds explain the dichotomy for null cone membership (NCM) from Table~\ref{tab:Dichotomy}. Together with the diameter bounds in Chapter~\ref{ch:BoundsDiameter} they strongly motivate the need of new geodesically convex methods, such as interior-point like algorithms.
+
+All main proof ideas for these upper bounds are due to myself.\footnote{In contrast, the diameter bounds in Chapter~\ref{ch:BoundsDiameter} are due to my co-author Cole Franks.}
+However, the concept of freeness from Section~\ref{sec:Free} is well-known in the literature and we give corresponding references. Moreover, the lower bound on the gap for a family of quivers in Subsection~\ref{subsec:QuiverLowerBound} was proven by Cole Franks and Visu Makam. I thank them for their permission to include these arguments. Their lower bound showcases an important distinction between weight margin and gap, and answers \cite[Problem~4.27]{WeightMargin} in the affirmative.
+
+
+
+
+\paragraph{Organization and Assumptions.}
+In Section~\ref{sec:WeightMarginGapDefinition} we introduce the concepts of weight margin and gap from \cite{GradflowArXiv}. A detailed discussion of the main results and related literature is provided in Section~\ref{sec:GapMainResults}. Afterwards, we present in Section~\ref{sec:Free} the concept of free sets of weights, which is a crucial part of the proof method, Section~\ref{sec:ProofMethod}. We prove the main results on tensor scaling in several steps, Section~\ref{sec:TensorGap}. This in turn allows to deduce similar bounds for polynomial scaling, compare Section~\ref{sec:PolynomialsGap}. Finally, Section~\ref{sec:QuiversGap} studies the $\SL$-action on a certain family of quivers: we give upper bounds on weight margin and gap, and the lower bound on the gap by Cole Franks and Visu Makam.
+
+The assumptions for this chapter are as in Setting~\ref{set:AssumptionsPart2}.
+
+
+
+
+
+\section{Weight Margin and Gap} \label{sec:WeightMarginGapDefinition}
+
+In the following we formally define the weight margin and gap, which were first introduced in \cite{GradflowArXiv}. As a motivation, recall the ``duality''~\eqref{eq:KempfNessDuality}, which can be reformulated as \eqref{eq:MomentPolytopeVsCapacity} using the moment polytope $\Delta_G(v)$.
+
+\begin{defn}[{\cite[Definition~4.3]{WeightMargin}}] \label{defn:WeightMarginGapConstant}
+	Let $\pi \colon G \to \GL(V)$ be a rational representation. We define the \emph{gap} of $\pi$ as\footnote{Gap and weight margin are well-defined, i.e., the minimum is attained. Indeed, the moment maps give rise to continuous maps on $\PP(V)$ and the non-zero $G$-unstable (respectively non-zero $T$-unstable) vectors form a projective subvariety of $\PP(V)$; in particular, they form a compact set.}
+	\begin{align*}
+		\gamma_G(\pi) := &\min \big\lbrace \norm{\mu_G(v)}_F \mid v \neq 0 \text{ is } G\text{-unstable} \big\rbrace \\
+		= &\min \big\lbrace \dist \big( 0, \Delta_G(v) \big) \mid v \neq 0 \text{ is } G\text{-unstable} \big\rbrace,
+	\end{align*}
+	and the \emph{weight margin} of $\pi$ as
+	\begin{align*}
+		\gamma_{T}(\pi) := &\min \big\lbrace \norm{\mu_{T}(v)}_F \mid v \neq 0 \text{ is } T\text{-unstable} \big\rbrace
+		\\ = &\min \big\lbrace \dist \big(0, \Delta_{T}(v)\big) \mid v \neq 0 \text{ is } T\text{-unstable} \big\rbrace.
+		\\ = &\min \big\lbrace \dist \big(0, \conv(\Gamma)\big) \mid \Gamma \subseteq \Omega(\pi), \, 0 \notin \conv(\Gamma) \big\rbrace.
+	\end{align*}
+	The last equality uses that the weight polytope $\Delta_T(v)$ is $\conv(\Gamma)$ for $\Gamma = \supp(v)$. Hence, the above definition of $\gamma_T(\pi)$ aligns with Definition~\ref{defn:WeightNormAndMargin}.
+	\hfill\defnSymbol
+\end{defn}
+
+If $G$ is a torus, i.e., $G=T$, then the weight margin is simply the gap. The description of weight margin and gap via weight respectively moment polytopes will enable us to find small upper bounds via extremal combinatorics of the polytopes.
+Let us state two important remarks on weight margin and gap.
+
+\begin{remark}[Gap and Weight Margin are Precision Parameters] \label{rem:PrecisionParameter}
+	\ \\
+	By definition, the gap $\gamma_G(\pi)$ is the largest constant $C > 0$ with the following property: if $\| \mu_G(v) \|_F < C$ for some vector $v\in V$, then $v$ is $G$-semistable. The same statement holds for the weight margin $\gamma_{T}(\pi)$ replacing $G$ by $T$. Therefore, these notions capture how small $\mu_G(g\cdot v)$ (respectively $\mu_{T}(t\cdot v)$) must be to certify null-cone non-membership. Hence, $\gamma_G(\pi)$ and $\gamma_T(\pi)$ are the precision parameters if the Scaling Problem~\ref{comp:Scaling} is used to solve the NCM Problem~\ref{comp:NCM}.
+	\hfill\remSymbol
+\end{remark}
+
+The next remark connects the gap to the classical notion of \emph{instability} due to Mumford \cite{MumfordGITbook}.
+
+\begin{remark}[Gap as Mumford's Instability, {\cite[Remark~4.4]{WeightMargin}}]
+	\ \\
+	 Denote the instability of a vector $v$ by $M(v)$,  see e.g., \cite[Eq.~(9)]{NessStratification}. It is positive if and only if $v$ is unstable. Now, if $v$ is non-zero and unstable then $\dist(0,\Delta_G(v)) \geq 2 M(v)$ by \cite[(13)]{NessStratification}. Together with \cite[Theorem~6.1]{NessStratification} this implies
+		\[\gamma_G(\pi) = \inf \big\lbrace 2M(v) \mid v \neq 0, v \text{ is } G\text{-unstable} \big\rbrace.\]
+	In words, the gap is twice the minimum value of all positive instabilities.
+	
+	We note that Mumford's instability $M(v)$ is defined as a supremum over one-parameter subgroups (1-psg's) of $G$, and this supremum is attained. A 1-psg that witnesses the instability $M(v)$ is called \emph{adapted}\footnote{Adapted 1-psg's are also known as Kempf-optimal subgroups.}
+	for $v$ and such 1-psg's play an important role in \cite{kempf1978instability}. As a consequence of the above observation the gap (and weight margin) may be studied via adapted 1-psg's.
+	\hfill\remSymbol
+\end{remark}
+
+Weight margin and gap satisfy the following inequality, also see \cite[Lemma~3.19]{GradflowArXiv}.
+
+\begin{prop}[{\cite[Proposition~4.6]{WeightMargin}}] \label{prop:GapConstantWeightMargin}
+	It holds that $\gamma_{T}(\pi) \leq \gamma_G(\pi)$.
+\end{prop}
+
+\begin{proof}
+	Let $v \neq 0$ be $G$-unstable. Then there exists $k \in K$ such that $k \cdot v$ is $T$-unstable; see Theorem~\ref{thm:Wallach3-25}. %TODO insert \cite[Theorem~3.25]{Wallach} into chapter two, this is a sepcial instance of Hilbert Mumford
+	We obtain
+	\begin{align*}
+		\norm{\mu_G(v)}_F = \norm{\mu_G( k \cdot v)}_F \geq \norm{\mu_{T}( k \cdot v)}_F \geq \gamma_{T}(\pi) \, ,
+	\end{align*}
+	where we used $\mu_G(k \cdot v) = k \mu_G(v) k^\dagger$ (Proposition~\ref{prop:UnitaryEquivarianceMomentMap}) in the equality, and Proposition~\ref{prop:MomentMaps} in the first inequality. We deduce $\gamma_G(\pi) \geq \gamma_{T}(\pi)$ from the displayed equation.
+\end{proof}
+
+Further properties of weight margin and gap are listed in Proposition~\ref{prop:WeightGapForDirectPower}. Let us end this section with an interesting open problem which is already posed in \cite[Remark~3.20]{GradflowArXiv}.
+
+\begin{problem}\label{prob:GapInNoncommutativeDuality}
+	Is the quantitive non-commutative duality from Theorem~\ref{thm:NonCommutativeDuality}
+	still true\footnote{perhaps, in a reasonable adjusted manner} if one replaces the weight margin $\gamma_T(\pi)$ by the gap $\gamma_{G}(\pi)$?
+\end{problem}
+
+If the question is answered in the affirmative, then the (possibly larger) gap can replace the weight margin in all appearances of running time bounds and the diameter bound in \cite{GradflowArXiv}.
+
+
+
+
+\section{Main Results and related Literature}\label{sec:GapMainResults}
+
+
+In this section we present and discuss the main results on weight margin and gap. First, we stress the relevance of these complexity parameters and review known lower bounds. Afterwards, we state the main result on array/tensor scaling, Theorem~\ref{thm:tensor-gap}, and discuss its implications and relation to the literature. Finally, we discuss and relate the main results on two other actions, which are studied in Section~\ref{sec:PolynomialsGap} and \ref{sec:QuiversGap} respectively.
+
+
+\paragraph{Significance of Weight Margin and Gap.}
+We discuss four important features of the complexity parameters weight margin and gap.
+
+First, the weight margin and gap capture the \emph{required precision} needed in the Scaling Problem~\ref{comp:Scaling} in order to decide the NCM Problem~\ref{comp:NCM}, compare Remark~\ref{rem:PrecisionParameter}. Thus, the smaller the weight margin (respectively gap)  is, the higher is the required precision to decide whether the optimization value of the underlying geometric program (respectively geodesic optimization problem) is positive. For an illustration of this fact the reader is referred to the extended example on matrix scaling in Section~\ref{sec:CompProblems}.
+
+Second, the weight margin gives a $\poly(\gamma_T(\pi)^{-1}, \log(1/\eps))$ upper bound on the diameter \cite{GradflowArXiv}, see Theorem~\ref{thm:DiameterViaWeightMargin}. Therefore, the smaller the weight margin is the larger the diameter may be, which can prevent efficient algorithms. We point out that diameter upper bounds play an important role in the literature, compare Sectionm~\ref{sec:DiameterComplexity}.
+
+Third, the inverse of the weight margin appears (polynomially) in running time bounds of geodesic methods in \cite{GradflowArXiv}. More precisely, it appears in running time bounds for NCM,\footnote{This is tackled by solving the scaling problem with the precision required by the weight margin.}
+e.g., in \cite[Corollary~1.26]{GradflowArXiv} and for Norm Minimization, e.g., in \cite[Theorem~1.22]{GradflowArXiv}. Therefore, an exponentially small weight margin only ensures exponential running time, while if polynomially small it yields a polynomial time algorithm.
+
+Finally, we recall that the weight margin controls the lower bounds in the quantitative non-commutative duality in Theorem~\ref{thm:NonCommutativeDuality}.
+As a consequence, the weight margin controls when an output for the Scaling Problem~\ref{comp:Scaling} is a valid output for the Norm Minimization Problem~\ref{comp:NormMinim} \cite[Corollary~1.18]{GradflowArXiv}; and it also characterizes the required precision in Norm Minimization to decide NCM \cite[Corollary~1.19]{GradflowArXiv}.
+Note that the second and third property would also apply to the gap, if the (possibly larger)\footnote{recall Proposition~\ref{prop:GapConstantWeightMargin}} gap can replace the weight margin in Theorem~\ref{thm:NonCommutativeDuality} (see open Problem~\ref{prob:GapInNoncommutativeDuality}).
+
+
+
+
+\paragraph{Known lower Bounds.}
+%\begin{itemize}
+%	\item matrix scaling and operator scaling: $\Omega(m^{3/2}) = \gamma_T(\pi_{m,2}) = \gamma_T(\pi_{m,2}^{\oplus n})$
+%	\item more generally: weight margin large if weight matrix is unimodular \cite[Corollaries~6.11 and 6.18]{GradflowArXiv}
+%	\item weight margin lower bounds for GL and SL quiver actions \cite[Theorem~6.24]{GradflowArXiv}
+%	\item general lower bounds for actions of products of GL's, resp. products of SL's in \cite[Theorem~6.10]{GradflowArXiv}
+%	\item latter specialized to $\pi_{m,d}$ gives $\gamma_{T}(\pi_{m,d}) \geq m^{-md} \sqrt{d}^{-md+1} (md)^{-1} = (m\sqrt{d})^{-md} \sqrt{d} (md)^{-1}$
+%	\item \cite{alon1997anti} for $m=2$
+%\end{itemize}
+
+Before we state the main result for tensor scaling we briefly review known lower bounds for the weight margin $\gamma_T(\pi)$ (and hence the gap by Proposition~\ref{prop:GapConstantWeightMargin}).
+
+In the case of matrix scaling and operator scaling it is known that
+	\begin{equation} \label{eq:WeightMarginMatrixOperator}
+		\Omega \big( m^{3/2} \big) = \gamma_T(\pi_{m,2}) = \gamma_T \big( \pi_{m,2}^{\oplus n} \big) \, ,
+	\end{equation}
+see \cite{linial2000deterministic, gurvits2004classical}. This good bound can be attributed to the extraordinary geometry of $\Omega(\pi_{m,2})$: its elements form the columns of a totally unimodular matrix (up to a shift). Similar good bounds on the weight margin are given in \cite[Corollaries~6.11 and 6.18]{GradflowArXiv} provided the weight matrix is (up to a shift) totally unimodular.
+
+Moreover, \cite[Theorem~6.24]{GradflowArXiv} gives lower bounds for GL-actions and for SL-actions on quivers. The most general lower bounds are provided in \cite[Theorem~6.10]{GradflowArXiv}: they hold for any rational representation for a product of GL's, respectively of $\SL$'s. The SL-case, i.e., \cite[Theorem~6.10 Item~3]{GradflowArXiv}, applied to the representation $\pi_{m,d}$ capturing array and tensor scaling yields
+	\begin{equation}\label{eq:WeightMarginTensor}
+		\Omega \big( (m \sqrt{d})^{-md} \big) = \gamma_T(\pi_{m,d}) .
+	\end{equation}
+Comparing this general bound with Equation~\eqref{eq:WeightMarginMatrixOperator} for the special case $d=2$ shows a huge discrepancy. This actually relates to the dichotomy presented in Table~\ref{tab:Dichotomy} as follows.
+
+
+\paragraph{Main Result on Tensor Scaling.}
+
+Given the just mentioned discrepancy, it is natural to ask whether the lower bound for the weight margin (and the gap) is too pessimistic. The main result shows that this is not the case: the weight margin \emph{and} the gap become exponentially small in $md$ for $d \geq 3$. 
+
+\begin{theorem}[General Tensor Gap, {\cite[Theorems~1.3 and 1.6]{WeightMargin}}] \label{thm:tensor-gap}
+	\ \\
+	There is a constant $C > 0$, independent of $m$ and $d$, such that for all $d \geq 3$ and $m \geq 2$, the weight margin and the gap for $d$-tensor scaling satisfy
+	\[ \gamma_{T}(\pi_{m,d}) \leq \gamma_G(\pi_{m,d}) \leq 2^{-C dm}. \]
+\end{theorem}
+
+A detailed statement on upper bounds for gap and weight margin can be found in Theorem~\ref{thm:GapConstantTensor}, and we show in Subsection~\ref{subsec:PaddingTensors} how to fill in the missing values of $m$ and $d$ to obtain Theorem~\ref{thm:tensor-gap}.
+We note that the upper bounds in Theorems~\ref{thm:tensor-gap} and \ref{thm:GapConstantTensor} are provided by constructing free tensors, whose support has $O(md)$ elements.
+
+\begin{remark}[Constant in Theorem~\ref{thm:tensor-gap}] \label{rem:ConstantTensorGap}
+	The constant $C = 1/16$ works for all $m \geq 2$, $d \geq 3$. For $m, d \gg 0$ one can choose $C \approx 1/6$, compare Theorem~\ref{thm:GapConstantTensor}.
+	\hfill\remSymbol
+\end{remark}
+
+
+\paragraph{Implications of Main Theorem.}
+%\begin{itemize}
+%	\item high precision required to solve NCM for array and tensor scaling (need ellipsoid and interior point for array scaling!)
+%	\item in particular current methods cannot give NCM and in poly time for tensor scaling; and current running time bounds for Norm minimization also exponential --> explains dichotomy for NCM in Section~\ref{sec:ScalingAlgorithms}.
+%	\item the diameter upper bound is exponentially large. in fact, Theorems~\ref{thm:diameterCommutative} and \ref{thm:nc-diameter} show that diameter \emph{is} exponentially large in the high precision regime for 3-order array and tensor scaling
+%	\item Even if Gap can replace weight margin in non-commutative duality, diameter bound and running time bounds, still have a problem
+%\end{itemize}
+
+Taking the paragraph on the significance of weight margin and gap into account, Theorem~\ref{thm:tensor-gap} implies the following.
+
+First of all, it shows that exponentially high precision is required to solve NCM for array and tensor scaling. In particular, current first and second order methods do not seem to be able to solve NCM for tensor scaling in poly time. Certainly, current running time bounds are exponential in $md$. Similarly, the main theorem suggests that ellipsoid and interior point methods are necessary for array scaling to ensure polynomial running time. This explains the dichotomy for NCM that we presented in Table~\ref{tab:Dichotomy} (Section~\ref{sec:ScalingAlgorithms}).
+
+Moreover, Theorem~\ref{thm:tensor-gap} yields that the upper bound on the diameter from Theorem~\ref{thm:DiameterViaWeightMargin} is exponentially large. In fact, Theorems~\ref{thm:diameterCommutative} and \ref{thm:nc-diameter} show that diameter \emph{is} exponentially large in the high precision regime for 3-order array and tensor scaling. Finally, we point out that running time and diameter upper bounds remain exponentially large even if we could replace the weight margin by the gap. Hence, an affirmative answer to Problem~\ref{prob:GapInNoncommutativeDuality} would not help for tensor scaling.
+
+\paragraph{Relation to the Literature.}
+Theorem~\ref{thm:tensor-gap} aligns with existing results showing that the $d>2$ array/tensor case is more complex than the matrix case. For example, it is known that the polytope of non-negative arrays with uniform marginals, known as the $d$-\emph{index axial assignment polytope}, has many more vertices when $d \geq 3$ and that the vertices can have exponentially small entries \cite{krav, linial2014vertices}.\footnote{Actually, we use such a vertex with exponentially small entry from \cite{krav} to settle the $d=3$ case.}
+In contrast, for $d = 2$ this polytope is the Birkhoff-von Neumann polytope which has integral vertices by the Birkhoff-von Neumann theorem.
+
+Next we discuss the case of local dimension two, i.e., $m=2$, for which Theorem~\ref{thm:GapConstantTensor}(a) provides a more concrete bound.  For $d$-dimensional array scaling $\gamma_T(\pi_{2,d})$ is on the order of the weight margin of the $d$-dimensional hypercube $\{\pm 1\}^d$. Therefore, $\gamma_T(\pi_{2,d}) = d^{-\frac{d}{2}(1 + o(1))}$ by \cite{alon1997anti}. This bound is better by a $\log(d)$ factor than the one in Theorem~\ref{thm:GapConstantTensor}(a). However, an $\exp(-d)$ for the gap $\gamma_G(\pi_{d,2})$ was not known before, also compare Remark~\ref{rem:QubitLiterature}.
+Still, there are interesting results regarding $\gamma_G(\pi_{d,2})$. First, using the algorithm in \cite{MaciazekSawicki2015} the authors numerically found several free\footnote{see Section~\ref{sec:Free}} tensors of format $(\CC^{2})^{\otimes d}$ with $\dist(0, \Delta_G(v))$ at most $\exp(-d)$; Theorem~\ref{thm:tensor-gap} confirms this exponential behaviour is the case for all $d$ (and all $m$). Second, \cite[Main result]{MaciazekSawicki2018} shows that $\dist(0,\Delta_{G}(v))^2$, where $0 \notin \Delta_G(v)$, tends for $d \to \infty$ to the Gamma distribution $\Gamma(1/2, 2d)$, where $2d$ is the rate parameter. Therefore, the witnesses of the exponential behaviour in Theorem~\ref{thm:GapConstantTensor}(a) are rare. It is an interesting open\footnote{to the authors knowledge} question whether a similar result holds for other parameter regimes, e.g., tensors of order three.
+
+Finally, note that the exponential rate of decay in Theorem~\ref{thm:tensor-gap} is tight up to log factors, compare Equation~\eqref{eq:WeightMarginTensor}. One may ask whether the true bound is $2^{-\Theta(m d)}$ or $2^{- \Theta( md (\log m + \log d))}$ as in the lower bound. \cite{alon1997anti} shows that the latter is correct in the \emph{commutative} case for $m=2$.
+
+
+
+
+
+
+\subsubsection*{Weight Margin and Gap results for other group actions}
+
+In addition to the tensor scaling action, we also consider two other actions of groups $G$ of interest in computational invariant theory.
+
+\textbf{Polynomial Scaling.}
+The first is the action of the special linear group on the space of homogeneous $d$-forms $\CC[x_1, \dots, x_n]_d$, in which $G = \SL_n(\CC)$ acts by $g \cdot p (x) = p (g^{-1} x)$ for $p \in \CC[x_1, \dots, x_n]_d$, see Section~\ref{sec:PolynomialsGap}.  This action and its null cone are crucial for constructing a moduli space of hypersurfaces of degree $d$ in $\PP^{n-1}(\CC)$, compare \cite[Section~7]{hoskinsLectureModuli}.
+In fact, homogeneous $d$-forms were among the objects studied earliest in computational invariant theory, and much of the theory was developed to catalogue invariants of the $\SL(n)$ action on forms \cite{weyl1946classical}. Still, deciding null-cone membership for $d = 3$ is challenging. We explain the difficulty by showing that the gap for this action is inverse exponential in $n$ as soon as $d \geq 3$, see Theorem~\ref{thm:dFormsGap}. This shows that the diameter bound from \cite{GradflowArXiv} (Theorem~\ref{thm:DiameterViaWeightMargin}) becomes exponentially large in $n$.
+
+In the commutative case, i.e., $T = \ST_n(\CC)$, the capacity $\capac_T(p)$ recovers Gurvit's polynomial capacity \cite{gurvits2004combinatorial, gurvits2006hyperbolic}. To decide whether the polynomial capacity is positive and for high precision approximations the bounds in Theorem~\ref{thm:dFormsGap} suggest the following. As soon as $d \geq 3$ sophisticated methods (like ellipsoid and interior point) are required to ensure polynomial running time, while gradient descent and trust region methods do not suffice.
+
+\textbf{Quiver Action.}
+Second,  in Section~\ref{sec:QuiversGap} we study the natural $\SL$-action on a family of quivers. We note that quiver representations include the important cases of operator scaling and an action that captures Horn's problem. However, efficient algorithms for $\SL$-actions on quivers are only known for certain cases. In this regard, the family in Section~\ref{sec:QuiversGap} is a very interesting example. The quivers in this family have $d$ vertices, each endowed with dimension $m$, and $d-1$ arrows. Theorem~\ref{thm:UpperBoundQuiver} gives the bound $O(m^{-d})$ on the weight margin, i.e., it becomes exponentially small as the number of vertices $d$ grows. Hence, the general lower bound \cite[Theorem~6.24 Item~2]{GradflowArXiv} cannot be improved in this regard. However, the gap is only polynomially small in $m$ and $d$, Theorem~\ref{thm:LargeGapQuiver}.\footnote{This result is due ot Cole Franks and Visu Makam.}
+Therefore, weight margin and gap differ significantly for this action; and the first order method from \cite{GradflowArXiv} still suffices to decide NCM in polynomial time thanks to the large gap.
+In contrast, when allowing $m$ copies of each arrow in the constructed quiver, i.e., $m(d-1)$ arrows in total, we can ensure the bound $O(m^{-d})$ for the gap as well, Theorem~\ref{thm:UpperBoundQuiver}. Therefore, current methods do not run in polynomial time for this enlarged quiver.
+
+
+
+\section{Free Sets of Weights} \label{sec:Free}
+We introduce the crucial tool for lifting bounds from the commutative (weight margin and diameter) to the non-commutative case (gap and diameter).
+
+Proposition~\ref{prop:GapConstantWeightMargin} states that $\gamma_T(\pi) \leq \gamma_G(\pi)$ and we will see in Section~\ref{sec:QuiversGap} that $\gamma_G(\pi)$ can be significantly larger than $\gamma_{T}(\pi)$. Therefore, an upper bound for the weight margin $\gamma_{T}(\pi)$ need not necessarily apply to the gap $\gamma_{G}(\pi)$. Still, many presented bounds in the commutative case transfer to the noncommutative case.
+For this, we crucially use the notion of a \emph{free} subset of weights, which appears in many references such as \cite{Sjamaar, franz, CVZ}.
+In \cite{dadok1985polar} freeness is called \emph{strong orthogonality} and in \cite{derksen2020exponential} it appears as \emph{uncramped}.
+
+\begin{defn}[{\cite[Definition~4.7]{WeightMargin}}]  \label{defn:freeGeneral}
+	Let $\pi \colon G \to \GL(V)$ be a rational representation with set of weights $\Omega(\pi)$.
+	
+	A subset $\Gamma \subseteq \Omega(\pi)$ is called \emph{free} if no two distinct elements of $\Gamma$ differ by a root of $G$. In other words, $\Gamma \cap (\Gamma + \alpha) = \emptyset$ holds for all roots $\alpha$ of $G$.
+	
+	A vector $v \in V\setminus \{0\}$ is called \emph{free} if its support $\supp(v) \subseteq \Omega(\pi)$ is free.
+	\hfill\defnSymbol
+\end{defn}
+
+For concreteness, let us translate the above general definition to the tensor scaling setting given by the representation $\pi_{m,d}$.
+
+\begin{defn}[Free sets, {\cite[Definition~4.12]{WeightMargin}}]\label{defn:freeTensors} %formerly "dfn:free"
+	A set $\Wscr \subseteq [m]^d$ is called \emph{free}, if $i = (i_1, \ldots, i_d), j = (j_1, \ldots, j_d) \in \Wscr$ with $i \neq j$ always implies that $\vert \lbrace i_l \neq j_l \mid l=1, \ldots, d \rbrace \vert \geq 2$.
+	\hfill\defnSymbol
+\end{defn}
+
+\begin{prop}[{\cite[Proposition~4.13]{WeightMargin}}] \label{prop:FreeTensorVsFreeGeneral}
+	Let $\Wscr \subseteq [m]^d$ and denote the induced subset of weights of $\pi_{m,d}$ by 
+	\[\Gamma_\Wscr := \lbrace (\eps_{i_1}, \ldots, \eps_{i_d}) \mid (i_1,\ldots,i_d) \in \Wscr \rbrace \subseteq (\RR^m)^d .\]
+	Then $\Wscr$ is a free set if and only if the set of weights $\Gamma_\Wscr \subseteq \Omega(\pi_{m,d})$ is free.
+\end{prop}
+
+\begin{proof}
+	The set of weights $\Gamma_\Wscr$ is free if and only if no two distinct elements of $\Gamma_\Wscr$ differ by a root of $G = \SL_m(\CC)^d$, see Definition~\ref{defn:freeGeneral}. Furthermore, remember that the roots of $G$ are
+	\begin{align*}
+		(e_i - e_j, 0_m, \ldots, 0_m), (0_m, e_i - e_j, 0_m, \ldots, 0_m), \ldots, (0_m, \ldots, 0_m, e_i - e_j) \in \left( \RR^m \right)^d
+	\end{align*}
+	for $i,j \in [m]$ with $i \neq j$; see also Example~\ref{exa:Roots}. Now, if $\Wscr \subseteq [m]^d$ is not free, then there exist $i = (i_1, \ldots, i_d), j = (j_1, \ldots, j_d) \in \Wscr$ with $i \neq j$ such that they exactly differ one component. Without loss of generality we assume $i_1 \neq j_1$ and $i_l = j_l$ for $l=2,\ldots,m$. But then
+	\[ (\eps_{i_1}, \ldots, \eps_{i_d}) = (\eps_{j_1}, \ldots, \eps_{j_d}) + (e_{i_1} - e_{j_1}, 0_m, \ldots, 0_m),\]
+	and hence $\Gamma_\Wscr$ is not free. The argument can be inverted to show that if $\Gamma_\Wscr$ is not free, then $\Wscr$ is not free.
+\end{proof}
+
+\begin{remark}\label{rem:NonFreeTensors}
+	We point out that the notion of freeness in \cite{CVZ} is stronger as follows. The authors of \cite{CVZ} call a tensor free, if there \emph{exist} ordered bases of the tensor factors, such that the support with respect to these bases is free. In contrast, free in this thesis means that the support is free with respect to the ordered standard bases.\footnote{This comes from the fact that we choose the maximal torus $T$ to be in $\GT_N(\CC)\subseteq \GL_N(\CC)$.}
+	
+	Moreover, \cite[Remark~4.17]{CVZ} gives a dimension argument that $(\CC^m)^{\otimes 3}$ does contain non-free tensors as soon as $m \geq 5$.
+	\hfill\remSymbol
+\end{remark}
+
+We illustrate consequences of Proposition~\ref{prop:FreenessDTensors} in two examples.
+
+\begin{example}[Freeness for Operator Scaling] \label{ex:FreenessOperatorScaling}
+	Let us consider operator scaling, i.e., the representation $\pi_{m,2}^{\oplus n}$. For $n=1$ and $M \in \CC^{m \times m}$, let $s(M) := \{ (i,j) \in [m]^2 \mid M_{ij} \neq 0 \}$ so that
+		\[ \supp(M) = \Gamma_{s(M)} = \big\{ (\eps_i, \eps_j) \mid M_{ij} \neq 0 \big\} \subseteq \Omega(\pi_{m,2}). \]
+	Now, Proposition~\ref{prop:FreeTensorVsFreeGeneral} shows that $M$ is free if and only if $M$ has at most one non-zero entry in each row and in each column. In particular, $M$ is free and invertible if and only if $s(M) = s(P)$ for a permutation matrix $P$.
+	
+	More generally, for $n \geq 1$ and $M = (M_1, \ldots, M_n) \in (\CC^{m \times m})^n$ we have 
+		\[ \supp(M) = \big\{ (\eps_i, \eps_j) \mid \exists \, k \in [n] \colon \;  (M_k)_{ij} \neq 0 \big\} \subseteq \Omega \big(\pi_{m,2}^{\oplus n} \big) = \Omega(\pi_{m,2}). \]
+	Therefore, $M = (M_1, \ldots, M_n)$ is free if and only if there is a permutation matrix $P$ such that $s(M_1), \ldots, s(M_n) \subseteq s(P)$.
+	\hfill\exSymbol
+\end{example}
+
+\begin{example}[Freeness and Quantum Marginals]
+	Let $d =3$ and consider a free tensor $v \in (\CC^m)^{\otimes 3}$ with respect to tensor scaling $\pi_{m,d}$. Then its quantum marginals are diagonal which is exemplified in the following.
+	The first quantum marginal of $v$ is $M M\HT$, where $M \in \CC^{m \times m^2}$ is the flattening of $v$ given by $M_{i,(j,k)} = v_{ijk}$.
+	For $s,t \in [m]$ with $s \neq t$ we compute
+		\begin{equation}\label{eq:QuantumMarginalDiagonal}
+			\big( M M\HT \big)_{s,t} = \sum_{j,k=1}^m M_{s,(j,k)} \: \overline{ M_{t,(j,k)} }
+			= \sum_{j,k =1}^m v_{s,j,k}\, \overline{v_{t,j,k}} = 0,
+		\end{equation}
+	where we used that $v_{s,j,k}\, \overline{v_{t,j,k}} = 0$ holds by freeness of $v$ and Proposition~\eqref{prop:FreenessDTensors}.\footnote{Equation~\eqref{eq:QuantumMarginalDiagonal} suggests why freeness is called \emph{strong orthogonality} in \cite{dadok1985polar}. The distinct slices $M_{s,\cdot}$ and $M_{t, \cdot}$ of $v$ are not only orthogonal - actually each summand in \eqref{eq:QuantumMarginalDiagonal} is zero.}
+	
+	This principle generalizes to tensors of any order $d$. Each off-diagonal entry of a quantum marginal is the inner product between distinct $d-1$-dimensional slices of a tensor, and if the support of the tensor is free then the supports of such slices are entirely disjoint. Hence, the quantum marginals are diagonal.
+	\hfill\exSymbol
+\end{example}
+
+Recall that for $\pi_{m,d}$ the components of the moment map are, up to addition of a scalar multiple of $\Id_m$, given by the quantum marginals, compare Example ???. %todo refer to Part I
+Thus, $\mu_G(v)$ is diagonal for a free tensor $v \in (\CC^m)^{\otimes d}$ and it follows that $\mu_G(v) = \mu_{T}(v)$. It is known that this fact generalizes to any rational representation and we use it to transfer bounds for the weight margin to bounds on the gap via Proposition~\ref{prop:FreeForGapConstant}. The latter appears implicitly in, e.g., \cite[Lemma~7.1]{Sjamaar} and \cite[Proposition~2.2]{franz}, but we prove it below for completeness.
+
+Thanks go to Visu Makam for pointing out that the equality $\mu_G(v) = \mu_{T}(v)$ still holds under a weaker condition on $v$, when the representation decomposes into orthogonal subrepresentations.\footnote{In a preliminary version of \cite{WeightMargin} Proposition~\ref{prop:FreeForGapConstant} was stated for the case $k=1$.}
+This can be used to turn a weight margin upper bound for quivers into a gap upper bound, see Theorem~\ref{thm:UpperBoundQuiver}. The weaker condition also appears in \cite[Theorem~6.5]{derksen2020exponential}.
+
+
+\begin{prop}[{\cite[Proposition~4.8]{WeightMargin}}]  \label{prop:FreeForGapConstant}
+	Let $\pi \colon G \to \GL(V)$ be a rational representation over $\CC$ %todo needed?
+	and suppose $V = \bigoplus_{i=1}^k V_i$ is an orthogonal decomposition into $G$-subrepresentations with respect to the $K$-invariant inner product, that is used to define $\mu_{T}$ and $\mu_G$. Let $v = 
+	\sum_{i=1}^k v_i \in V \setminus \{0\}$, $v_i \in V_i$ be such that all supports $\Gamma_i := \supp(v_i) \subseteq \Omega(\pi)$ are free. Set $\Gamma := \bigcup_i \Gamma_i = \supp(v)$. Then:
+		\begin{itemize}
+			\item[(i)] For all $t \in T$ it holds that $\mu_G(t \cdot v) \in \imag\Lie(T_K)$ and $\mu_G(t \cdot v) = \mu_{T}(t \cdot v)$.
+			
+			\item[(ii)] If $0 \notin \Delta_{T}(v) = \conv(\Gamma)$, then the upper bound $\dist(0, \conv(\Gamma))$ for the weight margin $\gamma_{T}(\pi)$ also applies to the gap, i.e., $\gamma_G(\pi) \leq \dist(0, \conv(\Gamma))$.
+		\end{itemize}
+\end{prop}
+
+\begin{proof}
+	The action of $T$ preserves the supports $\Gamma_i$, and in particular preserves their freeness. Hence, it suffices to show $\mu_G(v) \in \imag\Lie(T_K)$, which immediately yields $\mu_G(v) = \mu_{T}(v)$ by Proposition~\ref{prop:MomentMaps}. Moreover, the orthogonality with respect to the $K$-invariant inner product shows $\mu_G(v) = H_1 \oplus \cdots \oplus H_k$, where $H_i = \mu_G^{(i)}(v_i)$ is given by the moment map $\mu_G^{(i)}$ of the $G$-module $V_i$ if $v_i \neq 0$ and otherwise $H_i = 0$. The latter holds similarly for $\mu_{T}$.
+	
+	Therefore, we may assume $k=1$, i.e., $v \neq 0$ has free support $\Gamma$. We write $v = \sum_{\omega \in \Gamma} v_\omega$ for $v_\omega \in V_\omega$. For any root $\alpha$ of $G$ and all $A \in \imag \Lie(K) \cap \Lie(G)_\alpha$ we have $\Pi(A) v_\omega = 0$, by $\Gamma \cap (\Gamma + \alpha) = \emptyset$ (i.e., freeness) and Proposition~\ref{prop:Roots}. Thus, $\Pi(A)v = 0$ and $\tr \big( \mu_G(v)A \big) = 0$ for all roots $\alpha$ and all $A \in \imag \Lie(K) \cap \Lie(G)_\alpha$. With the root space decomposition $\Lie(G) = \Lie(T) \oplus \bigoplus_\alpha \Lie(G)_\alpha$ (see also Example~\ref{exa:Roots}) we conclude $\mu_G(v) \in \imag \Lie(T_K)$. The first statement is proven.
+	
+	For the second claim, assume $0 \notin \conv(\Gamma) = \Delta_{T}(v)$. Then $v$ is $T$-unstable. In particular, $v$ is $G$-unstable and thus
+	\[ \gamma_G(\pi) \leq \dist \big( 0, \Delta_G(v) \big) . \]
+	On the other hand, we have
+	\begin{align*}
+		\dist \big( 0, \Delta_G(v) \big) = \inf_{g \in G} \, \| \mu_G(g \cdot v) \|_F
+		\leq \inf_{t \in T} \, \| \mu_G(t \cdot v) \|_F \overset{(*)}{=} \dist \big( 0, \conv(\Gamma) \big) ,
+	\end{align*}
+	where we used $\mu_G(t \cdot v) = \mu_{T}(t \cdot v)$ in $(*)$. We conclude by combining the two inequalities.
+\end{proof}
+
+\begin{remark}[{\cite[Remark~4.9]{WeightMargin}}]
+	It is well-known that any rational representation $\pi \colon G \to \GL(V)$ can be decomposed into irreducible subrepresentations that are pairwise orthogonal with respect to the fixed $K$-invariant inner product. Therefore, to apply Proposition~\ref{prop:FreeForGapConstant} it suffices to ensure freeness on the irreducible subrepresentations.
+	\hfill\remSymbol
+\end{remark}
+
+A useful consequence of Proposition~\ref{prop:FreeForGapConstant} is that semi/polystability of a free vector under $G$ may be checked on the torus $T$.\footnote{I thank M. Levent Doğan for a fruitful discussion, in which we rediscovered this fact.}
+This application of freeness can be found in \cite[Proposition~1.2]{dadok1985polar} and \cite[Theorem~6.5]{derksen2020exponential} to construct vectors with closed $G$-orbit.
+
+\begin{cor} \label{cor:FreeVector}
+	Let $v \in V$ be a free vector. If $v$ is $T$-semistable (respectively $T$-polystable) then $v$ is $G$-semistable (respectively $G$-polystable).
+%	\begin{itemize}
+%		\item[(i)] If $v$ is $T$-polystable, then $v$ is $G$-polystable.
+%		\item[(ii)] If $v$ is $T$-semistable, then $v$ is $G$-semistable.
+%	\end{itemize}
+	%add that for a free vector we have: T semistable implies G semistable (see discussion with Levent from September 28)
+\end{cor}
+
+\begin{proof}
+	Since $v$ is free we have $\mu_{T}(t \cdot v) = \mu_{G} (t \cdot v)$ for all $t \in T$, by Proposition~\ref{prop:FreeForGapConstant}. If $v$ is $T$-polystable, then there exists some $t \in T$ with $0 = \mu_{T}(t \cdot v) = \mu_{G} (t \cdot v)$, by Kempf-Ness Theorem~\ref{thm:KempfNessAKRS}(e) for the action of $T$. But the same part of Kempf Ness for the action of $G$ yields that $v$ is $G$-polystable as $t \in G$ and $\mu_{G} (t \cdot v) = 0$.
+	
+	Similarly, if $v$ is $T$-semistable we can deduce that $v$ is $G$-semistable using Kempf-Ness, Theorem~\ref{thm:KempfNessAKRS}(f), and continuity of the moment maps $\mu_T$ and $\mu_G$.
+\end{proof}
+
+We end with an interesting connection between weight margin and gap.
+
+
+\begin{prop}[{\cite[Proposition~4.10]{WeightMargin}}]  \label{prop:WeightGapForDirectPower}
+	Let $\pi \colon G \to \GL(V)$ be a rational representation over $\CC$ and denote its $n$-fold direct sum by $\pi^{\oplus n}$.
+	\begin{enumerate}
+		\item The weight margin satisfies $\gamma_{T}(\pi) = \gamma_{T}(\pi^{\oplus n})$ for all $n \geq 1$.
+		
+		\item The gap satisfies $\gamma_{G}(\pi^{\oplus n}) \geq \gamma_{G} \big( \pi^{\oplus(n+1)} \big)$ for all $n \geq 1$.
+		
+		\item There exists some $n \leq \dim(V)$ such that $\gamma_{G}(\pi^{\oplus n}) = \gamma_{T}(\pi^{\oplus n}) = \gamma_{T}(\pi)$.
+	\end{enumerate}	 
+\end{prop}
+
+\begin{proof}
+	We note that $\pi^{\oplus n}$ is given by the action $g \cdot (v_1,\ldots,v_n) = (g \cdot v_1 , \ldots, g \cdot v_n)$ on $V^n$. Furthermore, the $K$-invariant inner product $\langle \cdot, \cdot \rangle$ of $V$ induces naturally a $K$-invariant product on $V^n$ by
+	\begin{align*}
+		\langle (v_1,\ldots,v_n), (w_1,\ldots,w_n) \rangle_{V^n} := \sum_{i=1}^n \; \langle v_i, w_i \rangle.
+	\end{align*}
+	
+	For the first claim just note that the weight space decomposition for $\pi^{\oplus n}$ is $V^n = \bigoplus_{\omega \in \Omega(\pi)} V_{\omega}^n$ and hence $\Omega(\pi^{\oplus n}) = \Omega(\pi)$.
+	
+	For the second claim, let $(v_1,\ldots,v_n) \in V^n \setminus \{0\}$ be $G$-unstable such that $\| \mu_G(v_1,\ldots,v_n) \|_F = \gamma_G(\pi^{\oplus n})$. Then $(v_1,\ldots,v_n,0) \in V^{n+1} \setminus \{0\}$ is $G$-unstable as well, so $\| \mu_G(v_1,\ldots,v_n,0) \|_F \geq \gamma_{G} \big( \pi^{\oplus(n+1)} \big)$. Moreover, under the inner product $\langle \cdot, \cdot \rangle_{V^{n+1}}$ the first $n$ copies of $V$ are orthogonal to the last copy. Thus, $\mu_{G}(v_1,\ldots,v_n,0)$ is the $2 \times 2$ block-diagonal matrix $\diag(\mu_G(v_1,\ldots,v_n),0)$ and hence $\| \mu_G(v_1,\ldots,v_n,0) \|_F = \| \mu_G(v_1,\ldots,v_n) \|_F =  \gamma_G(\pi^{\oplus n})$.
+	
+	Finally, let $\Gamma = \{ \omega_1,\ldots,\omega_n \} \subseteq \Omega(\pi)$ be a witness of the weight margin, i.e., $0 \notin \conv(\Gamma)$ and $\dist(0, \conv(\Gamma)) = \gamma_{T}(\pi)$. We have $n \leq \vert \Omega(\pi)\vert \leq \dim(V)$ by the weight space decomposition $V = \bigoplus_{\omega \in \Omega(\pi)} V_{\omega}$. %todo refer to weight space decomposition in chapter 1
+	Now, for each $\omega_i \in \Gamma$ fix some weight vector $v_i \in V_{\omega_i} \setminus \{0\}$. Then $v := (v_1,\ldots,v_n) \in V^n$ satisfies the assumptions of Proposition~\ref{prop:FreeForGapConstant}, because $\Gamma_i = \lbrace \omega_i \rbrace$ is free and the distinct copies of $V$ are orthogonal under $\langle \cdot, \cdot \rangle_{V^n}$. Thus, we obtain
+	\begin{align*}
+		\gamma_G(\pi^{\oplus n}) \leq \dist \big( 0, \conv(\Gamma) \big) = \gamma_{T}(\pi) = \gamma_{T}(\pi^{\oplus n}),
+	\end{align*}
+	but on the other hand $\gamma_G(\pi^{\oplus n}) \geq \gamma_{T}(\pi^{\oplus n})$ by Proposition~\ref{prop:GapConstantWeightMargin}.
+\end{proof}
+
+
+
+
+
+\section{Proof Method} \label{sec:ProofMethod}
+
+In this short section we present the main steps how we prove upper bounds on the weight margin $\gamma_T(\pi)$ and the gap $\gamma_G(\pi)$.
+	\begin{enumerate}
+		\item We exhibit a set of weights $\Gamma \subseteq \Omega(\pi)$ such that $0 \notin \conv(\Gamma)$. Hence, $\gamma_T(\pi) \leq \dist( 0, \conv(\Gamma) )$ by Definition~\ref{defn:WeightMarginGapConstant}. 
+		
+		\item We prove an upper bound on $\dist( 0, \conv(\Gamma) )$ to obtain a bound on $\gamma_T(\pi)$.
+		
+		\item If $\Gamma$ satisfies the assumptions of Proposition~\ref{prop:FreeForGapConstant} (e.g., if $\Gamma$ is free), then also $\gamma_G(\pi) \leq \dist( 0, \conv(\Gamma) )$ holds by Proposition~\ref{prop:FreeForGapConstant}(ii). Therefore, the upper bound from the second step also applies to the gap $\gamma_G(\pi)$.
+	\end{enumerate}
+
+
+For the first and second step we often use Lemma~\ref{lem:convCombEps-i} below. Recall that an \emph{affine linear combination} of $v_1, \dots, v_k \in \RR^m$ is $\lambda_1 v_1 + \dots + \lambda_k v_k$ for $\lambda_i \geq 0, \sum_{i = 1}^k \lambda_i = 1$. The affine hull $\aff(S)$ of a set $S\subset \RR^m$ is the set of all affine linear combinations of finite subsets of $S$, or equivalently the affine space of lowest dimension containing $S$. Furthermore, remember that $\eps_i = e_i - \frac{1}{m} \ones_m$.
+
+\begin{lemma}[{\cite[Lemma~2.2]{WeightMargin}}] \label{lem:convCombEps-i}
+	In $\RR^m$ we have
+	\begin{equation}\label{eq:SumEps-i}
+		\sum_{i=1}^m \frac{1}{m} \: \eps_i = 0_m
+	\end{equation}
+	and this is the only affine linear combination of $\eps_1,\ldots,\eps_m$ giving zero.
+\end{lemma}
+
+\begin{proof}
+	One calculates directly that $\sum_i \frac{1}{m} \, \eps_i = 0_m$. To show uniqueness of this affine combination, we note that the vectors $e_2, \ldots, e_m, \ones_m$ are linearly independent. Thus, $\eps_2, \ldots, \eps_m$ are linearly independent. On the other hand, $\eps_1,\ldots, \eps_m$ are linearly dependent. Therefore,
+	$
+	\left\lbrace (\lambda_1,\ldots,\lambda_m) \in \RR^m \mid \sum_i \lambda_i \: \eps_i = 0_m \right\rbrace
+	$
+	is a one-dimensional subspace of $\RR^m$, which yields the uniqueness of the affine linear combination.
+\end{proof}
+
+
+
+
+\section{Tensor Scaling} \label{sec:TensorGap}
+
+
+We recall that $\pi_{m,d}$ is the natural representation of $G = \SL_m(\CC)^d$ on $(\CC^m)^{\otimes d}$, which captures tensor scaling while its restriction to $T = \ST_m(\CC)^d$ captures array scaling.
+The purpose of this section is to prove exponentially small upper bounds on the weight margin $\gamma_{T}(\pi_{m,d})$ and the gap $\gamma_G(\pi_{m,d})$ for the case $d \geq 3$.
+
+\begin{theorem}[Bounds for Tensor Gap, {\cite[Theorems~2.1 and 4.11]{WeightMargin}}] \label{thm:GapConstantTensor}
+	\ \\
+	Let $\pi_{m,d}$ be the natural representation of $G := \SL_m(\CC)^d$ on $(\CC^m)^{\otimes d}$. The weight margin $\gamma_{T}(\pi_{m,d})$ and the gap $\gamma_G(\pi_{m,d})$ are bounded as follows:
+	\begin{itemize}
+		\item[(a)] If $m=2$ and $d \geq 3$, then
+		$
+		\gamma_{T}(\pi_{2,d}) \leq \gamma_G (\pi_{2,d}) \leq 2^{-\frac{d}{2} + 1}.
+		$
+		\item[(b)] If $m \geq 3$ and $d = 3$, then  $\gamma_{T}(\pi_{m,3}) \leq \gamma_G(\pi_{m,3}) \leq 2^{-m+1}$.
+		\item[(c)] If $m \geq 3$ and $d = 6 r - 3$ for some integer $r \geq 2$, then
+	\end{itemize}
+	\vspace{-1em}
+	\begin{align*}
+		\gamma_{T}(\pi_{m,d}) \leq \gamma_G(\pi_{m,d}) \leq \frac{\sqrt{6}}{(m-1)\sqrt{r}} \; 2^{-r(m-1) + 1} 
+		\leq 2^{- r(m-1) + 1} = 2^{- \frac{(d+3)(m-1)}{6} + 1}.
+	\end{align*}
+\end{theorem}
+
+We prove parts~(a), (b) and (c) of the preceding theorem in Subsection~\ref{subsec:Qubits}, \ref{subsec:3Tensors} and \ref{subsec:dTensors}, respectively. To do so, we proceed as described in Section~\ref{sec:ProofMethod}.
+
+Though Theorem~\ref{thm:GapConstantTensor} only applies to certain $d \geq 3$, we can ``pad'' tensor factors to obtain similar results for all $d \geq 3$. This padding procedure is described in Subsection~\ref{subsec:PaddingTensors} and allows us to conclude Theorem~\ref{thm:tensor-gap} from the above Theorem~\ref{thm:GapConstantTensor}.
+
+
+\subsection{Local Dimension two: Qubits} \label{subsec:Qubits}
+
+
+In this subsection we prove part (a) of Theorem~\ref{thm:GapConstantTensor}, which states that $\gamma_T(\pi_{2,d})$ and $\gamma_T(\pi_{2,d})$ are exponentially small in $d$. We start with a remark on related literature.
+
+\begin{remark}\label{rem:QubitLiterature}
+	We point out that $\gamma_T(\pi_{2,d}) = 2^{-\Theta(d \log d)}$ follows from \cite{alon1997anti}. This statement is actually stronger than the provided bound from Theorem~\ref{thm:GapConstantTensor}(a). However, the result in \cite{alon1997anti} is obtained by describing an involved algorithm that constructs ill-conditioned $\pm 1$-matrices. Thus, it is difficult to verify whether their construction produces free sets of weights. The latter is needed to lift the bound to the gap $\gamma_T(\pi_{2,d})$. In contrast, the construction presented here is simpler and proven to be free.
+	\hfill\remSymbol
+\end{remark}
+
+In the following we construct a subset of
+\begin{align*}
+	\Omega(\pi_{2,d}) =  \big\lbrace (\eps_{i_1}, \ldots, \eps_{i_d}) \mid i_1, \ldots, i_d \in [2] \big\rbrace \subseteq \big( \RR^2 \big)^d ,
+\end{align*}
+which witnesses the exponentially small weight margin. For this, we construct a matrix with entries in $[2]$, and each row of the matrix will correspond to an element of $\Omega(\pi_{2,d})$. For example, the row $(1,2,2)$ would correspond to $(\eps_1, \eps_2, \eps_2) \in \Omega(\pi_{2,3})$. To do so, we consider the matrices 
+\begin{align*}
+	A_2 : = \begin{pmatrix} 1 & 1 \\ 2 & 1 \end{pmatrix} , \;
+	B_1 := \begin{pmatrix} 1 & 1 \\ 2 & 2 \end{pmatrix} , \;
+	B_2 := \begin{pmatrix} 1 & 2 \\ 2 & 2 \end{pmatrix} , \;
+	B_3 := \begin{pmatrix} 2 & 1 \\ 1 & 1 \end{pmatrix} ,
+\end{align*}
+and define recursively
+\begin{equation}\label{eq:defA2r}
+	A_{2r+2} := \begin{pmatrix}
+		&  &  & B_1 \\ 
+		&  A_{2r} &  & \vdots \\ 
+		&  &  & B_1 \\ 
+		B_2 & \cdots & B_2 & B_3
+	\end{pmatrix} = 
+	\begin{pmatrix}
+		A_2 & B_1 & \cdots & B_1 \\ 
+		B_2  & B_3 & \ddots & \vdots \\ 
+		\vdots & \ddots & \ddots& B_1 \\ 
+		B_2 & \cdots & B_2 & B_3
+	\end{pmatrix}
+\end{equation}
+for $r \geq 1$. Figure~\ref{fig:qubit-matrices} is supplied as a visualization aid.
+
+\begin{figure}
+	$$ A_4 = \left(\begin{array}{c|c}
+		\cellcolor{black!30}\begin{array}{cc} * & * \\  & * \end{array}&\cellcolor{green!10} \begin{array}{cc} * & * \\  &  \end{array}\\
+		\hline
+		\cellcolor{red!10}\begin{array}{cc} * & \;\text{ }  \\  &  \end{array}& \cellcolor{blue!10}\begin{array}{cc}  & * \\ * & * \end{array}
+	\end{array}\right),
+	\quad 
+	A_6 = \left(\begin{array}{c|c|c} 
+		\cellcolor{black!30} \begin{array}{cc} * & * \\ & * \end{array}& \cellcolor{green!10}\begin{array}{cc} * & * \\  &  \end{array} & \cellcolor{green!10} \begin{array}{cc} * & * \\  &  \end{array} \\
+		\hline
+		\cellcolor{red!10}\begin{array}{cc} * & \;\text{ }  \\  &  \end{array} & \cellcolor{blue!10}  \begin{array}{cc}  & * \\ * & * \end{array} &  \cellcolor{green!10}\begin{array}{cc} * & * \\  &  \end{array}  \\
+		\hline
+		\cellcolor{red!10}\begin{array}{cc} * & \;\text{ } \\  &  \end{array}& \cellcolor{red!10}\begin{array}{cc} * & \;\text{ } \\  &  \end{array} &  \cellcolor{blue!10}\begin{array}{cc}  & * \\ * & * \end{array} \\
+	\end{array}\right)
+	$$
+	\caption{The positions of the ones in $A_4$ and $A_6$ are marked by $*$ in the following figure and the cells are coloured according to whether they belong to $A_2, B_1, B_2$ or $B_3$.}\label{fig:qubit-matrices}
+\end{figure}
+
+
+We remark that the entry of $A_{2r}$ at position $(i,j)$ is independent of $r$ and denote it by $a(i,j)$. We set for $r \geq 1$
+\begin{align*}
+	\Gamma_{2,2r} &:= \left\lbrace \left( \eps_{a(i,1)}, \eps_{a(i,2)}, \ldots, \eps_{a(i,2r)} \right) \mid i \in [2r] \right\rbrace \subseteq \Omega(\pi_{2,2r}) \subseteq \big( \RR^2 \big)^{2r},\\
+	\Gamma_{2,2r+1} &:= \left\lbrace \left( \eps_{a(i,1)}, \eps_{a(i,2)}, \ldots, \eps_{a(i,2r)}, \eps_{\chi(i)} \right) \mid i \in [2r] \right\rbrace \subseteq \Omega(\pi_{2,2r+1}) \subseteq \big( \RR^2 \big)^{2r+1},
+\end{align*}
+where $\chi \colon \NN \to \{1,2\}, \; i \mapsto i \mod 2$. That is, $\Gamma_{2,2r}$ is the subset of $\Omega(\pi_{2,2r})$ induced by the rows of $A_{2r}$ and $\Gamma_{2,2r+1}$ is obtained by alternately appending $\eps_1$ or $\eps_2$ to the $2r$-many elements of $\Gamma_{2,2r}$.
+
+\begin{lemma}[{\cite[Lemma~2.3]{WeightMargin}}] \label{lem:affHullQubits}
+	It holds that $0 \notin \aff(\Gamma_{2,2r})$ and $0 \notin \aff(\Gamma_{2,2r+1})$.
+\end{lemma}
+
+\begin{proof}
+	By construction, $0 \in \aff(\Gamma_{2,2r+1})$ implies $0 \in \aff(\Gamma_{2,2r})$, since one could choose the same coefficients for the affine linear combination. Hence, it suffices to prove $0 \notin \aff(\Gamma_{2,2r})$. We proceed by induction on $r \geq 1$. For $r=1$, it is clear that $0 \notin \aff(\Gamma_{2,2}) \subseteq \RR^2 \times \lbrace \eps_1 \rbrace$.
+	Now assume that $0 \notin \aff(\Gamma_{2,2r})$. For the sake of contradiction, let
+	\begin{equation}\label{eq:affCombGamma}
+		\sum_{i=1}^{2r+2} \lambda_i \left( \eps_{a(i,1)}, \eps_{a(i,2)}, \ldots, \eps_{a(i,2r+2)} \right) = 0 \in \left( \RR^2 \right)^{2r+2}
+	\end{equation}
+	be an affine linear combination of $\Gamma_{2,2r+2}$. Then Equation~\eqref{eq:affCombGamma} gives in each of the $(2r+2)$-many $\RR^2$-components the affine linear combination $2^{-1} (\eps_1 + \eps_2) = 0$, by Lemma~\ref{lem:convCombEps-i}. Considering the scalar factor of $\eps_1$ in the first, the penultimate and the last $\RR^{2}$-component respectively, we conclude
+	\begin{align*}
+		\underbrace{ \sum_{j=1}^{r+1} \lambda_{2j-1} }_{\text{first}} = \frac{1}{2}
+		= \underbrace{ \lambda_{2r+2} + \sum_{j=1}^{r} \lambda_{2j-1} }_{\text{penultimate}} 
+		= \frac{1}{2} = \underbrace { \lambda_{2r+2} + \sum_{j=1}^{r+1} \lambda_{2j-1} }_{\text{last}}
+	\end{align*}
+	by construction of $A_{2r+2}$. Hence, $\lambda_{2r+2} = 0$ using the first and last component. Furthermore, the penultimate and last column give $\lambda_{2r+1} = 0$. Therefore, the first $2r$-many components in Equation~\eqref{eq:affCombGamma} show $0 \in \aff(\Gamma_{2,2r})$, which contradicts our induction hypothesis.
+\end{proof}
+
+\begin{lemma}[{\cite[Lemma~2.4]{WeightMargin}}]\label{lem:convCombQubits}
+	It holds that $\dist(0, \conv(\Gamma_{2,2r}) ) \leq 2^{-r+ \frac{1}{2}}$ and $\dist(0, \conv(\Gamma_{2,2r+1}) ) \leq 2^{-r+ \frac{1}{2}}$.
+\end{lemma}
+
+\begin{proof}
+	First, we prove the inequality for $\conv(\Gamma_{2,2r})$. For $i \in [2r]$ let $\omega_i := \big( \eps_{a(i,1)}, \ldots, \eps_{a(i,2r)} \big) \in \left( \RR^2 \right)^{2r}$ be the weight in $\Gamma_{2,2r}$ that corresponds to the $i^{th}$ row of $A_{2r}$. Consider the convex combination
+	\begin{equation}\label{eq:convCombGamma}
+		(x_1, \ldots, x_{2r}) := 2^{-r} ( \omega_{2r-1} + \omega_{2r} ) + \sum_{l=1}^{r-1} 2^{-l-1} ( \omega_{2l-1} + \omega_{2l}) \in \left( \RR^2 \right)^{2r}.
+	\end{equation}
+	Note that $x_i \in \RR^2$. We will argue that $(x_1, \dots, x_{2r}) = 2^{-r+1} (0_2,\ldots,0_2, \eps_{1})$.
+	Since $x$ is a convex combination of the elements in $\Gamma_{2,2r}$, the statement then follows from $\| \eps_1 \| = 2^{-\frac{1}{2}}$.
+	
+	We consider $A_{2r}$ like in its construction~\eqref{eq:defA2r} as $r \times r$ block matrix with block entries being $2 \times 2$ matrices. For $m \in [r]$ the two weights $\omega_{2m-1}$ and $\omega_{2m}$ correspond to the $m^{th}$ block row of $A_{2r}$ and have the same scalar factor in~\eqref{eq:convCombGamma}. Hence, whenever for $i \in [2r]$ the $i^{th}$ column of the $m^{th}$ block row of $A_{2k}$ contains exactly one entry equal to one (and so the other entry equals two), then the contribution of $\omega_{2m-1}$ and $\omega_{2m}$ to $x_i$ cancels due to $\eps_1 + \eps_2 = 0_2$.
+	In particular, in \eqref{eq:convCombGamma} all contributions of block entries equal to $B_1$ cancel. Therefore the last column of $A_{2r}$ gives
+	\begin{align*}
+		x_{2r} = 2^{-r} (\eps_1 + \eps_1) = 2^{-r+1} \eps_1.
+	\end{align*}
+	Furthermore, $x_1 = x_{3} = \ldots = x_{2r-1} = 0_2$ using that also the first columns of $A_2$, of $B_2$ and of $B_3$ contain exactly one entry equal to one. For $r=1$ we are done.
+	If $r \geq 2$, then reading off the second column of $A_{2r}$, we find 
+	\begin{align*}
+		x_2 = \underbrace{2^{-2} (\eps_1 + \eps_1)}_{\text{first block row}} + \underbrace{2^{-r} (\eps_2 + \eps_2)}_{\text{last block row}} + \sum_{l=2}^{r-1} \underbrace{ 2^{-l-1} (\eps_2 + \eps_2)}_{\text{middle rows}} = 2^{-1} (\eps_1 + \eps_2) = 0_2.
+	\end{align*}
+	Analogously, as $B_1$ does not contribute we compute for $j = 2,3,\ldots,r-1$ that
+	\begin{align*}
+		x_{2j} = \underbrace{2^{-j-1} (\eps_1 + \eps_1)}_{j^{th} \text{ block row}} + \underbrace{2^{-r} (\eps_2 + \eps_2)}_{\text{last block row}} + \sum_{l=j+1}^{r-1} \underbrace{ 2^{-l-1} (\eps_2 + \eps_2)}_{\text{in between rows}} = 2^{-j} (\eps_1 + \eps_2) = 0_2,
+	\end{align*}
+	because the second columns of $B_2$ and $B_3$ are, respectively, $(2,2)\T$ and $(1,1)\T$. This proves the inequality in the case $\Gamma_{2,2r}$.
+	
+	By construction, for $\Gamma_{2,2r+1}$ the same convex combination works, because the last $\RR^2$-component does not contribute as the entries of the weights alternate between $\eps_1$ and $\eps_2$.
+\end{proof}
+
+Noting that for odd $d=2r+1$ one has $\; -r + 1/2 = -(d/2) + 1$, Lemma~\ref{lem:affHullQubits} and Lemma~\ref{lem:convCombQubits} together yield the bound from Theorem~\ref{thm:GapConstantTensor}(a) for the weight margin.
+It remains to show that the witness sets are free, to deduce the same bound for the gap. We use the characterization of freeness from Proposition~\ref{prop:FreeTensorVsFreeGeneral}.
+
+\begin{prop}[{\cite[Proposition~4.14]{WeightMargin}}] \label{prop:freeQubits}
+	For $r \geq 2$, the rows of $A_{2r}$ form a free subset of $[2]^{2r}$, i.e., $\Gamma_{2,2r}$ is free. Moreover, for $r \geq 1$ the set of weights $\Gamma_{2,2r+1}$ is free.
+\end{prop}
+
+\begin{proof}
+	First, note that $\Gamma_{2,3} = \{ \eps_{1,1,1}, \eps_{2,1,2} \}$ is free. Now, let $r \geq 2$. If $\Gamma_{2,2r}$ is free, then $\Gamma_{2,2r+1}$ is also free by construction. Thus, we are left to prove the former.
+	
+	Consider $A_{2r}$ as defined in Equation~\eqref{eq:defA2r}. We must show that distinct rows of $A_{2r}$ differ in at least two entries for all $r \geq 2$. The claim is proven by induction on $r \geq 3$. For $r = 3$, we verify the claim by inspection of $A_6$. Let $a_i$ be the $i^{th}$ row of $A_6$; its definition is recalled in the left-hand table below. The right-hand table lists for each pair $a_i$, $a_j$ with $i < j$ two distinct entries in which $a_i$ and $a_j$ differ, which shows the claim for $r=3$.
+	\begin{center}
+		\begin{tabular}{|c||c|c|c|c|c|c|}
+			\hline 
+			entry & 1 & 2 & 3 & 4 & 5 & 6 \\ 
+			\hline 
+			\hline
+			$a_1$ & 1 & 1 & 1 & 1 & 1 & 1 \\ 
+			\hline 
+			$a_2$ & 2 & 1 & 2 & 2 & 2 & 2 \\ 
+			\hline 
+			$a_3$ & 1 & 2 & 2 & 1 & 1 & 1 \\ 
+			\hline 
+			$a_4$ & 2 & 2 & 1 & 1 & 2 & 2 \\ 
+			\hline 
+			$a_5$ & 1 & 2 & 1 & 2 & 2 & 1 \\ 
+			\hline 
+			$a_6$ & 2 & 2 & 2 & 2 & 1 & 1 \\ 
+			\hline 
+		\end{tabular} $\qquad \qquad$
+		\begin{tabular}{|c||c|c|c||c|c|}
+			\hline 
+			& $a_2$ & $a_3$ & $a_4$ & $a_5$ & $a_6$ \\ 
+			\hline \hline
+			$a_1$  & 1,3 & 2,3 & 1, 2 & 2,4 & 1,2 \\ 
+			\hline 
+			$a_2$ & & 1,2 & 2,3 & 1,2 & 5,6 \\ 
+			\hline 
+			$a_3$ & & & 1,3 & 3,4 & 1, 4 \\ 
+			\hline \hline
+			$a_4$ & & & & 1,4 & 3,4 \\ 
+			\hline 
+			$a_5$ & & & & & 1,3 \\ 
+			\hline 
+		\end{tabular} 
+	\end{center}
+	In fact, the table also proves the claim for $r=2$, since $a_1,\ldots,a_4$ already pairwise differ in at least two of the first four entries.
+	
+	Now assume that the claim holds for some fixed $r \geq 3$. Let $a_i, a_j$ be distinct rows of $A_{2r + 2}$; we will show they differ in at least two entries. If $1 \leq i<j \leq 2r$, then by our inductive hypothesis there is nothing to prove because the first $2r$ rows of $A_{2r+2}$ contain $A_{2r}$ as a submatrix. 
+	
+	To complete the proof, it is enough to show that the $4\times (2r + 2)$ submatrix formed by restricting to the $k^{th}$ block row, $k \in [r]$, and the last block row of $A_{2r + 2}$ satisfies the hypothesis, i.e., any two distinct rows of this submatrix differ in at least two entries. This is the case as restricting to its first, $k^{th}$ and last block columns yields a $4 \times 6$ submatrix of $A_6$ if $k \neq 1$, namely 
+	$$\begin{pmatrix}
+		B_2 & B_3 & B_1\\
+		B_2 & B_2 & B_3
+	\end{pmatrix},$$
+	and a $4 \times 4$ submatrix equal to $A_4$ if $k = 1$. 
+\end{proof}
+
+
+
+
+\subsection{Tensors of order three} \label{subsec:3Tensors}
+
+In this subsection we show part~(b) of Theorem~\ref{thm:GapConstantTensor}, i.e., that $\gamma_T(\pi_{m,3})$ and $\gamma_G(\pi_{m,3})$ are exponentially small in $m$. To do so, we set
+\begin{equation}
+	\Wscr_{m,3} := \bigcup_{s=2}^m \lbrace (s,1,s), (s,s,1), (s-1,s,s) \rbrace \subseteq [m] \times [m] \times [m]
+\end{equation}
+and consider the corresponding subset
+\begin{equation}
+	\Gamma_{m,3} := \Gamma_{\Wscr_{m,3}} = \big\lbrace (\eps_i,\eps_j,\eps_k) \mid (i,j,k) \in \Wscr_{m,3} \big \rbrace \subseteq \Omega(\pi_{m,3}).
+\end{equation}
+Let us first show that $0 \notin \conv(\Gamma_{m,3})$ by proving the following statement.
+
+\begin{lemma}[{\cite[Lemma~2.8]{WeightMargin}}] \label{lem:affineHullKravtsov}
+	It holds that $\, 0 \notin \aff(\Gamma_{m,3})$.
+\end{lemma}
+
+\begin{proof}
+	For a proof by contradiction we assume $0 \in \aff(\Gamma_{m,3})$.  Then there exist $a_s, b_s, c_s \in \RR$ for $s=2,3,\ldots,m$ such that $\sum_s a_s + b_s + c_s = 1$ and
+	\begin{align*}
+		\sum_{s=2}^m \big( \, a_s (\eps_s, \eps_1, \eps_s) + b_s (\eps_s, \eps_s, \eps_1) + c_s (\eps_{s-1}, \eps_s, \eps_s) \, \big) = (0_m, 0_m, 0_m) \in (\RR^m)^3.
+	\end{align*}
+	In each of the three $\RR^m$-components we obtain $0_m$ as an affine linear combination of $\eps_1, \ldots,\eps_m$.
+	Applying Lemma~\ref{lem:convCombEps-i} to the coefficient of $\eps_{s-1}$ in the first component,  respectively to the coefficient of $\eps_s$ in the second and third component yields
+	\begin{align}
+		a_{s-1} + b_{s-1} + c_{s} &= m^{-1} \quad \text{ for } s=2,3,\ldots,m \label{eq:prpAffHull1} \\[4pt]
+		\text{respectively } \qquad
+		b_s+ c_s = a_s + c_s &= m^{-1} \quad \text{ for } s=2,3,\ldots,m  \qquad\qquad \label{eq:prpAffHull2}
+	\end{align}
+	where we necessarily set $a_1 = b_1 := 0$. Equation~\eqref{eq:prpAffHull1} for $s=2$ is $c_2 = m^{-1}$ and hence $a_2=b_2=0$ by \eqref{eq:prpAffHull2} for $s=2$. But now \eqref{eq:prpAffHull1} for $s=3$ gives $c_3 = m^{-1}$ and we can proceed inductively to conclude $c_s = m^{-1}$ and $a_s = b_s = 0$ for all $s=2,3,\ldots,m$.  This gives the contradiction $1 = \sum_{s=2}^m (a_s + b_s + c_s) = \frac{m-1}{m}$, so we must have $0 \notin \aff(\Gamma_{m,3})$. Another contradiction arises by applying Lemma~\ref{lem:convCombEps-i} to the coefficient of $\eps_m$ in the first component, which yields $a_m + b_m = m^{-1}$.
+\end{proof}
+
+Next, we prove an exponentially small upper bound on $\dist(0, \conv(\Gamma_{m,3}))$.
+The key combinatorial idea, which is presented in the following lemma, is due to \cite[Theorem~1 with $k=0$]{krav}.\footnote{In \cite{krav} Kravtsov extensively studies so-called complete $r$-noninteger vertices ($r$-CNVs) of the three-index axial assignment polytope. For $k \in \{0,1,\ldots,m-2\}$, \cite[Theorem~1]{krav} states explicitly a $(3m-2-k)$-CNV, among these we use the $(3m-2)$-CNV (i.e., $k=0$). Moreover, \cite[Theorem~2]{krav} states that such $r$-CNVs of the three-index axial assignment polytope actually only occur for $r \in \{2m,2m+1, \ldots, 3m-2\}$, and the later theorems in \cite{krav} fully characterize the $r$-CNVs and study their combinatorial properties.}  According to \cite{krav} the special case $k=0$ is already contained in \cite[Theorem~9]{luk}.
+
+\begin{lemma}[{\cite[Lemma~2.5]{WeightMargin}}] \label{lem:Kravtsov}
+	Let $m \geq 3$ and set $\lambda_{i,j,k} := 0$ for all $(i,j,k) \in [m]^3 \setminus \big(\Wscr_{n,3}\cup \lbrace (1,1,1) \rbrace \big)$. Moreover, define
+	\begin{align*}
+		\lambda_{1,1,1} := 2^{-m+1}, \quad \lambda_{1,2,2} := 1- 2^{-m+1}, \quad \lambda_{m,1,m} = \lambda_{m,m,1} := 2^{-1}
+	\end{align*}
+	and for $s=2,3,\ldots,m-1$
+	\begin{align*}
+		\lambda_{s,1,s} = \lambda_{s,s,1} := 2^{-m+s-1} ,\quad \lambda_{s,s+1,s+1} := 1-2^{-m+s} \, .
+	\end{align*}
+	Then the following equations hold:
+	\begin{align}
+		\big( \forall i \in [m] \colon \lambda_{i,+,+} = 1 \big), \;
+		\big( \forall j \in [m] \colon  \lambda_{+,j,+} = 1 \big), \;
+		\big( \forall k \in [m] \colon \lambda_{+,+,k} = 1 \big) \, .\label{eq:marginals-krav}
+	\end{align}
+	In particular, $ \lambda_{+,+,+} = \sum_{i,j,k} \lambda_{i,j,k} = m$.
+\end{lemma}
+
+\begin{proof}
+	This is \cite[Theorem 1 with $k=0$]{krav}. Alternatively, the statement can be checked by straightforward computation as follows.
+	
+	For $i=1$, we have $\lambda_{1,1,1} + \lambda_{1,2,2} =1$ and for $i=m$, $\lambda_{m,1,m} + \lambda_{m,m,1} = 1$. If $i \in \{2,3,\ldots,m-1\}$, then
+	\begin{align*}
+		\lambda_{i,+,+} = \lambda_{i,1,i} + \lambda_{i,i,1} + \lambda_{i,i+1,i+1} = 2\cdot2^{-m+i-1} + 1-2^{-m+i} = 1 \, .
+	\end{align*}
+	For the cases $j=2$, $j \in \{3,4,\ldots,m-1 \}$ and $j=m$ we compute, respectively,
+	\begin{align*}
+		\lambda_{+,2,+} &= \lambda_{1,2,2} + \lambda_{2,2,1} = 1-2^{-m+1} + 2^{-m+2-1} = 1 \\
+		\lambda_{+,j,+} &= \lambda_{j,j,1} + \lambda_{j-1,j,j} = 2^{-m+j-1} + 1 - 2^{-m+(j-1)} = 1 \\
+		\lambda_{+,m,+} &= \lambda_{m,m,1} + \lambda_{m-1,m,m} = 2^{-1} + 1 - 2^{-m+(m-1)} = 1 \, .
+	\end{align*}
+	Finally, for $j=1$ we get
+	\begin{align*}
+		\lambda_{1,1,1} + \left( \sum_{s=2}^{m-1} \lambda_{s,1,s} \right) + \lambda_{m,1,m}
+		= 2^{-m+1} + \big( 2^{-m+1} + \ldots + 2^{-2} \big) + 2^{-1} = 1 \, .
+	\end{align*}
+	Note that by definition $\lambda_{i,j,k} = \lambda_{i,k,j}$ for all $i,j,k \in [m]$. This ends the proof.
+\end{proof}
+
+\begin{example}[{\cite[Example~2.6]{WeightMargin}}]
+	To visualize the idea of Lemma~\ref{lem:Kravtsov} it is helpful to consider the slices $\Lambda_i$ given by $(\Lambda_i)_{j,k} = \lambda_{i,j,k}$.
+	For $m=4$ one has
+	\begin{align*}
+		&\Lambda_1 = {\color{blue}\frac{1}{8}} \begin{pmatrix}
+			{\color{blue}1} & 0 & 0 & 0 \\ 0 & {\color{blue}7} & 0 & 0 \\ 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0
+		\end{pmatrix},\quad
+		\Lambda_2 = {\color{blue}\frac{1}{8}} \begin{pmatrix}
+			0 & {\color{blue}1} & 0 & 0 \\ {\color{blue}1} & 0 & 0 & 0 \\ 0 & 0 & {\color{blue}6} & 0 \\ 0 & 0 & 0 & 0
+		\end{pmatrix},\\
+		&\Lambda_3 = {\color{blue}\frac{1}{8}} \begin{pmatrix}
+			0 & 0 & {\color{blue}2} & 0 \\ 0 & 0 & 0 & 0 \\ {\color{blue}2} & 0 & 0 & 0 \\ 0 & 0 & 0 & {\color{blue}4}
+		\end{pmatrix},\quad
+		\Lambda_4 = {\color{blue}\frac{1}{8}} \begin{pmatrix}
+			0 & 0 & 0 & {\color{blue}4} \\ 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 \\ {\color{blue}4} & 0 & 0 & 0
+		\end{pmatrix}
+	\end{align*}
+	and for $m = 5$ one has
+	{\small \begin{align*}
+		&\Lambda_1 = {\color{blue}\frac{1}{16}} \begin{pmatrix}
+			{\color{blue}1} & 0 & 0 & 0 & 0 \\ 0 & {\color{blue}15} & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0
+		\end{pmatrix},\;
+		\Lambda_2 = {\color{blue}\frac{1}{16}} \begin{pmatrix}
+			0 & {\color{blue}1} & 0 & 0 & 0 \\ {\color{blue}1} & 0 & 0 & 0 & 0 \\ 0 & 0 & {\color{blue}14} & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0
+		\end{pmatrix},\\
+		&\Lambda_3 = {\color{blue}\frac{1}{16}} \begin{pmatrix}
+			0 & 0 & {\color{blue}2} & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 \\ {\color{blue}2} & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & {\color{blue}12} & 0 \\ 0 & 0 & 0 & 0 & 0
+		\end{pmatrix}, \,
+		\Lambda_4 = {\color{blue}\frac{1}{16}} \begin{pmatrix}
+			0 & 0 & 0 & {\color{blue}4} & 0 \\ 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 \\ {\color{blue}4} & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & {\color{blue}8}
+		\end{pmatrix},\,
+		\Lambda_5 = {\color{blue}\frac{1}{16}} \begin{pmatrix}
+			0 & 0 & 0 & 0 & {\color{blue}8} \\ 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 \\ {\color{blue}8} & 0 & 0 & 0 & 0
+		\end{pmatrix}.
+	\end{align*}}
+
+	Indeed, we can see that summing over all entries of some $\Lambda_i$ gives one. Moreover, summing over the entries of the $j^{th}$ row (respectively $k^{th}$ column) of all $\Lambda_{i}$ again yields one.
+	\hfill\exSymbol
+\end{example}
+
+
+\begin{lemma}[{\cite[Lemma~2.7]{WeightMargin}}] \label{lem:distKravtsov}
+	For $m \geq 3$, $\, \dist\big( 0, \conv(\Gamma_{m,3}) \big) \leq 2^{-m+1}$.
+\end{lemma}
+
+\begin{proof}
+	Define $\lambda_{i,j,k} \geq 0$ for all $i,j,k \in [m]$ as in Lemma~\ref{lem:Kravtsov}, which we can apply as $m \geq 3$. Since $\sum_{i = 1}^m \eps_i = 0$ (compare Equation~\eqref{eq:SumEps-i}), Lemma~\ref{lem:Kravtsov} yields
+	\begin{align*}
+		&\sum_{i,j,k} \lambda_{i,j,k} (\eps_i,\eps_j,\eps_k)
+		= \sum_{i,j,k} \lambda_{i,j,k} \big( (\eps_i, 0_m, 0_m) + (0_m, \eps_j, 0_m) + (0_m, 0_m, \eps_k) \big) \\
+		= \, &\sum_i \lambda_{i,+,+} (\eps_i, 0_m, 0_m) + \sum_j \lambda_{+,j,+} (0_m, \eps_j, 0_m) + \sum_k \lambda_{+,+,k} (0_m, 0_m, \eps_k)
+		= 0_{3m}.
+	\end{align*}
+	Equivalently, we have 
+		\[ -2^{-m+1}(\eps_1,\eps_1,\eps_1) = \sum_{(i,j,k) \in \Wscr_{m,3}} \lambda_{i,j,k}(\eps_i,\eps_j,\eps_k). \]
+	Normalizing the latter equation we obtain 
+	\begin{align*}
+		x := - c^{-1} \, 2^{-m+1} (\eps_1,\eps_1,\eps_1) \in \conv(\Gamma_{m,3}), \;
+		\text{ where } c := \sum_{(i,j,k)\in \Wscr_{m,3}} \lambda_{i,j,k} \, .
+	\end{align*}
+	Finally, $\norm{(\eps_1, \eps_1, \eps_1)}^2 \leq 3$ and $c = m-2^{-m+1} \geq \sqrt{3}$ imply $\,\norm{x} \leq 2^{-m+1}$.
+\end{proof}
+
+Combining Lemma~\ref{lem:affineHullKravtsov} and Lemma~\ref{lem:distKravtsov} shows $\gamma_T(\pi_{m,3}) \leq 2^{-m+1}$.
+To conclude the same bound for the gap $\gamma_G(\pi_{m,3})$ it remains to show that $\Gamma_{m,3}$ is free. For this, we use the characterization of freeness from Proposition~\ref{prop:FreeTensorVsFreeGeneral}.
+
+\begin{prop}[{\cite[first part of Proposition~4.15]{WeightMargin}}]\label{prop:WnFree}
+	For $m \geq 3$ the set $\Wscr_{m,3} \subseteq [m]^3$ is free, i.e., $\Gamma_{m,3} =  \subseteq \Omega(\pi_{m,3})$ is free. 
+\end{prop}
+
+\begin{proof}
+	We remind the reader that
+	\[ \Wscr_{m,3} = \big\lbrace (s,1,s), (s,s,1), (s-1,s,s) \mid s=2,3,\ldots,m \big\rbrace. \]
+	Let $x = (x_1, x_2, x_3), y = (y_1, y_2, y_3) \in \Wscr_{m,3}$ be such that $x \neq y$. We prove by a distinction of cases that $x$ and $y$ differ in at least two entries.
+	
+	First, we assume $x_1 = y_1$. Then $a := x_1 = y_1 \geq 2$, otherwise $x = (1, 2, 2) = y$ contradicts $x \neq y$. Thus $x,y \in \lbrace (a, 1, a), (a, a, 1), (a, a+1, a+1) \rbrace$ and we conclude that $x$ and $y$ differ in the second and third entry as $a \geq 2$.
+	
+	Second, we assume $x_1 \neq y_1$. There is nothing to show if $x_2 \neq y_2$, so we additionally assume $b := x_2 = y_2$. If $b=1$, then we are done by $x = (x_1, 1, x_1)$ and $y = (y_1, 1, y_1)$. On the other hand, $b \geq 2$ yields $x, y \in \lbrace (b, b, 1), (b-1, b, b) \rbrace$ and as $x \neq y$ they differ in the first and third entry.
+\end{proof}
+
+
+
+
+\subsection{Tensors of higher order} \label{subsec:dTensors}
+
+
+In this subsection we part~(c) of \ref{thm:GapConstantTensor} by recycling the combinatorial idea of Lemma~\ref{lem:Kravtsov}.
+Let us give some intuition for our construction. The main idea is to use the construction from the previous subsection for some multiple of $m$, i.e., considering $\Wscr_{rm,3}$ for $r \geq 2$. Thereby, the main challenge is to ensure that the constructed subset of $\Omega(\pi_{m,d})$ does not contain zero in its convex hull. We can try to extend the elements of $\Omega(\pi_{m,3})$ to elements of $\Omega(\pi_{m,d})$. One natural idea is duplicate each component $d/3$ times, i.e., when $d=6$ the vector $(\eps_i, \eps_j, \eps_k) \in \Omega(\pi_{m,3})$ becomes $(\eps_i, \eps_i, \eps_j, \eps_j, \eps_k, \eps_k) \in \Omega(\pi_{m,6})$. However, we need a subset of $\Omega(\pi_{m,d})$ with $rm$ many elements to imitate the construction from the previous subsection. We still extend the elements of $\Omega(\pi_{m,3})$ in this way, but will additionally ``shift'' and ``twist'' by some functions $\sigma_1, \dots, \sigma_{2r-1} \colon [rm] \to [m]$, so that the elements of our set will look like 
+	\[
+	\left( \eps_{\sigma_1(i)}, \ldots, \eps_{\sigma_{d/3}(i)},
+	\eps_{\sigma_1(j)}, \ldots, \eps_{\sigma_{d/3}(j)}, \eps_{\sigma_1(k)}, \ldots, \eps_{\sigma_{d/3}(k)} \right)
+	\]
+for $d/3 = 2r-1$ and $(i,j,k) \in \Wscr_{rm,3}$. We now define the functions $\sigma_k$. For this, let $m \geq 3$ and fix a natural number $r \geq 2$. It is convenient to use an \emph{adjusted} modulo $m$ function $\mathrm{mod}' \;\; m$ that takes values in $[m]$, i.e., instead of zero it outputs $m$.
+For $i \in [r]$ we consider
+\begin{align*}
+	&\sigma_{i} \colon [r m] \to [m], \quad j \mapsto \left\lceil \frac{j + (i-1)}{r} \right\rceil \quad \mathrm{mod}' \;\; m \\
+	&\sigma_{r + i} := \sigma_1 \circ (r - i + 1 \quad r + 1) \colon [rm] \to [m]
+\end{align*}
+where $(r - i + 1 \quad r + 1)$ denotes the corresponding transposition in the symmetric group of $[rm]$.\footnote{We stress that we always take $\sigma_1$ (and \emph{not} $\sigma_i$) to define $\sigma_{r+i}$.} We only need the first $2 r - 1$ of these functions and combine them to obtain 
+\begin{align*}
+	\sigma \colon [r m] \to [m]^{2 r - 1}, \quad j \mapsto \big( \sigma_1(j), \sigma_2(j),\ldots, \sigma_{2 r - 1}(j) \big).
+\end{align*}
+
+\begin{example}[{\cite[Example~2.9]{WeightMargin}}] \label{exa:sigmaCase3}
+	For $r = 3$ the functions $\sigma_1, \sigma_2, \ldots, \sigma_6$ are sketched by the following table.
+	\begin{center}
+		\begin{tabular}{|c||c|c|c|c|c|c|c|c|c|c|c|c|c|}
+			\hline 
+			$j$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $\cdots$ & $3m -5$ & $3m - 4$ & $3m-3$ & $3m -2$ & $3m - 1$ & $3m$ \\ 
+			\hline \hline
+			$\sigma_1$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & $\cdots$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ \\
+			\hline 
+			$\sigma_2$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Tan!70}$3$ & $\cdots$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ & \cellcolor{cyan}$1$ \\ 
+			\hline 
+			$\sigma_3$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & $\cdots$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ \\ 
+			\hline \hline
+			$\sigma_4$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & $\cdots$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ \\  
+			\hline 
+			$\sigma_5$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & $\cdots$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ \\ 
+			\hline
+			$\sigma_6$ & \cellcolor{Yellow}$2$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & $\cdots$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowGreen}$m-1$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ & \cellcolor{YellowOrange}$m$ \\ 
+			\hline 
+		\end{tabular}
+	\end{center}
+	For $r = 3$ and $m = 5$ the functions $\sigma_1, \sigma_2, \ldots, \sigma_6$ are given by the following table.    
+	\begin{center}
+		\begin{tabular}{|*{16}{>{\centering\arraybackslash}p{13pt}|}}
+			\hline 
+			$j$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ & $8$ & $9$ & $10$ & $11$ & $12$ & $13$ & $14$ & $15$ \\ 
+			\hline \hline
+			$\sigma_1$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ \\
+			\hline 
+			$\sigma_2$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ & \cellcolor{cyan}$1$ \\ 
+			\hline 
+			$\sigma_3$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ \\ 
+			\hline \hline
+			$\sigma_4$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ \\
+			\hline 
+			$\sigma_5$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ \\
+			\hline
+			$\sigma_6$ & \cellcolor{Yellow}$2$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{cyan}$1$ & \cellcolor{Yellow}$2$ & \cellcolor{Yellow}$2$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{Tan!70}$3$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowGreen}$4$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ & \cellcolor{YellowOrange}$5$ \\
+			\hline 
+		\end{tabular}
+	\end{center}
+\end{example}
+
+\begin{remark}[{\cite[Remark~2.10]{WeightMargin}}] \label{rem:Sigma}
+	By construction, each element of $[m]$ is attained exactly $r$-times by $\sigma_k$, $k \in [2 r- 1]$. Moreover, the definition of $\sigma_1, \ldots, \sigma_r$ yields that $\sigma$ is injective.
+	\hfill\remSymbol
+\end{remark}
+
+For $i,j,k \in [r m]$ we introduce the short-hand
+\begin{align*}
+	\eps_{\sigma(i)} &:= \left( \eps_{\sigma_1(i)}, \eps_{\sigma_{2}(i)}, \ldots, \eps_{\sigma_{2 r - 1}(i)} \right) \in \left( \RR^m \right)^{2 r - 1} \\
+	\eps_{\sigma(i), \sigma(j), \sigma(k)} &:= \left( \eps_{\sigma_1(i)}, \ldots, \eps_{\sigma_{2 r - 1}(i)},
+	\eps_{\sigma_1(j)}, \ldots, \eps_{\sigma_{2 r - 1}(j)}, \eps_{\sigma_1(k)}, \ldots, \eps_{\sigma_{2 r - 1}(k)} \right)
+	\in \left( \RR^m \right)^{6r - 3}
+\end{align*}
+and we set
+\begin{align*}
+	\Jscr_r := \big\lbrace (s,1,s), (s,s,1) \mid s = 2,3,\ldots, r \big\rbrace \subseteq \ZZ^3.
+\end{align*}
+In the following we show that the convex hull of the set
+\begin{align*}
+	\Gamma_{m, 6 r - 3} := \big\lbrace \eps_{\sigma(i), \sigma(j), \sigma(k)} \mid (i,j,k) \in \Wscr_{rm, 3} \setminus \Jscr_{r} \big\rbrace \subseteq \Omega(\pi_{m, 6 r - 3}) \subseteq \Big( \big( \RR^m \big)^{2 r - 1} \Big)^3
+\end{align*}
+does not contain the zero vector, but is very close to it.\footnote{One could suggest to consider the set $\lbrace \eps_{\sigma(i), \sigma(j), \sigma(k)} \mid (i,j,k) \in \Wscr_{rm, 3} \rbrace$, but this won't ensure that zero is not in the convex hull. The intuition behind is, that $\Gamma_{m,3}$ from the last subsection is ``nearly at the limit'', i.e., $0 \notin \conv(\Gamma_{m,3})$ but $0 \in \conv(\Gamma_{m,3} \cup \{ (\eps_1,\eps_1,\eps_1) \})$. Now the function $\sigma$ ``introduces $2r-2$ additional linear relations'', since $\eps_{\sigma(i)} \in (\ones_m^\perp)^{2r-1}$ and the orthogonal complement $\ones_m^\perp \subseteq \RR^m$ has codimension one while $(\ones_m^\perp)^{2r-1} \subseteq (\RR^m)^{2r-1}$ has codimension $2r-1$. Thus, it is plausible to remove $2r-2$ many elements from $\Wscr_{rm,3}$.}
+But first, we prove freeness of $\Gamma_{m, 6r-3}$, which is a direct consequence of its construction.
+
+
+\begin{prop}[{\cite[second part of Proposition~4.15]{WeightMargin}}] \label{prop:FreenessDTensors}
+	For $m \geq 3$ and $r \geq 2$ the set of weights $\Gamma_{m,6r-3} \subseteq \Omega(\pi_{m,6r-3})$ is free.
+\end{prop}
+
+\begin{proof}
+	We use the characterization of freeness from Proposition~\ref{prop:FreeTensorVsFreeGeneral}. The above definition of $\Gamma_{m, 6r-3}$ shows that it equals $\Gamma_{\Wscr_{m, 6r - 3}}$, where
+		\[ \Wscr_{m, 6r - 3} := \big\{ \big(\sigma(i), \sigma(j), \sigma(k) \big) \mid (i,j,k) \in \Wscr_{rm, 3} \setminus \Jscr_{r} \big\}
+		\subseteq [m]^{6r - 3} \, . \]
+	By Proposition~\ref{prop:WnFree}, $\Wscr_{r m, 3 }$ is free and so is its subset $\Wscr_{r m, 3} \setminus \Jscr_r$. Hence, $\Wscr_{m, 6r - 3}$ must be free as $\sigma$ is injective.
+\end{proof}
+
+Thus, $\Gamma_{m, 6r-3}$ may also serve as a witness set for upper bounding the gap, by Proposition~\ref{prop:FreeForGapConstant}(ii). However, we need to ensure $0 \notin \conv \left( \Gamma_{m, 6 r - 3} \right)$, which indeed holds due to the following.
+
+\begin{lemma}[{\cite[Lemma~2.11]{WeightMargin}}] \label{lem:convStackingKravtsov}
+	For $m \geq 3$ and $r \geq 2$ it holds that $0 \notin \aff \left( \Gamma_{m, 6 r - 3} \right)$.
+\end{lemma}
+
+We defer the proof to the end of this subsection, as it is very technical. Instead, we give a lower bound on the distance from zero to the convex hull of $\Gamma_{m, 6r - 3}$.
+
+\begin{lemma}[{\cite[Lemma~2.12]{WeightMargin}}] \label{lem:distStackingKravtsov}
+	Let $m \geq 3$ and $r \geq 2$. Then 
+	\begin{align*}
+		\dist \big(0, \conv(\Gamma_{m,6 r - 3}) \big) \leq \frac{\sqrt{6}}{(m-1)\sqrt{r}} \; 2^{-r(m-1) + 1} \leq 2^{- r (m-1) + 1} .
+	\end{align*}
+\end{lemma}
+
+\begin{proof}
+	We set $N := r m$ and for $i,j,k \in [N]$ we define $\lambda_{i,j,k}$ as in Lemma~\ref{lem:Kravtsov} applied for the dimension $N$. Then Equation~\eqref{eq:marginals-krav} of Lemma~\ref{lem:Kravtsov} yields
+	\begin{align*}
+		&\sum_{i,j,k=1}^N \lambda_{i,j,k} \, \left( \eps_{\sigma(i)}, \eps_{\sigma(j)}, \eps_{\sigma(k)} \right)\\
+		= &\sum_{i,j,k=1}^N \lambda_{i,j,k} \, \left( \eps_{\sigma(i)}, 0, 0 \right)+ \sum_{i,j,k=1}^N \lambda_{i,j,k} \, \left( 0, \eps_{ \sigma(j)}, 0 \right) + \sum_{i,j,k=1}^N \lambda_{i,j,k} \, \left( 0, 0, \eps_{\sigma(k)} \right) \\
+		= &\sum_{i=1}^N \left( \eps_{\sigma(i)}, 0, 0 \right)+ \sum_{j=1}^N  \left( 0, \eps_{ \sigma(j)}, 0 \right) + \sum_{k=1}^N \left( 0, 0, \eps_{\sigma(k)} \right) 
+		= \sum_{i=1}^N \eps_{\sigma(i),\sigma(i),\sigma(i)} = 0 ,
+	\end{align*}
+	where we used in the last step Equation~\eqref{eq:SumEps-i} and Remark~\ref{rem:Sigma}, i.e., that each element of $[m]$ is attained exactly $r$-many times by all $\sigma_k \colon [r m] \to [m]$, $k \in [2 r - 1]$. Because $\Wscr_{N,3}$ contains the support of $\lambda$ apart from the element $(1,1,1)$, we have
+	\begin{equation}\label{eq:x-stacked}
+		\begin{split}
+			x &:= - \lambda_{1,1,1} \, \eps_{\sigma(1), \sigma(1), \sigma(1)} -  \sum_{(i,j,k) \in \Jscr_{r}} \lambda_{i,j,k} \, \eps_{\sigma(i), \sigma(j), \sigma(k)} \\
+			&=\sum_{(i,j,k) \in \Wscr_{N,3} \setminus \Jscr_{r}} \lambda_{i,j,k} \, \eps_{\sigma(i), \sigma(j), \sigma(k)} . 
+		\end{split}
+	\end{equation}
+	We see that the positive cone of $\Gamma_{m,6 r - 3} = \lbrace \eps_{\sigma(i), \sigma(j), \sigma(k)} \mid (i,j,k) \in \Wscr_{N,3} \setminus \Jscr_{r} \rbrace$ contains $x$.
+	Normalizing the latter equation with
+	\begin{align*}
+		c := \sum_{(i,j,k) \in \Wscr_{N,3} \setminus \Jscr_{r}} \lambda_{i,j,k} 
+		= \sum_{i,j,k=1}^N \lambda_{i,j,k} - \left( \lambda_{1,1,1} + \sum_{(i,j,k)\in \Jscr_{r}} \lambda_{i,j,k} \right) \geq N-1
+	\end{align*}
+	shows $c^{-1} x \in \conv(\Gamma_{m,6 r - 3})$. To bound the norm of $c^{-1} x$ we compute
+	\begin{align*}
+		\lambda_{1,1,1} + \sum_{(i,j,k) \in \Jscr_{r}} \lambda_{i,j,k} &= 2^{-N+1} + \sum_{s=2}^r \left( \lambda_{s,1,s} + \lambda_{s,s,1} \right) \\
+		&= 2^{-N+1} + \sum_{s=2}^r \left( 2 \cdot 2^{-N+s-1} \right)
+		= \sum_{s=1}^r 2^{-N+s} < 2^{-N + r + 1}.
+	\end{align*}
+	Finally, using $\| \eps_{i_1, i_2, \ldots, i_{6 r - 3}} \| \leq \sqrt{6 r - 3}$ for any $i_1, i_2, \ldots,i_{6r - 3} \in [m]$ together with the triangle inequality on Equation~\eqref{eq:x-stacked} implies
+	\begin{align*}
+		\| c^{-1} x\| \leq \frac{\sqrt{6 r - 3}}{N - 1} \; 2^{-N + r + 1}
+		\leq \frac{\sqrt{6}}{(m-1)\sqrt{r}} \; 2^{-N + r + 1} \leq 2^{-N + r + 1} = 2^{- r (m-1) + 1},
+	\end{align*}
+	where we used $m \geq 3$ and $r \geq 2$ for $\sqrt{6} \leq (m-1) \sqrt{r}$.
+\end{proof}
+
+From Proposition~\ref{prop:FreenessDTensors}, Lemma~\ref{lem:convStackingKravtsov} and Lemma~\ref{lem:distStackingKravtsov} we
+can deduce Theorem~\ref{thm:GapConstantTensor}(c). Still, we are left to show Lemma~\ref{lem:convStackingKravtsov}. First, we present a proof for the special case $r=3$, in which all main ideas of the general proof become apparent and visible. The proof for the general statement is given afterwards and certainly looks technical at a first encounter. Therefore, it is recommended to read the proof for $r=3$ first. Afterwards, while reading the general proof it may be helpful to compare it in parallel with the proof of the special case.
+
+\begin{proof}[Proof of Lemma~\ref{lem:convStackingKravtsov} for $r=3$]
+	 Assume that $0 \in \aff(\Gamma_{m, 15})$ for a proof by contradiction. Then there are coefficients $a_s, b_s, c_s \in \RR$, where $2 \leq s \leq 3 m$, such that $a_2 = a_3 = b_2 = b_3 = 0$ (due to removing $\Jscr_3$ from $\Wscr_{3m,3}$ in definition of $\Gamma_{m, 6\cdot 3 -3}$), $\sum_s (a_s + b_s + c_s) = 1$ and
+	\begin{align}
+		\sum_{s= 2}^{3 m} \left( a_s \, \eps_{\sigma(s),\sigma(1),\sigma(s)}
+		+ b_s \, \eps_{\sigma(s),\sigma(s),\sigma(1)} + c_s \, \eps_{\sigma(s-1),\sigma(s),\sigma(s)}  \right) = 0 \in (\RR^m)^{15}.\label{eq:main-comboCase3}
+	\end{align}
+	The bulk of our work will consist of proving the equations
+	\begin{align}\label{eq:StackBandCCase3}
+		b_2 + c_2 &= b_3 + c_3 = \ldots = b_{3 m} + c_{3 m}\\
+		\label{eq:StackAandCCase3} a_2 + c_2 &= a_3 + c_3 = \ldots = a_{3 m} + c_{3 m}.
+	\end{align}
+	From here we will derive a contradiction. We now set about proving \eqref{eq:StackBandCCase3} and \eqref{eq:StackAandCCase3}. Rewrite the left-hand-side of \eqref{eq:main-comboCase3} as the collection for $k \in [5]$ of the following affine linear combinations of $\eps_1,\ldots,\eps_m$ in $\RR^m$:
+	\begin{align}
+		\sum_{s= 2}^{3m} \left( a_s \, \eps_{\sigma_k(s)} 
+		+ b_s \, \eps_{\sigma_k(s)} + c_s \, \eps_{\sigma_k(s-1)}  \right) &= 0 \label{eq:StackComp1Case3}\\
+		\sum_{s= 2}^{3m} \left( a_s \, \eps_{\sigma_k(1)}
+		+ b_s \, \eps_{\sigma_k(s)} + c_s \, \eps_{\sigma_k(s)}  \right) &= 0 \label{eq:StackComp2Case3} \\
+		\sum_{s= 2}^{3m} \left( a_s \, \eps_{\sigma_k(s)}
+		+ b_s \, \eps_{\sigma_k(1)} + c_s \, \eps_{\sigma_k(s)}  \right) &= 0. \label{eq:StackComp3Case3}
+	\end{align}
+	If we expand each expression as an affine linear combination of the $\eps_l$, then by Lemma~\ref{lem:convCombEps-i} the coefficient of $\eps_l$ must be $m^{-1}$ for all $l \in [m]$. Translating this for Equation~\eqref{eq:StackComp1Case3} with $k = 2$, $l=2,\ldots,m$ and using Example~\ref{exa:sigmaCase3} we obtain 
+	
+	\begin{align}
+		(a_{p-3} + a_{p-2} + a_{p-1}) + (b_{p-3} + b_{p-2} + b_{p-1})  + (c_{p-2} + c_{p-1} + c_{p}) &= \frac{1}{m} \label{eq:First2}
+	\end{align}
+	for $p = 6,9,12,\dots, 3m$ (e.g., $l=2$ yields \eqref{eq:First2} with $p = 6$). A similar calculation for $k=1,3$ and $l=2,\ldots,m$ shows \eqref{eq:First2} holds for all $5 \leq p \leq 3m +1$, where we set  $c_{3 m + 1} := 0$.
+	
+	
+	Similarly for \eqref{eq:StackComp2Case3} with $l=2,\ldots,m$ and $k=1,2,3$ we obtain for $4 \leq p \leq 3m$ that
+	\begin{align}
+		(b_{p-2} + c_{p-2})  + (b_{p-1} + c_{p-1}) + (b_{p} + c_p)  &= \frac{1}{m} \label{eq:Second1} 
+	\end{align}
+	and the same equations with ``$b$'' replaced by ``$a$'' when considering \eqref{eq:StackComp3Case3}.
+	
+	In the following we prove \eqref{eq:StackBandCCase3}. Subtracting \eqref{eq:Second1} from itself with values of $p$ differing by one, we deduce that 
+	\begin{align*}
+		b_{2} + c_2 &= b_5 + c_5 = \ldots = b_{3m-1} + c_{3m-1}\\
+		b_3 + c_3 &= b_6 + c_6 = \ldots = b_{3m} + c_{3m}, \\
+		\qquad \text{and} \qquad b_4 + c_4 &= b_7 + c_7 = \ldots = b_{3m-2} + c_{3m-2}.
+	\end{align*}
+	Next we deduce \eqref{eq:StackBandCCase3} by showing $b_2 + c_2 = b_3 + c_3 = b_4 + c_4$. 
+	
+	To do so, we apply Lemma~\ref{lem:convCombEps-i} to \eqref{eq:StackComp2Case3} for the coefficient of $\eps_2$ using Example~\ref{exa:sigmaCase3}, which yields for $k=4,5$ the equations
+	\begin{align}
+		(b_3 + c_3) + (b_5 + c_5) + (b_6 + c_6)  &= \frac{1}{m}  \label{eq:finishBandC1}\\
+		(b_2 + c_2) + (b_5 + c_5) + (b_6  + c_6)  &= \frac{1}{m} \label{eq:finishBandC2}
+	\end{align}
+	respectively. Subtracting the two shows $b_2 + c_2  = b_3 + c_3$, and we have $b_3 + c_3  = b_4 + c_4$ via subtracting \eqref{eq:finishBandC1} from \eqref{eq:Second1} for $p=6$. This completes the proof of \eqref{eq:StackBandCCase3}; using \eqref{eq:StackComp3Case3} we similarly deduce \eqref{eq:StackAandCCase3}.
+	
+	To get a contradiction we show that $a_s = b_s = c_s = 0$ for all $s = 2,3,\ldots, 3 m$. For this, we set $a := \sum_{s} a_s$ and $b := \sum_s b_s$, and recall that $a_2 = a_3 = b_2 = b_3 = 0$. This time we use Lemma~\ref{lem:convCombEps-i} applied to the coefficient of $\eps_1$ in \eqref{eq:StackComp1Case3}, in \eqref{eq:StackComp2Case3} and in \eqref{eq:StackComp3Case3} respectively for $k=1$ to get
+	\begin{equation}\label{eq:Case3contradiction}
+		c_2 + c_3 + c_4 = \frac{1}{m}, \qquad
+		a + c_2 + c_3 = \frac{1}{m}  \qquad \text{ and } \qquad
+		b + c_2 + c_3 = \frac{1}{m}
+	\end{equation}
+	respectively. We deduce from these three equations that $a = b = c_4$. Furthermore, $b_2 = b_3 = 0$ shows that \eqref{eq:Second1} for $p=4$ is $b_4 + (c_2 + c_3 + c_4) = m^{-1}$. Subtracting from the latter the left-hand equation in \eqref{eq:Case3contradiction} yields $b_4 = 0$. Similarly, $a_4 = 0$ follows from $a_2 = a_3 = 0$ and the analogous equation of \eqref{eq:Second1} with $a$'s replaced by $b$'s.
+	
+	Now, \eqref{eq:First2} for $p=5$ simplifies to $c_3 + c_4 + c_5 = m^{-1}$. Thus, $c_2 = c_5$ with \eqref{eq:Case3contradiction} and therefore $a_5 = b_5 = 0$ by \eqref{eq:StackBandCCase3}, \eqref{eq:StackAandCCase3} and $a_2=b_2=0$. This simplifies \eqref{eq:First2} for $p=6$ to $c_4 + c_5 + c_6 = m^{-1}$. Hence, $c_3 = c_6$ as we also have $c_3 + c_4 + c_5 = m^{-1}$ and we get via \eqref{eq:StackBandCCase3} and \eqref{eq:StackAandCCase3} that $a_6 = b_6 = 0$. The latter in turn shows that \eqref{eq:First2} for $p=7$ becomes $c_5 + c_6 + c_7 = m^{-1}$, so $c_4 = c_7$ and $a_7 = b_7 = 0$ by, again, \eqref{eq:StackBandCCase3} and \eqref{eq:StackAandCCase3}.
+	
+	It should have become apparent that we can proceed inductively in the same manner with \eqref{eq:First2} for $p=5,\ldots,3m+1$; thereby using \eqref{eq:StackBandCCase3} and \eqref{eq:StackAandCCase3} to deduce $a_s = b_s = 0$ for all $s=2,3,\ldots,3m$. In particular, $a = b = c_4 = 0$. Finally, \eqref{eq:StackBandCCase3} implies $c_4 = c_s$ for all $s=2,3,\ldots,3m$, which gives the desired contradiction.
+\end{proof}
+
+
+\begin{proof}[Proof of Lemma~\ref{lem:convStackingKravtsov} for arbitrary $r$]
+	For the sake of contradiction assume that $0 \in \aff(\Gamma_{m, 6 r - 3})$. Then there are coefficients $a_s, b_s, c_s \in \RR$, where $2 \leq s \leq r m$, such that $a_2 = \ldots = a_r = b_2 = \ldots = b_r = 0$, $\sum_s (a_s + b_s + c_s) = 1$ and
+	\begin{align}
+		\sum_{s= 2}^{r m} \left( a_s \, \eps_{\sigma(s),\sigma(1),\sigma(s)}
+		+ b_s \, \eps_{\sigma(s),\sigma(s),\sigma(1)} + c_s \, \eps_{\sigma(s-1),\sigma(s),\sigma(s)}  \right) = 0 \in (\RR^m)^{6 r - 3}.\label{eq:main-combo}
+	\end{align}
+	The bulk of our work will consist of proving the equations
+	\begin{align}\label{eq:StackBandC}
+		b_2 + c_2 &= b_3 + c_3 = \ldots = b_{r m} + c_{r m}\\
+		\label{eq:StackAandC} a_2 + c_2 &= a_3 + c_3 = \ldots = a_{r m} + c_{r m}.
+	\end{align}
+	From here we will derive a contradiction. We now set about proving \eqref{eq:StackAandC} and \eqref{eq:StackBandC}. Rewrite the left-hand-side of \eqref{eq:main-combo} as the collection for $k \in [2 r - 1]$ of the following affine linear combinations of $\eps_1,\ldots,\eps_m$ in $\RR^m$:
+	\begin{align}
+		\sum_{s= 2}^{r m} \left( a_s \, \eps_{\sigma_k(s)} 
+		+ b_s \, \eps_{\sigma_k(s)} + c_s \, \eps_{\sigma_k(s-1)}  \right) &= 0 \label{eq:StackComp1}\\
+		\sum_{s= 2}^{r m} \left( a_s \, \eps_{\sigma_k(1)}
+		+ b_s \, \eps_{\sigma_k(s)} + c_s \, \eps_{\sigma_k(s)}  \right) &= 0 \label{eq:StackComp2} \\
+		\sum_{s= 2}^{r m} \left( a_s \, \eps_{\sigma_k(s)}
+		+ b_s \, \eps_{\sigma_k(1)} + c_s \, \eps_{\sigma_k(s)}  \right) &= 0. \label{eq:StackComp3}
+	\end{align}
+	If we expand this expressions as affine linear combinations of the $\eps_l$, then by Lemma~\ref{lem:convCombEps-i} the coefficient of $\eps_l$ must be $m^{-1}$ for all $l \in [m]$. Translating this for Equations~\eqref{eq:StackComp1}, \eqref{eq:StackComp2} and \eqref{eq:StackComp3} respectively with $2 \leq l \leq m$ and $k \in [r]$, and using for $j \in [r]$ that
+	\begin{align}
+		\sigma_{k} \big(r(l-1)+j - k + 1 \big) = \left\lceil \frac{(r(l-1)+j - k + 1) + (k-1)}{r} \right\rceil = l \label{eq:sigma-inverse}
+	\end{align}
+	we get for all $k \in [r], l \in \{2,3,\ldots,m\}$ that
+	\begin{align}
+		\sum_{j=1}^r \big( a_{r(l-1)+j - k + 1} + b_{r(l-1)+j - k + 1} + c_{r(l-1)+j- k + 2} \big) &= \frac{1}{m} \label{eq:Coeff1} \\
+		\sum_{j=1}^{r} \big( b_{r(l-1)+j - k + 1} + c_{r(l-1)+j - k + 1} \big) &= \frac{1}{m} \label{eq:Coeff2} \\
+		\sum_{j=1}^{r} \big( a_{r(l-1)+j - k + 1} + c_{r(l-1)+j - k + 1} \big) &= \frac{1}{m} \label{eq:Coeff3}
+	\end{align}
+	respectively, where we set  $c_{r m + 1} := 0$. Fixing some $l \geq 2$ and subtracting \eqref{eq:Coeff2} with $k = 1$ from \eqref{eq:Coeff2} for $k= 2$, we find a telescoping sum that reduces to $b_{r(l-1)} + c_{r(l-1)} = b_{r l} + c_{r l}$. Indeed, subtracting the two yields
+	\begin{align*}
+		0 &= \sum_{j=1}^{r} \big( b_{r(l-1)+j - 1} + c_{r(l-1)+j - 1} \big) - \sum_{j=1}^{r} \big( b_{r(l-1)+j} + c_{r(l-1)+j} \big) \\
+		&= \sum_{j=0}^{r-1} \big( b_{r(l-1)+j } + c_{r(l-1)+j } \big)  - \sum_{j=1}^{r} \big( b_{r(l-1)+j} + c_{r(l-1)+j} \big) \\
+		&= ( b_{r(l-1)} + c_{r(l-1)}) - (b_{r l} + c_{r l}).
+	\end{align*}
+	More generally, for $k \in  [r-1]$ combining \eqref{eq:Coeff2} for $k$ and $k \leftarrow k + 1$, implies 
+	$b_{r l - k + 1} + c_{r l - k + 1} = b_{r(l-1)- k + 1} + c_{r(l-1)- k + 1}$
+	for all $l = 2,\ldots,m$, i.e. for every $k \in [r - 1]$ we have
+	\begin{equation}\label{eq:StackBandC1}
+		c_{r - k + 1} = b_{r - k + 1} + c_{r - k+ 1} = b_{2r - k + 1} + c_{2r - k + 1} = \ldots = b_{r m - k + 1} + c_{r m - k + 1}.
+	\end{equation}
+	We are still missing the value $k = 0$, i.e., the equations 
+	\begin{equation}\label{eq:StackBandC2}
+		b_{r+1} + c_{r+1} = b_{2r + 1} + c_{2r + 1} = \ldots = b_{r(m-1) + 1} + c_{r(m-1) + 1}.
+	\end{equation}
+	We obtain this by subtracting, for $l = 2, \dots, m$,  \eqref{eq:Coeff2} for $k = 1$ and $l$ from \eqref{eq:Coeff2} with $k = r$ and $l \leftarrow l + 1$ . Indeed, 
+	\begin{align*}0 &= \sum_{j=1}^{r} \big( b_{r l+j - r + 1} + c_{r l +j - r + 1} \big) - \sum_{j=1}^{r} \big( b_{r(l-1)+j} + c_{r(l-1)+j} \big) \\
+		&= \sum_{j=2}^{r+1} \big( b_{r(l-1)+j } + c_{r(l-1) +j}\big) - \sum_{j=1}^{r} \big( b_{r(l-1)+j} + c_{r(l-1)+j} \big) \\
+		&= \big( b_{r l + 1} + c_{r l + 1}\big) - \big( b_{r(l-1)+1} + c_{r(l-1)+1} \big).
+	\end{align*}
+	
+	
+	Lastly, we are missing the equations $b_2 + c_2 = b_3 + c_3 = \ldots = b_{r+1} + c_{r+1}$  for \eqref{eq:StackBandC}. We have not yet used in \eqref{eq:StackComp2} the values $k = r + p$ with $p \in [r-1]$. For this we note that
+	\begin{align*}
+		\sigma_{r + p} \big(j \big) =  2 \quad &\text{ for } \; j \in  \{r - p + 1\} \cup \{r + 2, r + 3, \dots, 2 r\}.
+	\end{align*}
+	We use this equation to apply Lemma~\ref{lem:convCombEps-i} to \eqref{eq:StackComp2} for $\eps_2$ and $k=r + p$ with $p \in [r-1]$ to obtain 
+	$$ b_{r - p + 1} + c_{r - p +1} + \sum_{j=2}^{r} \big( b_{r + j} + c_{r + j} \big) = \frac{1}{m}.
+	$$
+	We need one more equation to eliminate the right-hand term, so we use the following. Lemma~\ref{lem:convCombEps-i} applied to 
+	Equation~\eqref{eq:Coeff2} for $k=1$ and $l=2$ yields
+	\begin{align*}
+		\sum_{j=1}^r \big( b_{r + j} + c_{r + j} \big) = \frac{1}{m}.
+	\end{align*}
+	Subtracting this equation from the previous one yields, $b_{r - p + 1} + c_{r - p +1} = b_{r+1} + c_{r + 1}$ for all $p = 1,\ldots,r-1$. Together with the Equations~\eqref{eq:StackBandC1} and \eqref{eq:StackBandC2} we conclude \eqref{eq:StackBandC}. Analogously, \eqref{eq:StackComp3} and \eqref{eq:Coeff3} can be used to obtain
+	\eqref{eq:StackAandC}. 
+	
+	To get a contradiction we show that $a_s = b_s = c_s = 0$ for all $s = 2,3,\ldots, r m$. For this, we set $a := \sum_{s} a_s$ and $b := \sum_s b_s$. Equation~\eqref{eq:sigma-inverse} still applies for $l =1, k = 1$, so Lemma~\ref{lem:convCombEps-i} applied to the coefficient of $\eps_1$ in \eqref{eq:StackComp1}, in \eqref{eq:StackComp2} and in \eqref{eq:StackComp3} respectively for $k=1$ gives
+	\begin{align*}
+		\sum_{j=1}^{r} c_{j+1} = \frac{1}{m}, \qquad a + \sum_{j=1}^{r-1} c_{j+1} = \frac{1}{m} \qquad \text{ and } \qquad
+		b + \sum_{j=1}^{r-1} c_{j+1} = \frac{1}{m}
+	\end{align*}
+	respectively. Subtracting the second equation from the first gives $a=c_{r+1}$, and reasoning analogously for the third yields $a=b=c_{r+1}$. Moreover, \eqref{eq:Coeff2} with $k=r$ and $l=2$ is $\sum_{j=1}^r (b_{j+1} + c_{j+1}) = m^{-1}$. Using the latter together with $b_2 = \ldots = b_r = 0$ and $\sum_{j=1}^{r} c_{j+1} = m^{-1}$ yields $b_{r+1} = 0$ and similarly $a_{r+1} = 0$ via \eqref{eq:Coeff3} with $k=r$ and $l=2$.
+	
+	Since now also $a_{r + 1} = b_{r +1} = 0$, the Equation~\eqref{eq:Coeff1} with $k=r$ and $l=2$ simplifies to $\sum_{j=1}^r c_{j+2} = m^{-1}$. In conjunction with $\sum_{j=1}^{r} c_{j+1} = m^{-1}$ we deduce $c_2 = c_{r+2}$ and hence $b_{r+2} = 0 = a_{r +2} $ by \eqref{eq:StackBandC} and \eqref{eq:StackAandC}. But now \eqref{eq:Coeff1} with $k=r-1$ and $l=2$ is $\sum_{j=1}^r c_{j+3} = m^{-1}$ and together with $\sum_{j=1}^r c_{j+2} = m^{-1}$ we get $c_3 = c_{r+3}$. Continuing inductively we obtain 
+	\begin{align*}
+		\forall \, j \in [r] \colon \quad c_{j+1} = c_{r + j + 1} \quad \text{ and } \quad a_{r + j +1} = b_{r + j + 1} = 0
+	\end{align*}
+	via \eqref{eq:Coeff1} with $l=2$, $k \in [r]$ and via \eqref{eq:StackBandC}, \eqref{eq:StackAandC}. Then \eqref{eq:Coeff1} with $k=r$ and $l=3$ simplifies to $\sum_{j=1}^r c_{r + j+2} = m^{-1}$ and together with $m^{-1} = \sum_{j=1}^{r} c_{j+1} =  \sum_{j=1}^{r} c_{r + j +1}$ we have $c_{r + 2} = c_{2r + 2}$. Hence, $b_{2 r+2} = 0 = a_{2 r + 2}$ via \eqref{eq:StackBandC} respectively \eqref{eq:StackAandC}. Continuing inductively in the outlined manner with Equation~\eqref{eq:Coeff1} for $k \in [r]$, $l=3,\ldots,m$ and with the Equations~\eqref{eq:StackBandC} and \eqref{eq:StackAandC} we conclude $a_s = b_s = 0$ for all $s=2,3 \ldots, r m$, so $a=b=0$. Finally, \eqref{eq:StackBandC} implies $c_{r + 1} = c_s$ for all $s = 2,\ldots, r m$, but $c_{r + 1} = b = 0$ giving the desired contradiction.
+\end{proof}
+
+
+
+
+
+
+\subsection{Padding of tensor factors} \label{subsec:PaddingTensors}
+
+
+Theorem~\ref{thm:GapConstantTensor} only gives bounds on $\gamma_T(\pi_{m,d})$ and $\gamma_G(\pi_{m,d})$ for certain sub-families of $\{ (m,d) \mid m\geq 2, \, d \geq 3 \}$. Still, we can deduce Theorem~\ref{thm:tensor-gap}, which gives a bound for all $m \geq 2$ and all $d \geq 3$, via some padding on the number of tensor factors~$d$. That padding is provided in this subsection and used to prove Theorem~\ref{thm:tensor-gap}. Recall that $\Omega(\pi_{m,d}) = \lbrace \eps_{i} \mid i \in [m] \rbrace^d \subseteq (\RR^m)^d$.
+
+\begin{prop}[{\cite[Proposition~C.1]{WeightMargin}}] \label{prop:dTensorsPadding}
+	Let $m,d \geq 1$. Consider a set of weights $\Gamma_{m,d} \subseteq \Omega(\pi_{m,d})$ such that $0 \notin \conv(\Gamma_{m,d})$, i.e., $\Gamma_{m,d}$ witnesses the inequality $\gamma_{T}(\pi_{m,d}) \leq \dist (0, \conv(\Gamma_{m,d}))$.
+	\begin{itemize}
+		\item[(i)] Then $\gamma_{T}(\pi_{m,d+1}) \leq \dist \big(0, \conv(\Gamma_{m,d}) \big)$. Thus, $\gamma_{T}(\pi_{m,d+1}) \leq \gamma_{T}(\pi_{m,d})$.
+		\item[(ii)] If $\Gamma_{m,d}$ is free, then $\gamma_{G}(\pi_{m,d+r}) \leq \dist \big(0, \conv(\Gamma_{m,d}) \big)$ for all $r \geq 2$.
+	\end{itemize}
+\end{prop}
+
+\begin{proof}
+	To prove the statement we set for $r \geq 1 $
+	\[ \Upsilon_r := \big\{ (\eps_i,\ldots,\eps_i) \mid i \in [m] \big\} \subseteq (\RR^m)^r \quad \text{and} \quad
+	\Gamma_{m,d+r} := \Gamma_{m,d} \times \Upsilon_r \subseteq \Omega(\pi_{m,d+r}) . \]
+	By Equation~\eqref{eq:SumEps-i} we have $0 \in \conv(\Upsilon_r)$ and therefore
+	\begin{align*}
+		\conv(\Gamma_{m,d+r}) = \conv(\Gamma_{m,d}) \times \conv(\Upsilon_r)
+		\supseteq \conv(\Gamma_{m,d}) \times \{0\}.
+	\end{align*}
+	The latter implies
+	\begin{equation}\label{eq:Padding}
+		\dist \big( 0, \conv(\Gamma_{m,d+r}) \big) \leq \dist \big( 0, \conv(\Gamma_{m,d}) \big).
+	\end{equation}
+	Since $\conv(\Gamma_{m,d+r}) = \conv(\Gamma_{m,d}) \times \conv(\Upsilon_r)$, the assumption $0 \notin \conv(\Gamma_{m,d})$ yields $0 \notin \conv(\Gamma_{m,d+r})$. The latter shows $\gamma_{T}(\pi_{m,d+1}) \leq \dist \big(0, \conv(\Gamma_{m,d + 1}) \big)$ for $r=1$ and we conclude the desired inequality with \eqref{eq:Padding}. Taking the minimum over all $\Gamma_{m,d} \subseteq \Omega(\pi_{m,d})$ with $0 \notin \conv(\Gamma_{m,d})$ shows that $\gamma_{T}(\pi_{m,d+1}) \leq \gamma_{T}(\pi_{m,d})$.
+	
+	Assume in addition that $\Gamma_{m,d}$ is free and let $r \geq 2$. Considering Definition~\ref{defn:freeTensors} and Proposition~\ref{prop:FreeTensorVsFreeGeneral} we prove that also $\Gamma_{m,d+r}$ is free. For this, let $\Wscr \subseteq [m]^d$ be such that $\Gamma_\Wscr = \Gamma_{m,d}$ and consider $(x,i,\ldots,i), (y,j,\ldots,j) \in \Wscr \times [m]^r$ with $(x,i,\ldots,i) \neq (y,j,\ldots,j)$. If $x \neq y$, then $x$ and $y$ differ in at least two components by freeness of $\Wscr$. If $x = y$, then we have $i \neq j$ and so $(x,i,\ldots,i)$ and $(y,j,\ldots,j)$ differ in at least two components using $r \geq 2$. This shows that $\Gamma_{m,d+r}$ is free for $r \geq 2$. Since also $0 \notin \conv(\Gamma_{m,d+r})$ we obtain with Proposition~\ref{prop:FreeForGapConstant}(ii) that $\gamma_{G}(\pi_{m,d+r}) \leq \dist \big(0, \conv(\Gamma_{m,d + r}) \big)$ holds for all $r \geq 2$. Finally, we deduce the second statement using Equation~ \eqref{eq:Padding}.
+\end{proof}
+
+The preceding proposition allows to pad the results from Theorem~\ref{thm:GapConstantTensor} to almost all tuples $(m,d)$. Since Proposition~\ref{prop:dTensorsPadding}(ii) requires a step length of at least two, the case $m \geq 3$ and $d=4$ is missing for the gap $\gamma_G(\pi_{m,d})$.\footnote{Given the fact $\gamma_{T}(\pi_{m,d+1}) \leq \gamma_{T}(\pi_{m,d})$, it is natural to ask whether the same inequality holds for the gap. This would lead to a more natural argument than the one presented here.}
+
+\begin{prop}[{\cite[Proposition~C.2]{WeightMargin}}] \label{prop:4TensorsPadding}
+	For all $m \geq 3$ it holds that $\gamma_{T}(\pi_{m,4}) \leq \gamma_G(\pi_{m,4}) \leq 2^{-m+1}$.
+\end{prop}
+
+\begin{proof}
+	This result can be obtained by imitating the proof of Theorem~\ref{thm:GapConstantTensor}(b) in Subsection~\ref{subsec:3Tensors}. Defining
+	\begin{align*}
+		\Gamma_{m,4} := \big\lbrace (\eps_i,\eps_j,\eps_k, \eps_i) \mid (i,j,k) \in \Wscr_{m,3} \big\rbrace \subseteq \Omega(\pi_{m,4}).
+	\end{align*}
+	we have $0 \notin \conv(\Gamma_{m,4})$ as $0 \notin \conv(\Gamma_{m,3})$ by Lemma~\ref{lem:affineHullKravtsov}. Moreover, one can show with Lemma~\ref{lem:Kravtsov} (similar to the proof of Lemma~\ref{lem:distKravtsov}) that
+	\begin{align*}
+		x:= -\frac{1}{c \, 2^{m-1}} (\eps_1,\eps_1,\eps_1, \eps_1) \in \conv(\Gamma_{m,4}), \quad \text{where }\;\;
+		c = m-2^{-m+1} \geq 2.
+	\end{align*}
+	Thus, $\norm{(\eps_1,\eps_1,\eps_1, \eps_1)} \leq \sqrt{4}$ implies $\norm{x} \leq c^{-1} 2^{-m+1} \sqrt{4} \leq 2^{-m+1}$. This proves $\gamma_{T}(\pi_{m,4}) \leq 2^{-m+1}$.
+	
+	Since $\Wscr_{m,3}$ is free by Proposition~\ref{prop:WnFree}, the set $\lbrace (i,j,k,i) \mid (i,j,k) \in \Wscr_{m,3} \rbrace$ is free. Hence, $\gamma_{G}(\pi_{m,4}) \leq 2^{-m+1}$ by Proposition~\ref{prop:FreeTensorVsFreeGeneral} and Proposition~\ref{prop:FreeForGapConstant}.
+\end{proof}
+
+Using Propositions~\ref{prop:dTensorsPadding} and \ref{prop:4TensorsPadding} we can deduce Theorem~\ref{thm:tensor-gap} from Theorem~\ref{thm:GapConstantTensor}. We provide a proof to justify that the constant $C = 1/16$ always works, compare Remark~\ref{rem:ConstantTensorGap}.
+
+\begin{proof}[Proof of Theorem~\ref{thm:tensor-gap}]
+	First, note that all upper bounds in Theorem~\ref{thm:GapConstantTensor} involve a negative exponent. Even for $m=2$ and $d=3$ we have $\gamma_G(\pi_{2,3}) \leq 2^{-1/2}$, see Theorem~\ref{thm:GapConstantTensor}(a).
+	Moreover, note that thanks to Theorem~\ref{thm:GapConstantTensor}(c) we need to pad at most seven tensor factors to apply a bound from Theorem~\ref{thm:GapConstantTensor}. 
+	Consequently, a positive constant $C$ with
+		\begin{equation}\label{eq:ConstantTensorGap}
+			\forall \, m \geq 2, \, d \geq 3 \colon \qquad \gamma_{G}(\pi_{m,d}) \leq 2^{-Cmd} \qquad \qquad
+		\end{equation}
+	exists. Moreover, as $d$ grows the impact of the padding becomes smaller, and hence for $d,m \gg 0$ we can choose $C \approx 1/6$ by Theorem~\ref{thm:GapConstantTensor}(c).
+	
+	By the above arguments, it suffices to show for small $d$ and $m$ (and biggest necessary padding step) that $C := 1/16$ satisfies Eq.~\eqref{eq:ConstantTensorGap}. First, if $m=2$ then
+		\[ - \frac{d}{2} +1 \leq - C md = - \frac{2d}{16}  \qquad \Leftrightarrow \qquad - \frac{3d}{8} \leq -1 \]
+	and the latter holds for all $d \geq 3$. Together with Theorem~\ref{thm:GapConstantTensor}(a) this settles the case $m=2$ and $d \geq 3$. The largest padding step when applying the bound from Theorem~\ref{thm:GapConstantTensor}(b) arises for $d=10$.\footnote{Note that we cannot apply the bound from Theorem~\ref{thm:GapConstantTensor}(c) for $d=10$ since Proposition~\ref{prop:dTensorsPadding} requires a padding step of at least two for the gap.}
+	In this case 
+		\[ -m+1 \leq -Cmd = - \frac{10m}{16} \qquad \Leftrightarrow \qquad - \frac{3m}{8} \leq - 1\]
+	and the inequality is satisfied for all $m \geq 3$. For $d < 10$ the required lower bound on $m$ gets smaller. Finally, we consider the largest padding step and smallest $d$ when Theorem~\ref{thm:GapConstantTensor}(c) is applied. This is the case for $d=16$ and we use the bound with $r=2$. We have
+		\[ -2m + 3  = -r(m-1) +1 \leq -Cmd = - \frac{16}{16} m \qquad \Leftrightarrow \qquad -m \leq -3 \]
+	which is equivalent to $m \geq 3$. This ends the proof.
+\end{proof}
+
+
+
+ \section{Polynomial Scaling} \label{sec:PolynomialsGap}
+
+%todo note that bombieri weyl is correct inner product here, to ensure K-invariance
+In this subsection we transfer the bounds on weight margin and gap from $d$-tensors to bounds on polynomial scaling. For this, let $\CC[x_1, \ldots, x_n]_d$ denote the $\CC$-vector space of homogeneous polynomials of degree $d$ in $n$ variables (including zero). Polynomial Scaling is given by the natural $\SL_{n}(\CC)$ action on $\CC[x_1, \ldots, x_n]_d$. The corresponding representation is
+\begin{align*}
+	\varrho_{n,d} \colon \SL_n(\CC) \to \GL \big( \CC[x_1, \ldots, x_n]_d \big), \; g \mapsto \big( p(x) \mapsto p(g^{-1} x) \big).
+\end{align*}
+We remark that applications of polynomial scaling and related literature are discussed in Section~\ref{sec:GapMainResults}.
+
+Each monomial $x^\alpha = x_1^{\alpha_1} \cdots x_n^{\alpha_n}$, where $\alpha = (\alpha_1, \ldots, \alpha_n) \in (\ZZ_{\geq 0})^n$ is a multi-index with $\vert \alpha \vert := \sum_i \alpha_i = d$, is a weight vector of $\varrho_{n,d}$ with weight $- \alpha + \frac{d}{n} \ones_n$. Therefore,
+\begin{align*}
+	\Omega(\varrho_{n,d}) = \left\lbrace - \alpha + \frac{d}{n} \, \ones_n \; \bigg\vert \; \alpha \in (\ZZ_{\geq 0})^n \text{ with } \vert \alpha \vert = d \right\rbrace 
+\end{align*}
+as the monomials of degree $d$ span $\CC[x_1,\ldots,x_n]_d$.
+
+We transfer the bounds for $\pi_{m,d}$ to $\varrho_{n,d}$ by relating their set of weights as follows.
+If $n = dm$ for some integer $m \geq 1$ and $i \in [m]$, then $\eps_i  = e_i - \frac{1}{m} \ones_m = e_i - \frac{d}{n} \ones_m$. Hence, for any $i_1,\ldots,i_d \in [m]$ we have 
+	\[ - \big( \eps_{i_1},\ldots,\eps_{i_d} \big) = - \big( e_{i_1}, \ldots e_{i_d} \big) 
+	+ \frac{d}{n} \big( \ones_m, \ldots, \ones_m \big) = - \big( e_{i_1},\ldots, e_{i_d} \big) + \frac{d}{n}\, \ones_{dm}, \]
+which shows $- \Omega(\pi_{m,d}) \subseteq \Omega(\varrho_{n,d})$. Thus, we can transfer bounds on $\gamma_{\ST_m(\CC)^d}(\pi_{m,d})$ to bounds on $\gamma_{\ST_n(\CC)}(\varrho_{n,d})$. The next statement ensures the same for the gap.
+
+\begin{prop}[{\cite[Proposition~4.16]{WeightMargin}}] \label{prop:FreeTensorVsPolynomial}
+	Let $\Gamma \subseteq \Omega(\pi_{m,d})$ and $n = dm$ for some integer $m \geq 1$. If $\Gamma \subseteq \Omega(\pi_{m,d})$ is free, then $-\Gamma \subseteq \Omega(\varrho_{n,d})$ is free.
+\end{prop}
+
+\begin{proof}
+	We prove the statement by contraposition. Assume that $-\Gamma \subseteq \Omega(\varrho_{n,d})$ is not free. Then there exists a root $\alpha = e_i - e_j \in \RR^n$ of $\SL_n(\CC)$, where $i,j \in [n]$ with $i \neq j$, and two distinct weights $\omega, \omega' \in -\Gamma$ such that $\omega = \omega' + e_i - e_j$, equivalently, $-\omega = -\omega' - e_i + e_j$. The latter enforces $- \alpha$ to be of the form
+	\begin{align*}
+		( 0_m, \ldots, 0_m, e_k - e_l, 0_m, \ldots, 0_m ) \in \left( \RR^m \right)^d \cong \RR^n
+		\quad \text{ for some }  k,l \in [m] \text{ with } k \neq l,
+	\end{align*}
+	because $-\omega, -\omega' \in \Omega(\pi_{m,d}) = \{ (\eps_{i_1}, \ldots, \eps_{i_d}) \mid i_1,\ldots,i_d \in [m] \}$. Thus, $-\alpha$ is a root of $\SL_m(\CC)^d$ and hence $\Gamma \subseteq \Omega(\pi_{m,d})$ is not free.
+\end{proof}
+
+As a consequence we obtain bounds for the gap of polynomial scaling.
+
+\begin{theorem}[Gap for Polynomial Scaling, {\cite[Theorem~4.17]{WeightMargin}}]\label{thm:dFormsGap}
+	\ \\
+	Let $d \geq 3$ and let $n = dm$ for some integer $m \geq 2$. Set $G := \SL_n(\CC)$ and $T:= \ST_n(\CC)$. Then there exists a constant $C > 0$, independent of $n$ and $d$, with
+	\begin{align*}
+		\gamma_{T}(\varrho_{n,d}) \leq \gamma_{G}(\varrho_{n,d}) \leq 2^{-C d m} = 2^{-Cn}.
+	\end{align*}
+	More concretely, for $d=3$ and $m \geq 3$ it holds that
+	\begin{align*}
+		\gamma_{T}(\varrho_{n,3}) \leq \gamma_{G}(\varrho_{n,3}) \leq 2^{-m + 1} = 2^{-\frac{n}{3} + 1},
+	\end{align*}
+	and if $m \geq 3$ and $d = 6r-3$ for some $r \geq 2$, we have
+	\begin{align*}
+		\gamma_{T}(\varrho_{n,6r-3}) \leq \gamma_{G}(\varrho_{n,6r-3})
+		\leq 2^{- r (m-1) + 1} = 2^{- \frac{(d+3)(m-1)}{6} + 1} \approx 2^{- \frac{n}{6}}.
+	\end{align*}
+\end{theorem}
+
+\begin{proof}
+	First, remember that $\gamma_{T}(\varrho_{n,d}) \leq \gamma_{G}(\varrho_{n,d})$, by Proposition~\ref{prop:GapConstantWeightMargin}.
+	Furthermore, we recall that Theorem~\ref{thm:tensor-gap} was proven by padding the results from Theorem~\ref{thm:GapConstantTensor}. Thus,  the bound $\gamma_{\SL_m(\CC)^d}(\pi_{m,d}) \leq 2^{-Cdm}$ for each $m \geq 2$ and $d \geq 3$ from Theorem~\ref{thm:tensor-gap} is witnessed by a free set of weights $\Gamma_{m,d} \subseteq \Omega(\pi_{m,d})$, i.e., $0 < \dist(0, \conv(\Gamma_{m,d}) ) \leq 2^{-C d m}$. But then we also have $0 \notin \conv(-\Gamma_{m,d})$, and that $-\Gamma_{m,d} \subseteq \Omega(\varrho_{n,d})$ is free by Proposition~\ref{prop:FreeTensorVsPolynomial}. Therefore,
+	\begin{align*}
+		\gamma_{G}(\varrho_{n,d}) \leq \dist \big(0, \conv(-\Gamma_{m,d}) \big) = \dist \big(0, \conv(\Gamma_{m,d}) \big) \leq 2^{-C d m}.
+	\end{align*}
+ 	by Proposition~\ref{prop:FreeForGapConstant}.
+	Applying to the latter equation the inequalities from Lemma~\ref{lem:distKravtsov} respectively Lemma~\ref{lem:distStackingKravtsov} yields the other two inequalities.
+\end{proof}
+
+
+
+
+\section{Action on a Family of Quivers} \label{sec:QuiversGap}
+
+In this section we study a certain family of quivers and its corresponding $\SL$-action. For $\GL$-actions on quivers the weight margin (and hence the gap) are large, i.e., inverse polynomial in the number of vertices and the entries of the dimension vector, compare \cite[Theorem~6.21 Item~2]{GradflowArXiv}. Therefore, the algorithms in \cite{GradflowArXiv} solve NCM in polynomial time. In the case of $\SL$-actions \cite[Theorem~6.21 Item~4]{GradflowArXiv} provides a lower bound on the weight margin, which is exponentially small in the number of vertices. We show that this general lower bound can essentially not be improved: the $\SL$-weight margin for our family of quivers is exponentially small in the number of vertices, see Theorem~\ref{thm:UpperBoundQuiver}. Interestingly, its gap is still large as we state in Theorem~\ref{thm:LargeGapQuiver} -- a result due to Cole Franks and Visu Makam.
+
+
+\subsection{Upper Bounds on Weight Margin and Gap} \label{subsec:QuiverUpperBound}
+
+For $d \geq 2$ let $Q_d$ be the quiver
+\[ \begin{tikzcd}[row sep = tiny]
+	1 \ar[r, leftarrow] & 2 \ar[r, rightarrow] & 3 \ar[r, dotted, no head ,thick] & d-2 \ar[r, rightarrow] & d-1 \ar[r, leftarrow] & d & \text{if } d \text{ even} \\
+	1 \ar[r, rightarrow] & 2 \ar[r, leftarrow] & 3 \ar[r, dotted, no head ,thick] & d-2 \ar[r, rightarrow] & d-1 \ar[r, leftarrow] & d & \text{if } d \text{ odd}
+\end{tikzcd} \]
+and let $Q_{d}^{(k)}$ be the quiver one obtains from $Q_d$ by adding $k-1$ additional copies of each arrow in $Q_d$.
+Then $G = \SL_{m}(\CC)^d$ (and $T = \ST_{m}(\CC)^d$)  act on the quiver $Q_d$ with dimension vector $(m, \ldots, m)$ as described in Example~\ref{ex:QuiverRep}.
+We denote the corresponding representation by
+	\[ \tau_{m,d} \colon \SL_{m}(\CC)^d \to \GL \big( (\CC^{m \times m} )^{d-1} \big) . \]
+Note that the action of $G$ on $Q_d^{(k)}$ with dimension vector $(m, \ldots, m)$ is given by $\tau_{m,d}^{\oplus k}$.  In this subsection we prove an upper bound on the weight margin of $\tau_{m,d}$ and on the gap of $\tau_{m,d}^{\oplus m}$. The bound on $\gamma_{G}(\tau_{m,d}^{\oplus m})$ is thanks to the refinement in Proposition~\ref{prop:FreeForGapConstant} pointed out by Visu Makam. %todo adjust formulations to the formulation in Example on Quiver Reps
+
+\begin{theorem}[{\cite[Theorem~4.25]{WeightMargin}}] \label{thm:UpperBoundQuiver}
+	Let $m, d \geq 2$. It holds that
+	\begin{align*}
+		\gamma_{T}(\tau_{m,d}) \leq (m-1)^{-d+1} \qquad \text{and} \qquad \gamma_{G}(\tau_{m,d}^{\oplus m}) \leq (m-1)^{-d+1}.
+	\end{align*}
+\end{theorem}
+
+\begin{remark}[{\cite[Remark~4.26]{WeightMargin}}] \label{rem:QuiverGapMargin}
+	Before proving the theorem, we point out a few consequences.
+	\begin{enumerate}
+		\item Theorem~\ref{thm:UpperBoundQuiver} shows that $\gamma_{T}(\tau_{m,d})^{-1}$ and $\gamma_{G}(\tau_{m,d}^{\oplus m})^{-1}$ are not polynomially bounded in $\dim (\CC^{m \times m})^{d-1} = (d-1)m^2$ and $\dim \SL_m(\CC)^d = d(m^2 -1)$. Instead we see for fixed $m$ and $d \to \infty$ an exponential behaviour in the number of vertices $d$. Thus, our bound shows that the exponential behaviour in $d$ cannot be avoided in general lower bounds for quiver actions like \cite[Theorem~6.21 Item~4]{GradflowArXiv}. The latter applied to $\tau_{m,d}$ shows $\gamma_{T}(\tau_{m,d}) \geq m^{-d^2-(3/2)d}(dm+1)^{-d}$.
+		
+		\item The proof of Theorem~\ref{thm:UpperBoundQuiver} below shows that for the bound on the gap it is enough to consider the quiver $Q_d^{(m-1)}$ with an additional $m^{th}$ arrow from $d$ to $d-1$. 
+		
+		\item The ideas presented below can be adjusted to prove similar bounds for other dimension vectors. For example, one can show that the gap for the $\SL$-action on $Q_d^{(2)}$ with dimension vector $(1,3,3,\ldots,3,2)$ is inverse exponential in $d$. This aligns with an algebraic barrier for this action; the invariants that cut out the null cone for this action have exponential degree \cite[Proposition~1.5]{derksen2018degree}.
+		
+		\item In Theorem~\ref{thm:LargeGapQuiver} we see that the gap $\gamma_{G}(\tau_{m,d})$ is only polynomially small in $m$ and $d$. Thus, $\tau_{m,d}$ is an interesting family of representations for which the weight margin and gap differ significantly.
+		\hfill\remSymbol
+	\end{enumerate}
+\end{remark}
+
+
+To prove Theorem~\ref{thm:UpperBoundQuiver} we proceed again as described in Section~\ref{sec:ProofMethod}. Note that the set of weights of $\tau_{m,d}$ viewed as a subset of $(\RR^{m})^d$ is
+\begin{align*}
+	\big\lbrace \big( (-1)^d \eps_i, (-1)^{d-1} \eps_j,0,\ldots,0 \big), \big( 0, (-1)^{d-1} \eps_i, (-1)^{d-2} \eps_j,0,\ldots,0 \big)&, \ldots \\
+	\ldots, \big( 0,\ldots,0,\eps_i, - \eps_j \big) &\mid i,j \in [m] \big\rbrace.
+\end{align*}
+We define recursively subsets of weights $\Upsilon_{m,d} \subseteq \Omega(\tau_{m,d})$ via
+\begin{align*}
+	\Upsilon_{m,2} := &\left\lbrace (\eps_i, -\eps_j) \mid i \in [m-1], \, j \in [m] \right\rbrace
+	\, , \text{ and for } d \geq 3 \\
+	\Upsilon_{m,d} := &\left\lbrace \big( (-1)^d \eps_i, (-1)^{d-1} \eps_m,0_m,\ldots,0_m \big) \mid i \in [m-1] \right\rbrace \cup \big( \lbrace 0_m \rbrace \times \Upsilon_{m,d-1} \big) \, .
+\end{align*}
+%\begin{align*}
+%	\Upsilon_{m,2} := &\left\lbrace (\eps_i, -\eps_j) \mid i \in [m-1], \, j \in [m] \right\rbrace \subseteq \Omega(\tau_{m,2}) \subseteq \RR^{2m} \\
+%	\text{for } d \geq 3, \; \Upsilon_{m,d} := &\left\lbrace \big( (-1)^d \eps_i, (-1)^{d-1} \eps_m,0_m,\ldots,0_m \big) \mid i \in [m-1] \right\rbrace \\
+%	&\cup \big( \lbrace 0_m \rbrace \times \Upsilon_{m,d-1} \big) \subseteq \Omega(\tau_{m,d}) \subseteq \RR^{dm} \, .
+%\end{align*}
+
+\begin{remark}[{\cite[Remark~4.28]{WeightMargin}}] \label{rem:QuiverNotFree}
+	We note that for all $d \geq 2$, $\Upsilon_{m,d}$ is \emph{not} free. For instance, we can always write
+	\begin{align*}
+		(0_m,\ldots,0_m, \eps_1, - \eps_1) = (0_m,\ldots,0_m, \eps_1, - \eps_2) + (0_m,\ldots,0_m,0_m, e_2 - e_1),
+	\end{align*}
+	i.e., the weights $(0_m,\ldots,0_m, \eps_1, - \eps_1), \, (0_m,\ldots,0_m, \eps_1, - \eps_2) \in \Upsilon_{m,d}$ differ by the root $(0_m,\ldots,0_m,0_m, e_2 - e_1)$ of $\SL_m(\CC)^d$.
+	Therefore, we \emph{cannot} deduce a bound on the gap $\gamma_G(\tau_{m,d})$ via Proposition~\ref{prop:FreeForGapConstant}. However, the latter allows us to deduce at least a bound on the gap of $\tau_{m,d}^{\oplus m}$.
+	\hfill\remSymbol
+\end{remark}
+
+In the next two lemmas we show that $\Upsilon_{m,d}$ witnesses the bound on $\gamma_{T}(\tau_{m,d})$ and afterwards we use Proposition~\ref{prop:FreeForGapConstant} to transfer this bound to $\gamma_G(\tau_{m,d}^{\oplus m})$.
+
+\begin{lemma}[{\cite[Lemma~4.29]{WeightMargin}}] \label{lem:quiverConvHull}
+	For all $d \geq 2$ it holds that $0 \notin \conv(\Upsilon_{m,d})$.
+\end{lemma}
+
+\begin{proof}
+	We prove the statement by induction on $d \geq 2$. For $d=2$, just note that any element in $\conv(\Upsilon_{m,2}) \subseteq \RR^{2m}$ has value $-1/m$ in the $m^{th}$ entry. In particular, $0 \notin \conv(\Upsilon_{m,2})$.
+	For $d \geq 3$ let
+	\begin{align*}
+		x = \sum_{\omega \in \Upsilon_{m,d}} \lambda_\omega \, \omega \; , \quad \lambda_\omega \geq 0
+	\end{align*}
+	be a convex combination of the elements in $\Upsilon_{m,d}$. Assume there is an $i \in [m-1]$ such that for
+	\begin{align*}
+		\omega_i := \big( (-1)^d \eps_i, (-1)^{d-1} \eps_m,0_m,\ldots,0_m \big)
+	\end{align*}
+	one has $\lambda_{\omega_i} > 0$. Then the $m^{th}$ entry of $x$ is non-zero, since $\omega_i$ has $m^{th}$ entry $(-1)^{d+1}/m$ and all (other) $\omega \in \Upsilon_{m,d}$ have $(-1)^{d+1}/m$ or zero as $m^{th}$ entry. Hence, $x \neq 0$ in this case.
+	On the other hand, if $\lambda_{\omega_i} = 0$ for all $i \in [m-1]$, then $x \in \lbrace 0_m \rbrace \times \conv(\Upsilon_{m,d-1})$ by construction of $\Upsilon_{m,d}$. We conclude $x \neq 0$ by induction hypothesis on $d-1$.
+\end{proof}
+
+\begin{lemma}[{\cite[Lemma~4.30]{WeightMargin}}] \label{lem:quiverDist}
+	For $d \geq 2$ define
+	\begin{align*}
+		x_d := \lambda_d \big( (-1)^{d-1} \eps_m, 0_m, \ldots, 0_m\big) \in (\RR^m)^d
+		,\quad \text{where } \lambda_d := \left( \sum_{i=1}^{d-1} (m-1)^i \right)^{-1} \, .
+	\end{align*}
+	Then we have $x_d \in \conv(\Upsilon_{m,d}) \,$ and $\, \|x_d\|_2 < \vert \lambda_d \vert \leq (m-1)^{-d+1}$.
+\end{lemma}
+
+\begin{proof}
+	We proceed by induction on $d \geq 2$. For $d=2$, we use Equation~\eqref{eq:SumEps-i} to obtain the convex combination
+	\begin{align*}
+		\sum_{i=1}^{m-1} \sum_{j=1}^m \frac{1}{(m-1)m} (\eps_i,-\eps_j)
+		= \frac{1}{m-1} (-\eps_m, 0_m) = x_2 \, .
+	\end{align*}
+	Now assume the claim is proven for some $d \geq 2$, hence
+	\begin{equation}\label{eqConvCombGammad}
+		\lambda_d \big( 0_m, (-1)^{d-1} \eps_m, 0_m, \ldots, 0_m \big) \in \lbrace 0_m \rbrace \times \conv(\Upsilon_{m,d}) \subseteq \conv(\Upsilon_{m,d+1}).
+	\end{equation}
+	Setting $\nu := (m-1)\lambda_{d+1} \lambda_d^{-1}$
+	we have $\nu \lambda_d = (m-1)\lambda_{d+1}$ and $\nu + (m-1)\lambda_{d+1} = 1$. Together with Equations~\eqref{eq:SumEps-i} and \eqref{eqConvCombGammad} we deduce $x_{d+1} \in \conv(\Upsilon_{m,d+1})$ via
+	\begin{align*}
+		&\nu \lambda_d \big( 0_m,(-1)^{d-1} \eps_m, 0_m,\ldots,0_m \big) + \lambda_{d+1} \sum_{i=1}^{m-1} \big( (-1)^{d+1} \eps_i,(-1)^{d}\eps_m,0_m,\ldots,0_m \big) \\
+		= \; &\left( -(-1)^{d+1} \lambda_{d+1} \eps_m \, , \, (-1)^{d-1} \big[\nu \lambda_d - (m-1)\lambda_{d+1} \big] \eps_m \, , 0_m,\ldots,0_m \right) \\
+		= \; &\big( (-1)^d \lambda_{d+1} \eps_m,0_m,0_m,\ldots,0_m \big) = x_{d+1} \, .
+	\end{align*}
+	This ends the induction. Finally, $\|x_d\|_2 < \vert \lambda_d \vert$ follows from $\|\eps_m\|_2 < 1$.
+\end{proof}
+
+
+\begin{proof}[Proof of Theorem~\ref{thm:UpperBoundQuiver}]
+	By Lemma~\ref{lem:quiverConvHull} and Lemma~\ref{lem:quiverDist} we have 
+	\begin{align*}
+		\gamma_{T}(\tau_{m,d}) \leq (m-1)^{-d+1}.
+	\end{align*}
+	With the fact $\Omega(\tau_{m,d}) = \Omega(\tau_{m,d}^{\oplus m})$ and Proposition~\ref{prop:FreeForGapConstant} we transfer this bound to the gap of $\tau_{m,d}^{\oplus m}$. To do so, we note that the inner product on $(\CC^{m \times m})^{m(d-1)}$, given by the trace inner product on each $\CC^{m \times m}$ copy, is invariant under the action of $K = \SU(m)^d$. Distinct $\CC^{m \times m}$ copies are orthogonal under this inner product. Thus, to be able to apply Proposition~\ref{prop:FreeForGapConstant} it is enough to assign to each $\CC^{m \times m}$ copy, i.e., to each arrow of $Q_d^{(m)}$, a matrix $M_i$ such that $\supp(M_i)$ is free and $\Upsilon_{m,d} = \bigcup_i \supp(M_i)$.
+	For this, we consider the $m \times m$ matrices
+	\begin{align*}
+		M := \begin{pmatrix} \Id_{m-1} & 0 \\ 0 & 0 \end{pmatrix} \qquad \text{ and } \qquad
+		P := \begin{pmatrix} 0 & \Id_{m-1} \\ 1 & 0 \end{pmatrix},
+	\end{align*}
+	and $E_{i,j}$ is the matrix with $(i,j)$-entry one and all other entries zero. Then $E_{i,i}P = E_{i,\sigma(i)}$, where $\sigma \colon [m] \to [m]$ is the cycle $(1 \; 2\; \ldots \; m)$. Therefore, for $k \in [m]$ we have
+	\begin{align*}
+		\supp \left(MP^{k-1} \right) &= \left\lbrace \big( 0_{m(d-2)}, \eps_i, -\eps_{\sigma^{k-1}(i)} \big)  \mid i \in [m-1] \right\rbrace ; \\
+		\text{ and } \quad  \lbrace 0_{m(d-2)} \rbrace \times \Upsilon_{m,2} &= \bigcup_{k \in [m]} \supp \left(MP^{k-1} \right).
+	\end{align*}
+	For fixed $k \in [m]$, $i_1 \neq i_2$ implies $\sigma^{k-1}(i_1) \neq \sigma^{k-1}(i_2)$, so any distinct elements of $\supp(MP^{k-1})$ differ in the last two $\RR^m$-components. Hence, each $\supp(MP^{k-1})$ is free and we assign $M, MP, \ldots, MP^{m-1}$ to the $m$ arrows that go from vertex $d$ to vertex $d-1$. For $l \in [d-2]$, we assign to the $m$ arrows between the vertices $l$ and $l+1$ each of the matrices $E_{1,m}, E_{2,m}, \ldots, E_{m-1,m}$ at least once. (Exactly one of the latter matrices is assigned to two of these arrows.) Clearly, the support of $E_{i,m}$, $i \in [m-1]$ is free as it contains just one weight. By construction, this whole assignment gives an element of $(\CC^{m \times m})^{m(d-1)})$ such that its support is $\Upsilon_{m,d}$ and so that we can apply Proposition~\ref{prop:FreeForGapConstant}. This shows
+	\begin{align*}
+		\gamma_{G}(\tau_{m,d}^{\oplus m}) \leq (m-1)^{-d+1}.
+	\end{align*}
+	Moreover, the argument shows that $m-1$ arrows between the vertices $l$ and $l+1$, $l \in [d-2]$, would suffice as commented in part two of Remark~\ref{rem:QuiverGapMargin}.
+\end{proof}
+
+
+
+
+
+\subsection{A large lower Bound on the Gap} \label{subsec:QuiverLowerBound}
+
+
+We show that the gap $\gamma_G(\tau_{m,d})$ is inverse polynomial in $m$ and $d$. The presented proof is completely due to Cole Franks and Visu Makam. I heartily thank them for the permission to include their arguments here. 
+The main result is the following.
+
+\begin{theorem} \label{thm:LargeGapQuiver}
+	For all $m,d \geq 2$ it holds that
+		\[ \gamma_G(\tau_{m,d}) \geq \frac{1}{d^2\, m} \; .\]
+\end{theorem} %todo adjust bound if possible
+
+As a consequence of the ``large'' gap, the first order algorithm from \cite{GradflowArXiv} can solve the null-cone membership problem for $\tau_{m,d}$ in $\poly(m,d)$-time. There are also algebraic algorithms for this problem that run in polynomial-time, because $Q_d$ is of finite representation type and has no oriented cycles.\footnote{Personal communication with Visu Makam. There does not seem to be an explicit reference in the literature. It seems plausible that the same is true for the optimization methods from \cite{GradflowArXiv}.} This leads to the following interesting question.
+
+\begin{problem}
+	Let $Q$ be a quiver of finite representation type and consider the $\SL$-action on $Q$ with dimension vector $(m_1, \ldots, m_d)$.
+	Is the gap of this action inverse polynomial in $m_1,\ldots,m_d$ and the number of vertices $d$?
+\end{problem}
+
+To prove Theorem~\ref{thm:LargeGapQuiver} we explicitly state the moment map of $\tau_{m,d}$. For $A \in \CC^{m \times m}$, we recall from \eqref{eq:PhiMomentMapTau} that
+	\begin{equation}
+		\Phi_1(A) = - A\HT A + \frac{\|A\|^2_F}{m} \Id_m  \qquad \text{and} \qquad
+		\Phi_2(A) = A A\HT - \frac{\|A\|^2_F}{m} \Id_m .
+	\end{equation}
+The Hermitian matrices $\Phi_1(A)$ and $\Phi_2(A)$ are traceless as $\tr(A\HT A) = \tr(A A\HT) = \|A\|_F^2$. Furthermore, note that each vertex in $Q_d$ is either a \emph{source}, i.e., the vertex only appears as a tail of arrows, or a \emph{sink}, i.e., the vertex only appears as a head.
+Thus, one can deduce the moment map of $\tau_{m,d}$ from Example~\ref{ex:MomentMapQuiver}. There we computed the moment map \eqref{eq:SinkMomentMap} of the quiver~\eqref{eq:ThreeSinkQuiver} with vertex $2$ being a sink of two arrows. Moreover, we stated the moment map~\eqref{eq:SourceMomentMap} of a similar quiver where vertex $2$ is a source. With this knowledge we obtain the following.
+
+\begin{lemma} \label{lem:MomentMapTauMD}
+	Let $B = (B_1,B_2,\ldots,B_{d-1})\in (\CC^{m \times m})^{d-1}$. Then the moment map $\mu := \mu_G$ of $\tau_{m,d}$ at $B$ is $\mu(B) = \|B\|^{-2} \big( \mu_1(B), \ldots, \mu_d(B) \big)$, where the components $\mu_i(B)$ are given as follows. We have $\mu_d(B) = \Phi_1(B_{d-1})$ and for $i \in [d-1]$
+	\begin{align*}
+		\mu_i(B) = \begin{cases} \Phi_1(B_{i-1}) + \Phi_1(B_i), & \text{ if vertex } i \text{ is a source} \\
+							\Phi_2(B_{i-1}) + \Phi_2(B_i), & \text{ if vertex } i \text{ is a sink} \end{cases}
+	\end{align*}
+	where we set $B_0 := 0$, so that $\Phi_1(B_0) = \Phi_2(B_0) = 0$.
+\end{lemma}
+
+%\begin{proof}
+%	Remember that $\imag \Lie(\SU_m)$ contains all Hermitian matrices with trace zero. The moment map $\mu(B) = \|B\|^{-2} \big( \mu_1(B), \ldots, \mu_d(B) \big) \in ( \imag \Lie(\SU_m) )^d$ is uniquely defined by 
+%		\begin{equation}\label{eq:MomentMapTau}
+%			\begin{split}			
+%			\sum_{i=1}^d \tr \big( \mu_i(B) X_i \big)
+%			&= \left. \frac{d}{dt} \right|_{t=0}  \big\langle B, \tau_{m,d} \big( e^{tX} \big) B \big\rangle \\
+%			&= \left. \frac{d}{dt} \right|_{t=0} \, \sum_{i=1}^{d-1} \tr \big( B\HT_i (\tau_{m,d}(e^{tX}) B_i) \big)
+%		\end{split}
+%		\end{equation}
+%	for all $X = (X_1,\ldots,X_d) \in ( \imag \Lie(\SU_m) )^d$, compare Definition~\ref{defn:MomentMap}.
+%	
+%	First, note that for general $A \in \CC^{m \times m}$ and $(X_1,X_2) \in (\imag \SU_m)^2$ we have
+%	 	\[ \left. \frac{d}{dt} \right|_{t=0} e^{tX_1} A e^{-tX_2}
+%	 	= \left. \left( X_1 e^{t X_1} A e^{-t X_2} + e^{t X_1} A (-X_2) e^{-t X_2} \right)\right|_{t=0} 
+%	 	= X_1 A - A X_2 \, .\]
+%	 Thus, using $X = (0,\ldots,0,X_d)$ in \eqref{eq:MomentMapTau} we obtain with $\tr(X_d)=0$ that
+%	 	\begin{align*}
+%	 		\tr \big( \mu_d(B) X_d \big)& = \tr \big( B\HT_{d-1} (-B_{d-1} X_d) \big) 
+%	 		\overset{(*)}{=}  \tr \big( - B\HT_{d-1} B_{d-1} X_d  \big) + \frac{\|B_{d-1}\|_F^2}{m} \tr( X_d ) \\
+%	 		&= \tr \big( \Phi_1(B_{d-1}) X_d \big) .
+%	 	\end{align*}
+%	 Since $\Phi_1(B_{d-1}) \in \imag \Lie(\SU_m)$, we deduce $\mu_d(B) = \Phi_1(B_{d-1})$. Similarly, we can compute $\mu_{i}(B)$ for $i \in [d-1]$, depending on whether vertex $i$ is a source or a sink. For example, if $i$ is a sink, then $X_j = 0$ for $j \neq i$ in \eqref{eq:MomentMapTau} yields
+%	 	\begin{align*}
+%	 		\tr \big( \mu_i(B) X_i \big) &= \tr \big( B\HT_i (X_i B_i) \big) + \tr \big( B\HT_{i-1} (X_i B_{i-1}) \big) \\
+%	 		&= \tr \big( \Phi_2(B_i) X_d \big) + \tr \big( \Phi_2(B_{i-1}) X_d \big)
+%	 		=  \tr \big( (\Phi_2(B_i) + \Phi_2(B_{i-1}) ) X_d \big) ,
+%	 	\end{align*}
+% 	where we used the cyclic property of the trace and $\tr(X_i) = 0$. We conclude $\mu_i(B) = \Phi_2(B_i) + \Phi_2(B_{i-1})$, because $\Phi_2(B_i) + \Phi_2(B_{i-1}) \in \imag \Lie(\SU_m)$.
+%\end{proof}
+
+
+Next, we point out that the action of $G = \SL_m(\CC)^d$ on $(\CC^{m \times m})^{d-1}$ via $\tau_{m,d}$ preserves the determinant in each $\CC^{m \times m}$ component. In particular, if for $B = (B_1,\ldots,B_{d-1}) \in (\CC^{m \times m})^{d-1}$ there is $i \in [d-1]$ with $\det(B_i) \neq 0$, then $B$ is $G$-semistable. Equivalently, if $B$ is $G$-unstable then $\rk(B_i) < m$ for all $i \in [d-1]$.\footnote{Actually, $B$ is unstable if and only if $\rk(B_i) < m$ holds for all $i \in [d-1]$. The ``if''-direction may be shown via Schofield invariants, which can be used to prove that the ring of invariants is generated by the $\det(B_i)$, $i \in [d-1]$.}
+Thus, the next lemma will allow us to bound $\|\mu(B)\|$ for an unstable $B$.
+
+\begin{lemma} \label{lem:LargeGapQuiver}
+	Let $A \in \CC^{m \times m}$. It holds that $\| \Phi_1(A) \|_F = \| \Phi_2(A) \|_F$, and if $\rk(A) < m$ then $\| \Phi_1(A)\|_F \geq m^{-1} \|A\|^2_F$.
+\end{lemma}
+
+\begin{proof}
+	Let $U S V$ be a singular value decomposition of $A$, i.e., $U$ and $V$ are unitary matrices and $S = \diag(\sigma_1,\ldots,\sigma_m)$ with $\sigma_i \in \RR_{\geq 0}$ and $\sigma_1 \geq \sigma_2 \geq \cdots \geq \sigma_m$. Then $A\HT A = V\HT S^2 V$ and using that the Frobenius norm is invariant under unitary transformations we compute
+		\begin{equation} \label{eq:NormPhi}
+			\|\Phi_1(A)\|_F = \left\| V\HT \left( - S^2 + \frac{\|A\|^2_F}{m} \Id_m \right) V \right\|_F
+			= \left\| \left( S^2 - \frac{\|A\|^2_F}{m} \Id_m \right) \right\|_F  .
+		\end{equation}
+	A similar computation via $A A\HT = U S^2 U\HT$ holds for $\| \Phi_2(A) \|_F$, which shows the first claim.
+	If $\rk(A) < m$, then $\sigma_m = 0$ and we obtain with \eqref{eq:NormPhi} that 
+		\[ \|\Phi_1(A)\|_F  = \Big( \sum_{i=1}^m \big( \sigma_i^2 - m^{-1}\|A\|^2_F \big)^2 \Big)^{1/2}
+		\geq \Big| \sigma_m^2 - m^{-1}\|A\|^2_F \Big| = m^{-1} \|A\|_F^2   \]
+	holds as desired.
+\end{proof}
+
+
+\begin{proof}[Proof of Theorem~\ref{thm:LargeGapQuiver}]
+	Let $B = (B_1,B_2,\ldots,B_{d-1}) \in (\CC^{m \times m})^{d-1} \setminus \{0\}$ be unstable with respect to $\tau_{m,d}$. To prove the claim it suffices to show $\| \mu(B) \| \geq (d^2 \, m)^{-1}$, compare Definition~\ref{defn:WeightMarginGapConstant}.
+	Since $\mu(\lambda B) = \mu(B)$ holds for all $\lambda \in \CC^{\times}$, we can assume $\|B\| = 1$. Thus, $\mu(B) = \big( \mu_1(B),\ldots,\mu_d(B) \big)$, where $\mu_i(B)$ is as in Lemma~\ref{lem:MomentMapTauMD}. We note that $\| \mu(B) \| \geq \| \mu_i(B)\|$ holds for all $i \in [d]$.
+	
+	First, we prove by induction on $i \in [d-1]$ that
+		\begin{equation}\label{eq:LargeGapQuiver}
+			 i \, \| \mu(B) \| \geq \| \Phi_1(B_i) \| = \| \Phi_2(B_i) \| 
+		\end{equation}
+	holds. By Lemma~\ref{lem:LargeGapQuiver}, we have $\| \Phi_1(B_i) \| = \| \Phi_2(B_i) \|$, so it suffices to show the inequality for one of them. For $i=1$, we observe that $\mu_1(B) = \Phi_k(B_1)$ for some $k \in \{1,2\}$, by Lemma~\ref{lem:MomentMapTauMD}. The claim follows with $\| \mu(B) \| \geq \|\mu_1(B)\|$. Now, assume that Equation~\eqref{eq:LargeGapQuiver} holds for some $i < d-1$. Again by Lemma~\ref{lem:MomentMapTauMD} there exists $k \in \{1,2\}$ such that $\mu_{i+1}(B) = \Phi_k(B_{i+1}) + \Phi_k(B_{i})$ and therefore $\| \Phi_k(B_{i+1}) + \Phi_k(B_{i}) \| \leq \| \mu(B) \|$. Together with the triangle inequality and the induction hypothesis we conclude
+		\[ \| \Phi_k(B_{i+1}) \| \leq \| \Phi_k(B_{i+1}) + \Phi_k(B_{i}) \| + \| - \Phi_k(B_i) \|
+		\leq \| \mu(B) \| + i \, \|\mu(B)\| \, .  \]
+	
+	Finally, we recall that $B$ being unstable implies $\rk(B_i) < m$ for all $i \in [d-1]$. Therefore, Lemma~\ref{lem:LargeGapQuiver} and Equation~\eqref{eq:LargeGapQuiver} yield  $i \, \| \mu(B) \| \geq m^{-1} \|B_i\|^2_F$ for all $i \in [d-1]$. Since $1 = \|B\|^2 = \sum_i \|B_i\|^2_F$, there exists $j \in [d-1]$ such that $\|B_j\|^2_F \geq (d-1)^{-1}$. Thus, $\| \mu(B)\| \geq j^{-1} m^{-1} \|B_j\|^2_F \geq d^{-2} m^{-1}$.
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

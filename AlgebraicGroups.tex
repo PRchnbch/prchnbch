@@ -1,0 +1,1188 @@
+
+%todo intro: will be brief, still try to be self-contained with most important definitions and results; reader not so familiar should not be afraid: soon will restrict to the very concrete setting of self-adjoint groups; need both algebraic and analytic world, i.e., algebraic groups and Lie groups
+
+This chapter collects required preliminaries and thereby fixes notation. The presented material covers a wide range, because we need algebraic as well as analytic methods.
+The aims of the chapter are to allow readers from diverse contexts to follow, and to keep the thesis as self-contained as possible.
+
+Usually, we skip proofs and refer to the literature. References for further reading are provided at the beginning of each section.
+A reader familiar with the presented material may skip this chapter and only consult it when referenced.
+
+%Although we start quite abstractly, the discussion will soon allow us to restrict to a concrete setting. 
+
+\paragraph{Organization.}
+Section~\ref{sec:LinearAlgebraicGroups} recalls linear algebraic groups while Section~\ref{sec:MatrixLieGroups} introduces their analytic analogue of (matrix) Lie groups. Afterwards, Section~\ref{sec:RepTheory} reviews aspects of the representation theory of these groups. Finally, Section~\ref{sec:StabilityNotions} defines the (topological) stability notions and discusses their relation to Geometric Invariant Theory.
+
+%content: linear algebraic groups and their representations; tori, unipotent, Levi decomposition into reductive and unipotent radical, (linearly) reductive; torus actions via weights; reductive vs self-adjoint; matrix Lie groups?; stability notions and quotients; digression: many instances of NCM and OCI problem
+
+%unipotent groups are connected, Lie Kolchin? (rather in rep theory??)
+
+%TODO somewhere cite 
+%\cite{GoodmanWallachBook, MilneBook, BorelBook, SpringerBook, Humphreys, ProcesiBook, OnishchikVinbergBook, Wallach, MumfordGITbook, DolgachevBook, PopovVinberg, DerksenKemperBook, SturmfelsBookInvariant, DerksenWeymanBook, HallBook, KraftBook, WaterhouseBook}
+
+%\cite{borel2006lie} !!!
+
+%(also Borel, Springer, Humphreys, Procesi) ; GoodmanWallach especially suited, because it works over CC and RR, and also uses algebraic and analytic tools
+
+%content: linear algebraic groups and their representations; tori, unipotent, Levi decomposition into reductive and unipotent radical, (linearly) reductive; torus actions via weights; reductive vs self-adjoint; matrix Lie groups?; stability notions and quotients;
+
+
+%---------- Linear Algebraic Groups -----------------
+\section{Linear Algebraic Groups} \label{sec:LinearAlgebraicGroups}
+
+We briefly review the required knowledge on linear algebraic groups. For a detailed treatment the reader is referred to the many textbooks available: e.g., classical books are \cite{BorelBook, Humphreys, SpringerBook}, a treatment in scheme language is given in \cite{MilneBook, WaterhouseBook}, and a combined treatment of algebraic groups and Lie groups can be found in \cite{borel2006lie, GoodmanWallachBook, OnishchikVinbergBook, ProcesiBook}.
+
+\subsubsection{Basic Definitions and $\RR$-structures}
+
+We remind the reader that in the whole thesis $\KK \in \{ \RR, \CC\}$.
+
+\begin{defn}[Linear algebraic group]\label{defn:LinearAlgebraicGroup}
+	A \emph{linear algebraic group}\index{group!linear algebraic} $G$ over $\KK$ is an affine algebraic group over $\KK$. That is, $G$ is an affine variety over $\KK$ endowed with a group structure such that multiplication and inversion are morphisms of varieties over $\KK$.
+	\hfill\defnSymbol
+\end{defn}
+
+A \emph{morphism of algebraic groups}\index{morphism!of algebraic groups} over $\KK$ is a morphism of varieties that is also a group morphism. Such a morphism is an isomorphism of algebraic groups if its inverse is as well a morphism of algebraic groups.
+
+Any Zariski closed subgroup $G \subseteq \GL_m(\KK)$ is a linear algebraic group over $\KK$. Actually, the naming originates from the fact that any linear algebraic group over $\KK$ is isomorphic to a Zariski closed subgroup of some $\GL_m(\KK)$, see \cite[Proposition~1.10]{BorelBook} or \cite[Theorem in §3.4]{WaterhouseBook}.
+Since all algebraic groups in this thesis are affine, we often drop the term \emph{``linear''}.
+
+\begin{example}\label{ex:LinearAlgebraicGroups}
+	The following are linear algebraic groups over $\KK$.
+	\begin{enumerate}
+		\item The general linear group $\GL_m(\KK)$ of invertible $m \times m$ matrices over $\KK$.
+		
+		\item The special linear group $\SL_m(\KK) := \{g \in \GL_m(\KK) \mid \det(g) =  1\}$.
+		
+		\item The intersection $G \cap H$ of two Zariski closed subgroups $G, H \subseteq \GL_m(\KK)$.
+		
+		\item Any torus $(\KK^{\times})^m$ is linear algebraic. In particular, the groups
+			\begin{align*}
+				\GT_m(\KK) &:= \{g \in \GL_m(\KK) \mid g \text{ is diagonal}\} \\
+				\text{and} \qquad	\ST_m(\KK) &:= \GT_m(\KK) \cap \SL_m(\KK) \cong (\KK^\times)^{m-1}
+			\end{align*}
+			are linear algebraic groups.
+			
+		\item The \emph{additive group}\index{group!additive} $(\KK^m, +)$.
+			
+		\item The group $\Bor_m(\KK)$ of invertible upper triangular matrices.
+		
+		\item The group $\Unipotent_m(\KK) := \{ g \in  \Bor_m(\KK) \mid \forall \, i \in [m] \colon g_{ii} = 1\}$ of unipotent upper triangular matrices.
+		
+		\item The groups of orthogonal respectively special orthogonal matrices over $\KK$: \index{group!orthogonal}
+			\[\Orth_m(\KK) := \{ g \in \GL_m(\KK) \mid g\T g = \Id_m\} \quad \text{and} \quad
+			\SO_m(\KK) := \Orth_m(\KK) \cap \SL_m(\KK) . \]
+
+		\item The (semi-)direct product of two linear algebraic groups.	\hfill\exSymbol
+	\end{enumerate}
+\end{example}
+
+\begin{example}\label{ex:NonAlgebraic}
+	The groups of unitary respectively special unitary matrices
+	\[ \Un_m := \big\{ g \in \GL_m(\CC) \mid g\HT g = \Id_m \big\} \qquad \text{and} \qquad
+	\SU_m := \Un_m \cap \SL_m(\CC)\]
+	are \emph{not} algebraic over $\CC$. However, after identifying $\CC \cong \RR^2$ we see that $\Un_m$ and $\SU_m$ are \emph{real} algebraic subgroups of $\GL_{2m}(\RR)$.
+	\hfill\exSymbol
+\end{example}
+
+Examples like $\GL_m(\KK)$, $\GT_m(\KK)$ and $\Orth_m(\KK)$ indicate that  one can often study the real and complex situation in parallel, which is especially useful for Part~\ref{part:AlgebraicStatistics} on algebraic statistics.
+In order to do so, we discuss $\RR$-structures on complex vector spaces and varieties, compare \cite[AG~§11 and~§12]{BorelBook} or \cite[Chapter~11]{SpringerBook}.  Given a (not necessarily finite dimensional) complex vector space~$V$, an $\RR$-structure\index{Rstructure@$\RR$-structure on!a vector space} on $V$ is an $\RR$-vector space $V_\RR \subseteq V$ such that scalar extension of the inclusion yields $V_\RR \otimes_{\RR} \CC = V$. A $\CC$-linear map $f \colon V \to W$ of $\CC$-vector spaces with $\RR$-structures is an \emph{$\RR$-morphism}\index{Rmorphism@$\RR$-morphism of!vector spaces} or \emph{defined over $\RR$} , if $f(V_{\RR}) \subseteq W_{\RR}$.
+
+Now, let $X$ be an affine variety over $\CC$ with coordinate ring $\CC[X]$.
+An $\RR$-structure\index{Rstructure@$\RR$-structure on!an affine variety} on $X$ is an $\RR$-structure $\RR[X]$ on $\CC[X]$, which is an $\RR$-subalgebra of $\CC[X]$. An affine complex variety with $\RR$-structure is simply called a \emph{$\RR$-variety}\index{Rvariety@$\RR$-variety}.
+Usually, we identify $X$ with its set $X_{\CC}$ of $\CC$-rational points, which correspond to $\CC$-algebra morphisms $\CC[X] \to \CC$. If $X$ is an $\RR$-variety, then $X_\RR$ denotes the set of $\RR$-rational points, which correspond to $\CC$-algebra morphisms $\CC[X] \to \CC$ that are defined over $\RR$. We note that $X_{\RR}$ is a real algebraic variety.
+Moreover, a morphism $\varphi \colon X \to Y$ of $\RR$-varieties is called an \emph{$\RR$-morphism}\index{Rmorphism@$\RR$-morphism of!$\RR$-varieties} or \emph{defined over $\RR$}, if its associated map $\varphi^{\ast} \colon \CC[Y] \to \CC[X]$ on coordinate rings is defined over $\RR$.
+
+Next, a $\RR$-group is a complex algebraic group $G$ that is a $\RR$-variety such that multiplication and inversion are defined over $\RR$. Thus, given a $\RR$-group $G$ its $\KK$-rational points $G_{\KK}$ form an algebraic group over $\KK$, i.e., $G$ indeed encodes a real and a complex algebraic group at the same time. Note that all groups given in Example~\ref{ex:LinearAlgebraicGroups} for $\KK = \CC$ are naturally $\RR$-groups. E.g., $\GL_m(\CC)$ is an $\RR$-group with $\RR$-rational points $\GL_m(\RR)$. A \emph{$\RR$-morphism of $\RR$-groups}\index{Rmorphism@$\RR$-morphism of!$\RR$-groups} $G$ and $G'$ is a morphism $\varphi \colon G \to G'$ of algebraic groups that is defined over $\RR$.
+
+%todo note about real dim'n of G_\RR being eqal to complex dim'n of G
+
+Finally, we note that starting from a real algebraic situation, we naturally obtain by scalar extension a complex algebraic setting with natural $\RR$-structures. 
+
+
+
+\subsubsection{Zariski and Euclidean identity component}
+
+
+Given an algebraic group $G$ over $\KK$, the \emph{Zariski identity component}\index{identity component!Zariski} $G^{\circ, \Zar}$ is the Zariski connected component of $G$ that contains the identity. 
+
+\begin{prop}[{\cite[Proposition~1.2]{BorelBook}}]
+	Let $G$ be a complex algebraic group. Then $G^{\circ, \Zar}$ is a normal subgroup of finite index in $G$ whose cosets are the Zariski connected as well as irreducible components of $G$.
+	If $G$ is a $\RR$-group, then $G^{\circ, \Zar}$ is defined over $\RR$ so that $(G_{\RR})^{\circ, \Zar} = (G^{\circ,\Zar})_\RR$.
+\end{prop}
+
+Since all points of an algebraic group $G$ over $\KK$ are non-singular, $G$ possesses a canonical structure of a Lie group over $\KK$, compare \cite[Sections~3.1.2 and ~2.3.4]{OnishchikVinbergBook} and Theorem~\ref{thm:AlgebraicGroupIsLieGroup} below.
+This will become more apparent in Section~\ref{sec:MatrixLieGroups}. As an upshot, $G$ carries a natural Euclidean topology. 
+
+Now, the \emph{Euclidean identity component}\index{identity component!Euclidean} $G^{\circ}$ is the Euclidean connected component of (the Lie group) $G$ that contains the identity. Since the Euclidean topology is finer than the Zariski topology, it holds that $G^{\circ} \subseteq G^{\circ, \Zar}$ and depending on $\KK$ we have the following.
+	\begin{itemize}
+		\item[1.] For $\KK = \CC$, one always has equality $G^{\circ} = G^{\circ, \Zar}$.
+		
+		\item[2.] For $\KK = \RR$, the inclusion $G^{\circ} \subseteq G^{\circ, \Zar}$ may be \emph{strict}.
+	\end{itemize}
+The first item follows from the facts that $G^{\circ, \Zar}$ is irreducible, and that any irreducible complex affine variety is connected in the Euclidean topology \cite[Theorem~7.1]{ShafarevichBAG2}.
+The upcoming example provides a strict containment in the real case. Consequently, we need to be careful in the real case whether we mean the Zariski or Euclidean identity component.
+
+\begin{example}\label{ex:ZariskiVsEuclideanIdComponent}
+	The real algebraic group $\GL_m(\RR)$ is irreducible and therefore Zariski connected. However, it has two Euclidean connected components, namely
+		\begin{align*}
+			\GL^+_m(\RR) &= \{ g \in \GL_m(\RR) \mid \det(g) > 0 \} \\ 
+			\text{and} \qquad	\GL^-_m(\RR) &= \{ g \in \GL_m(\RR) \mid \det(g) < 0 \}.
+		\end{align*}
+	In particular, $\GL_m(\RR)^{\circ} = \GL^+_m(\RR) \varsubsetneq \GL_m(\RR) = \GL_m(\RR)^{\circ, \Zar}$.
+	\hfill\exSymbol
+\end{example}
+
+Nevertheless, also in the real setting the Euclidean identity component $G^\circ$ is a normal subgroup, and its cosets are the finitely many (see next theorem) Euclidean connected components of $G$.
+
+\begin{theorem}[{\cite[Theorem~3]{Whitney}}] \label{thm:Whitney}
+	A real algebraic variety $V \subseteq \RR^m$ has finitely many Euclidean connected components.
+\end{theorem}
+
+We note that the preceding theorem holds more generally for semialgebraic subsets of $\RR^m$, compare \cite[Theorem~2.4.5]{BochnakCosteRoy}.
+
+
+
+\subsubsection{Properties of Morphisms of Algebraic Groups}
+
+
+\begin{prop}\label{prop:ZClosedAlgebraicImage}
+	Let $\varphi \colon G \to G'$ be a morphism of complex algebraic groups.
+	\begin{itemize}
+		\item[(a)] $\varphi(G)$ is a Zariski closed subgroup of $G'$. If $\varphi$ is a $\RR$-morphism of $\RR$-groups, then $\varphi(G)$ is defined over $\RR$.
+		
+		\item[(b)] $\varphi \big( G^{\circ,\Zar} \big) = \varphi(G)^{\circ,\Zar}$.
+		
+		\item[(c)] $\ker(\varphi)$ is a Zariski closed normal subgroup of $G$. If $\varphi$ is a $\RR$-morphism of $\RR$-groups, then $\ker(\varphi)$ is defined over $\RR$. 
+		
+		\item[(d)] $\dim_\CC G = \dim_\CC \ker(\varphi) + \dim_\CC \varphi(G)$. If $\varphi$ is a $\RR$-morphism of $\RR$-groups, then $\dim_\RR G_\RR = \dim_\RR \ker(\varphi)_\RR + \dim_\RR \varphi(G)_\RR$ as real algebraic groups.
+	\end{itemize}
+\end{prop}
+
+\begin{proof}
+	Parts~(a), (b) and the first part of (d) are \cite[Corollary~1.4]{BorelBook}, while (c) follows from \cite[Propositions~2.2.5(i) and~12.1.3]{SpringerBook}. The second part of~(d) follows from $\dim_\CC H = \dim_\RR H_\RR$ for any $\RR$-group $H$.
+\end{proof}
+
+Regarding parts~(a) and~(b) of Proposition~\ref{prop:ZClosedAlgebraicImage} the upcoming example stresses the following. In general, one may have $\varphi(G_{\RR}) \varsubsetneq \varphi(G)_{\RR}$ and $\varphi(G_{\RR}^{\circ, \Zar}) \varsubsetneq \varphi(G)_{\RR}^{\circ,\Zar}$, and the image of $\RR$-points $\varphi(G_{\RR})$ does not need to be Zariski closed. Still, $\varphi(G_{\RR})$ is well-behaved as we shall see in Corollary~\ref{cor:ImageRealPoints}.
+
+\begin{example}[taken from {\cite[§5.2]{borel2006lie}}]\label{ex:BorelRealPoints}
+	Consider the surjective $\RR$-morphism
+		\[ \chi \colon \GL_m(\CC) \mapsto \CC^\times , \quad g \mapsto \det(g)^2\]
+	of Zariski connected $\RR$-groups. It is not surjective on the $\RR$-rational points, as
+		\[ \chi(\GL_m(\RR)) = \RR_{>0} \varsubsetneq \RR^\times  = \chi(\GL_m(\CC))_{\RR} . \]
+	We see that $\chi(\GL_m(\RR))$ is not real algebraic, but only semialgebraic.
+	\hfill\exSymbol
+\end{example}
+
+
+
+
+
+
+
+\subsubsection{Algebraic Group Actions}
+
+%todo add \cite[Proposition~12.1.32]{SpringerBook} ?? Orbit and stabilizer are defined over RR
+
+Let $G$ be an algebraic group over $\KK$ and $V$ an affine variety over $\KK$.
+A \emph{group (left-)action}\index{group action} of $G$ on $V$ is a map
+	\[ \alpha \colon G \times V \to V, \; (g,v) \mapsto \alpha(g,v) =: g \cdot v \]
+such that $\id \cdot v = v$ and $(gh) \cdot v = g \cdot (h \cdot v)$ hold for all $v \in V$ and $g,h \in G$.
+An \emph{algebraic group action}\index{group action!algebraic} of $G$ on $V$ is a group action $\alpha$ that is also a morphism of varieties over $\KK$.
+As usual, we define the \emph{orbit}\index{orbit} of $v$ and the \emph{stabilizer}\index{stabilizer} of $v$ as
+	\begin{equation}\label{eq:defnOrbitAndStabilizer}
+		G \cdot v := \big\lbrace g \cdot v \mid g \in G \big\rbrace \qquad \text{and} \qquad
+		G_v := \big\{ g \in G \mid g \cdot v = v \big\},
+	\end{equation}
+respectively. Note that $g \cdot v - v = 0$ gives polynomial equations in the entries of $g$, since the action is algebraic. Consequently, the stabilizer $G_v$ is a Zariski closed subgroup of $G$, i.e., is itself an algebraic group over $\KK$.
+In this thesis we focus on the following specific case of algebraic group actions.
+
+\begin{defn}[Rational Representation] \label{defn:RationalRepresentation}
+	Let $G$ be an algebraic group over $\KK$ and $V$ a finite dimensional $\KK$-vector space. A \emph{rational representation}\index{rational representation}\index{representation!rational} is a morphism $\pi \colon G \to \GL(V)$ of algebraic groups over $\KK$. Equivalently, the induced $\KK$-linear action
+		\[ G \times V \to V, (g,v) \mapsto g \cdot v := \pi(g)(v) \]
+	is algebraic. Note that $\KK$-linear algebraic actions of $G$ on $V$ are in one to one correspondence with rational representations $G \to \GL(V)$.
+	\hfill\defnSymbol
+\end{defn}
+
+Of course, if $G$ is a complex algebraic $\RR$-group and $V$ a complex affine $\RR$-variety, an algebraic $\RR$-action is an algebraic action $\alpha$ that is a $\RR$-morphism. If applicable, this allows to encode algebraic actions over $\RR$ and $\CC$ at the same time.
+
+The one-dimensional representations of a group are of particular interest.
+
+\begin{defn}[Character] \label{defn:Character}
+	Let $G$ be a complex algebraic group. A \emph{character}\index{character} of $G$ is an algebraic group morphism $\chi \colon G \to \CC^\times = \GL_1(\CC)$. The set of all characters of $G$ is denoted $\Xfrak(G)$. It becomes an abelian group (written additively) via $(\chi + \chi')(g) := \chi(g)\chi'(g)$ for all $g \in G$.
+	If $G$ is a $\RR$-group, then the subgroup of characters defined over $\RR$ is denoted $\Xfrak_{\RR}(G)$.
+	\hfill\defnSymbol
+\end{defn}
+
+Next, we collect some properties of real and complex orbits.
+
+\begin{prop}[{\cite[Proposition~I.1.8]{BorelBook}}] \label{prop:OrbitStructure}
+	Let $G$ be a complex algebraic group acting algebraically on a complex affine variety $V$. The orbit $G \cdot v$ of $v \in V$ is Zariski-open in its Zariski-closure. Its boundary consists of orbits of strictly lower dimension. In particular, orbits of minimal dimension are Zariski-closed.
+\end{prop}
+
+A subset $U$ of a complex affine variety $V$ with $U$ being Zariski open in $\overline{U}^{\Zar}$ has Euclidean closure $\overline{U} = \overline{U}^{\Zar}$; see \cite[Corollary~1.26]{Wallach} or \cite[Section~AI.7.2]{KraftBook}. Thus, an important consequence of Proposition~\ref{prop:OrbitStructure} is the following.
+
+\begin{cor}\label{cor:ClosureComplexCase}
+	Let $G $ be an algebraic group over $\CC$ acting algebraically on a complex affine variety $V$. For $v \in V$, the Euclidean and the Zariski closure of the orbit coincide: $\overline{G \cdot v} = \overline{G \cdot v}^{\Zar}$.
+\end{cor}
+
+\begin{remark}\label{rem:RealOrbits}
+	We point out that Proposition~\ref{prop:OrbitStructure} and Corollary~\ref{cor:ClosureComplexCase} fail over $\RR$. For this, consider the character given in Example~\ref{ex:BorelRealPoints} as an $\RR$-algebraic action of $G = \GL_m(\CC)$ on $V = \CC$. For $v = 1 \in V_\RR$, the orbit $G_{\RR} \cdot v = \RR_{>0}$ is \emph{not} Zariski open in its Zariski closure $\RR = V_{\RR}$, and $\overline{G_\RR \cdot v} = \RR_{\geq 0} \varsubsetneq \RR = \overline{G_\RR \cdot v}^{\Zar}$. Moreover, we have the strict containment
+		\[ G_{\RR} \cdot v = \RR_{>0} \varsubsetneq \RR^\times = (G \cdot v) \cap V_\RR , \]
+	of the real orbit in the $\RR$-rational points of the complex orbit. Here, $(G \cdot v) \cap V_\RR$ is the union of two real orbits, namely $G_{\RR} \cdot v$ and $G_{\RR} \cdot (-1)$.
+	\hfill\remSymbol
+\end{remark}
+
+Actually, it is a general fact that $(G \cdot v) \cap V_\RR$ is a finite union of real orbits.
+
+\begin{prop}[{\cite[Proposition~2.3]{BorelHarishChandra}}] \label{prop:BorelHarishChandraProp2-3}
+	Let $G$ be a connected complex algebraic $\RR$-group, $\pi \colon G \to \GL(V)$ a rational representation defined over $\RR$ and $v \in V$. Denote the Euclidean identity component of $G_\RR$ by $(G_{\RR})^\circ$. If $(G \cdot v) \cap V_\RR$ is not empty, then it is a finite union of $(G_{\RR})^\circ$-orbits, which are Euclidean closed if $G \cdot v$ is Euclidean closed.
+\end{prop}
+
+
+%\begin{lemma}\label{lem:DimensionFormulaGroupAction}
+%	Inhalt... %somewhere dimension forumla: group = orbit + stabilizer
+%	$\dim G = \dim (G \cdot v) + \dim (G_v)$
+%\end{lemma}
+
+
+
+
+\subsubsection{Classes of Linear Algebraic Groups}
+
+We end this section by presenting different types of linear algebraic groups. Since we usually work with algebraic subgroups $G \subseteq \GL_m(\KK)$, some definitions are ad-hoc and do not follow usual definitions, but are rather equivalent characterizations that require a proof.
+
+Based on \cite[Propositions~8.2 and~8.4]{BorelBook} we define the following.
+
+\begin{defn}\label{defn:DiagonalizableGroup}
+	Let $G$ be an algebraic group over $\CC$. We say $G$ is \emph{diagonalizable}\index{group!diagonalizable} if $G$ is isomorphic to a Zariski closed subgroup of $\GT_m(\CC)$.
+	$G$ is a torus\index{torus}, if $T$ is isomorphic to some $(\CC^\times)^m \cong \GT_m(\CC)$.
+	If $G$ is a diagonalizable $\RR$-group, we call $G$ \emph{split over $\RR$}\index{group!$\RR$-split diagonalizable} if $G$ is $\RR$-isomorphic to a Zariski closed subgroup of $\GT_m(\CC)$.
+	\hfill\defnSymbol
+\end{defn}
+
+\begin{example}[Non-split torus]
+	The affine $\RR$-variety $T := \{ (x,y) \in \CC^2 \mid x^2 + y^2 = 1 \}$ becomes an algebraic group via the multiplication
+	$(x,y)(x',y') = (xx' - yy', xy' + x'y)$. Furthermore, $T \cong \CC^{\times}$ as complex algebraic groups via
+		\[ T \to \CC^\times , \; (x,y) \mapsto x+ \imag y \qquad \text{and} \qquad
+		\CC^\times \to T, \; z \mapsto \frac{1}{2} \big( z + z^{-1}, -\imag (z - z^{-1}) \big),	\]
+	where $\imag$ is the imaginary unit.
+	The torus $T$ is not split over $\RR$: $T_\RR$ is the compact unit circle, which is not isomorphic to the non-compact set $\RR^\times = (\CC^\times)_{\RR}$. %todo refer to Borel 8.16?? (he uses the equivalent description $T = \SO_2(\CC)$ and $\SO_2(\RR)$)
+	\hfill\exSymbol
+\end{example}
+
+We note the following. All diagonalizable $\RR$-groups in this thesis will be $\RR$-split, so we usually drop the term ``$\RR$-split''. Moreover, if we have a real algebraic group $G$ and say it is diagonalizable, then we mean that the complex algebraic group obtained by scalar extension is $\RR$-split diagonalizable.
+
+We collect properties of diagonalizable groups and their character groups.
+
+\begin{prop}\label{prop:Characters}
+	Let $G$ be a complex diagonalizable $\RR$-group.
+	\begin{itemize}\itemsep 1pt
+		\item[(a)] If $H$ is a Zariski closed subgroup of $G$, then any character $\chi \in \Xfrak(H)$ extends to a character on $G$. \cite[Proposition~8.2(c)]{BorelBook}
+		
+		\item[(b)] $G$ is split over $\RR$ if and only if $\Xfrak_\RR(G) = \Xfrak(G)$. \cite[Corollary~8.2]{BorelBook}
+		
+		\item [(c)] The character group $M := \Xfrak(G)$ is a finitely generated abelian group (\cite[Corollary~3.2.4]{SpringerBook}) and $\Xfrak(G^{\circ,Zar}) = M/M^{\mathrm{tor}}$, where $M^{\mathrm{tor}}$ denotes the torsion subgroup of $M$. (\cite{SpringerBook}: 3.2.5 together with proof of Corollary~3.2.7)
+		
+		\item[(d)] $G$ is a torus if and only if it is Zariski connected. In this case $\Xfrak(G) = \ZZ^m$, where $m$ is such that $G \cong (\CC^\times)^m$. \cite[Proposition~8.5]{BorelBook}
+		
+		\item[(e)] If $G$ is $\RR$-split diagonalizable, then it is isomorphic to the direct product of a $\RR$-split torus and a finite group. \cite[Proposition~8.7]{BorelBook}
+	\end{itemize}
+\end{prop}
+
+Diagonalizable groups are a special case of so-called solvable groups. Thanks to \cite[Theorem~15.4]{BorelBook} we give the following ad-hoc definition.
+
+\begin{defn}[Solvable Group] \label{defn:SolvableGroup}
+	Let $G$ be an algebraic group over $\KK$. We say $G$ is \emph{($\KK$-split) solvable} if it is isomorphic to a Zariski closed subgroup of $\Bor_m(\KK)$.
+	\emph{solvable group}\index{group!solvable}
+	\hfill\defnSymbol
+\end{defn}
+
+All solvable groups considered in this thesis are split over $\KK$, and we usually drop this term.
+Another special case of solvable groups are unipotent groups.
+
+\begin{defn}[Unipotent Group]\label{defn:UnipotentGroup}
+	Let $G$ be an algebraic group over $\KK$. We say $G$ is \emph{unipotent}\index{group!unipotent}, if it is isomorphic to a Zariski-closed subgroup of $\Unipotent_m(\KK)$.
+	\hfill\defnSymbol
+\end{defn}
+
+The preceding ad-hoc definition is justified by \cite[Corollary~4.8]{BorelBook} (or \cite[Theorem in 8.3]{WaterhouseBook}).
+
+\begin{prop}[{\cite[Corollary in 8.3]{WaterhouseBook}}] \label{prop:UnipotentCharacter}
+	Let $U$ be a unipotent group. Then $\Xfrak(U) = 0$.
+\end{prop}
+
+%unipotent groups are Z-connected,
+
+
+\begin{defn}[Unipotent Radical] \label{defn:UnipotentRadical}
+	Let $G$ be a complex algebraic group. The \emph{unipotent radical}\index{unipotent radical} $R_u(G)$ is the maximal Zariski closed, connected, normal unipotent subgroup of $G$.
+\end{defn}
+
+\begin{defn}[Reductive Group] \label{defn:ReductiveGroup}
+	Let $G$ be a linear algebraic group over $\CC$. We call $G$ a \emph{reductive group}\index{group!reductive} if its unipotent radical is trivial, i.e., $R_u(G) = \{ \id \}$. A real linear algebraic group is called \emph{reductive}, if the complex group obtained by scalar extension is reductive.
+	\hfill\defnSymbol
+\end{defn}
+
+We stress that we do \emph{not} assume connectedness, as is done in some literature.
+
+%\cite[Proposition~19.11]{MilneBook} says that pseudo-reductive equals reductive over perfect ground fields.%todo
+
+\begin{example}\label{ex:ReductiveGroups}
+	The following are reductive groups over $\KK$.
+	\begin{enumerate}\itemsep 1pt
+		\item $\GL_m(\KK)$ and $\SL_m(\KK)$.
+		
+		\item $\Orth_m(\KK)$ and $\SO_m(\KK)$.
+		
+		\item Any diagonalizable group (in particular, any torus) over $\KK$ is reductive.
+		
+		\item The direct product of two reductive groups over $\KK$.\hfill\exSymbol
+	\end{enumerate}
+\end{example} %todo reference
+
+\begin{example}[Non-reductive groups] \label{ex:NonReductive}
+	The additive group $\KK^m$ and $\Unipotent_m(\KK)$ are unipotent and hence not reductive. The group $\Bor_m(\KK)$ of invertible upper triangular matrices is not reductive, as its unipotent radical is $\Unipotent_m(\KK)$.
+	\hfill\exSymbol
+\end{example}
+
+Any algebraic group over $\KK$ admits the following decomposition, because $\KK$ has characteristic zero.
+
+\begin{theorem}[Levi-type decomposition, {\cite{mostowLeviDecomposition}}] \label{thm:LeviDecomposition}
+	Let $G$ be a linear algebraic group over $\KK$ with unipotent radical $U$. Then there is a reductive group $R$ over $\KK$ such that $G$ is the semi-direct product of $R$ and $U$: $G \cong R \ltimes U$. In particular, a solvable group is the semi-direct product of a diagonalizable group and its unipotent radical.
+\end{theorem}
+
+\begin{example}
+	One has $\Bor_m(\KK) = \GT_m(\KK) \ltimes \mathfrak{U}_m(\KK)$.
+	\hfill\exSymbol
+\end{example}
+
+
+
+
+
+
+
+
+%---------- Matrix Lie Groups and Lie Algebras -----------------
+\section{Matrix Lie Groups and Lie Algebras} \label{sec:MatrixLieGroups}
+
+In this section we collect preliminary knowledge on Lie groups and their Lie algebras. For convenience and brevity, we restrict to so-called matrix Lie groups. This ensures a concrete approach, which is sufficient for this thesis. For further details we refer to textbooks such as \cite{HallBook, KnappBook, LeeSmoothManifolds}, and for a combined treatment of Lie groups and algebraic groups to \cite{borel2006lie, GoodmanWallachBook, OnishchikVinbergBook, ProcesiBook}. 
+
+\subsubsection{Matrix Lie Groups}
+
+\begin{defn}[Matrix Lie group, {\cite[Definition~1.4]{HallBook}}]\label{defn:MatrixLieGroup}
+	\ \\
+	A \emph{matrix Lie group}\index{group!matrix Lie} is a Euclidean closed subgroup $G$ of $\GL_m(\CC)$.\footnote{We stress that we mean the complex general linear group. But, of course, any Euclidean closed subgroup of $\GL_m(\RR)$ is a Euclidean closed subgroup of $\GL_m(\CC)$.}
+	\hfill\defnSymbol
+\end{defn}
+
+Remember that a Lie group in the abstract sense is a smooth manifold with a group structure such that multiplication and inversion are smooth maps. Moreover, a \emph{morphism of Lie groups}\index{morphism!of Lie groups} is a group morphism that is smooth. Similarly as for algebraic groups, the Euclidean connected component of a (matrix) Lie group containing the identity is denoted $G^\circ$. 
+
+As suggested by the name, any matrix Lie group is a Lie group \cite[Corollary~3.45]{HallBook}. This result was first proven by John von Neumann. More generally, one has the following theorem due to \'Elie Cartan.
+
+\begin{theorem}[Closed Subgroup Theorem, {\cite[Theorem~2.12]{LeeSmoothManifolds}}] \label{thm:ClosedSubgroup}
+	\ \\
+	Let $G$ be a Lie group and $H \subseteq G$ a Euclidean closed subgroup. Then $H$ is an embedded Lie subgroup of $G$.
+\end{theorem}
+
+%a continuous morphism of Lie groups is analytic (Helgason, Theorem~II.2.6)
+
+\begin{example}\label{ex:MatrixLieGroup}
+	Let $\KK \in \{\RR, \CC\}$. The following groups are matrix Lie groups.
+	\begin{enumerate}
+		\item \label{item:MatrixLieZClosed}
+		Any Zariski closed subgroup $G \subseteq \GL_m(\KK)$ is a matrix Lie group, since it is Euclidean closed in $\GL_m(\KK)$, and hence in $\GL_m(\CC)$. In particular, all groups in Example~\ref{ex:LinearAlgebraicGroups} are matrix Lie groups.  Moreover, any linear algebraic group over $\KK$ is isomorphic to a matrix Lie group. 
+		
+		\item The groups $\Un_m$ and $\SU_m$ from Example~\ref{ex:NonAlgebraic} are Euclidean closed in $\GL_m(\CC)$ and hence matrix Lie groups.
+		
+		\item The intersection $G \cap H$ of two matrix Lie groups $G,H \subseteq \GL_m(\CC)$ is a matrix Lie group.
+		
+		\item \label{item:DirectProductMatrixLie}
+		Let $G \subseteq \GL_{m_1}(\CC)$ and $H \subseteq \GL_{m_2}(\CC)$ be matrix Lie groups. Under the block-diagonal embedding
+			\[ G \times H \hookrightarrow \GL_{m_1 + m_2}(\CC), \quad (g,h) \mapsto \begin{pmatrix} g & 0 \\ 0 & h\end{pmatrix} \]
+		the direct product $G \times H$ is a matrix Lie subgroup of $\GL_{m_1 + m_2}(\CC)$.
+		\hfill\exSymbol
+	\end{enumerate}
+\end{example}
+
+Regarding Example~\ref{ex:MatrixLieGroup} Item~\ref{item:MatrixLieZClosed}, one has the following general statement.
+
+\begin{theorem}[{\cite[Theorem~6 in §3.1.2]{OnishchikVinbergBook}}] \label{thm:AlgebraicGroupIsLieGroup}
+	Any complex (real) algebraic group is a complex (real) Lie group of the same dimension.
+\end{theorem}
+
+In general, the image of a Lie group morphism need not be a Lie group. However, in the real algebraic setting this is true and provides an analogue of Proposition~\ref{prop:ZClosedAlgebraicImage}(a) in the real situation, also compare Example~\ref{ex:BorelRealPoints}.
+Due to the lack of an explicit reference, we provide proofs.
+
+\begin{prop}\label{prop:LieGroupImage}
+	Let $\varphi \colon G \to G'$ be a morphism of real linear algebraic groups. Then $\varphi(G)$ is a closed Lie subgroup of $G'$.
+\end{prop}
+
+\begin{proof}
+	Set $H := \varphi(G)$. We can consider $G$ as a real algebraic subgroup of some $\GL_m(\RR) \subseteq \RR^{m \times m} \cong \RR^{m^2}$, and similarly for $G'$. In particular, we can view them as matrix Lie groups.\footnote{They are also Lie groups by Theorem~\ref{thm:AlgebraicGroupIsLieGroup}}
+	By Theorem~\ref{thm:ClosedSubgroup}, the Euclidean closure $\overline{H} \subseteq G'$ is a closed Lie subgroup. Hence, it suffices to show that $H = \overline{H}$. For this, we need several results from Real Algebraic Geometry and refer to \cite{BochnakCosteRoy} for further information.
+	
+	Since $\varphi$ is a morphism of real algebraic groups, its image $H$ is semialgebraic as a consequence of Tarski-Seidenberg, \cite[Proposition~2.2.7]{BochnakCosteRoy}. Thus, $\overline{H} \subseteq G'$ and $\overline{H} \backslash H$ are semialgebraic as well. There is a natural notion of (local) dimension of a semialgebraic set \cite[Section~2.8]{BochnakCosteRoy}. We have 
+		\[ \dim \big( \overline{H} \backslash H \big) < \dim H = \dim \overline{H} \]
+	as semi-algebraic sets \cite[Propositions~2.8.2 and~2.8.13]{BochnakCosteRoy}. If $\overline{H} \backslash H \neq \emptyset$ then the Lie group $\overline{H}$ has points of different local dimension in the sense of semialgebraic sets. But the latter is equal to the local dimension in the manifold sense (i.e., the dimension of the tangent space at the point); compare proof of \cite[Proposition~2.8.14]{BochnakCosteRoy}. This contradicts the fact that $\dim T_h \overline{H} = \dim \Lie \big( \overline{H} \big)$ for all $h \in \overline{H}$. Therefore, $\overline{H} \backslash H$ must be empty.
+\end{proof}
+
+\begin{cor}\label{cor:ImageRealPoints}
+	Let $\varphi \colon G \to G'$ be an $\RR$-morphism of complex linear algebraic $\RR$-groups. Then $\varphi(G_{\RR})$ is a closed, semialgebraic Lie subgroup of $G'_{\RR}$, respectively of $\varphi(G)_{\RR}$, and $\dim \varphi(G_\RR) = \dim \varphi(G)_{\RR}$. In particular, $(\varphi(G)_{\RR})^\circ \subseteq \varphi(G_{\RR})$.
+\end{cor}
+
+\begin{proof}
+	On the level of real points we have $\varphi_\RR \colon G_{\RR} \to G'_\RR$, a morphism of real algebraic groups. By Proposition~\ref{prop:LieGroupImage} and its proof, $\varphi(G_\RR)$ is a closed, semialgebraic Lie subgroup of $G'_\RR$ and so also of $\varphi(G)_\RR$. It remains to show $\dim \varphi(G_\RR) = \dim \varphi(G)_{\RR}$. We have
+		\begin{align*}
+			\dim G_\RR &= \dim \ker (\varphi)_\RR + \dim \varphi(G)_\RR &\text{as real algebraic groups} \\
+			\dim G_\RR &= \dim \ker(\varphi_\RR) + \dim \varphi(G_\RR) &\text{as Lie groups}.
+		\end{align*}
+	The first equality is Proposition~\ref{prop:ZClosedAlgebraicImage}(d). The second follows since $\varphi_\RR$ is of constant rank as a morphism of Lie groups \cite[Theorem~2 in §1.1.6]{OnishchikVinbergBook}, and its image $\varphi(G_\RR)$ is a Lie group.
+	Clearly, $\ker(\varphi_\RR) = \ker(\varphi)_\RR$. We deduce $\dim \varphi(G_\RR) = \dim \varphi(G)_{\RR}$, because real algebraic groups have the same dimension as when viewed as a Lie group.
+\end{proof}
+
+
+
+\subsubsection{Lie Algebras}
+
+We introduce Lie algebras of matrix Lie groups. For this, we denote the exponential of a matrix $X \in \KK^{m \times m}$ by $\exp(X)$ or also by $e^X$.
+
+\begin{defn}[Lie algebra] \label{defn:LieAlgebra}
+	Let $G \subseteq \GL_m(\CC)$ be a matrix Lie group. The \emph{Lie algebra}\index{Lie algebra} of $G$ is
+		\[ \Lie (G) := \big\{ X \in \CC^{m \times m} \mid \forall \,  t \in \RR \colon \; \exp(tX) \in G \big\} \]
+	and we equip it with the Lie bracket $[X,Y] := XY - YX$.
+	\hfill\defnSymbol
+\end{defn}
+
+We collect some properties of $\Lie(G)$.
+
+\begin{prop}\label{prop:LieAlgebraProperties}
+	Let $G \subseteq \GL_m(\CC)$ be a matrix Lie group.
+	\begin{itemize}
+		\item[(a)] $\Lie(G)$ is a $\RR$-vector space and $[X,Y] \in \Lie(G)$ for all $X,Y \in \Lie(G)$. With the latter bracket $\Lie(G)$ becomes a real Lie algebra. Furthermore, $\Lie(G)$ is the tangent space at the identity of $G$ (in the sense of smooth manifolds).
+		
+		\item[(b)] If $G$ is Zariski closed in $\GL_m(\CC)$, then $\Lie(G)$ is a $\CC$-vector space and hence a complex Lie algebra. In this case, $\Lie(G)$ is the tangent space at the identity of $G$ (in the sense of algebraic geometry).
+		
+		\item[(c)] If $H \subseteq \GL_m(\CC)$ is a matrix Lie group, then  $\Lie(G \cap H) = \Lie(G) \cap \Lie(H)$.
+		
+		\item[(d)] For all $X \in \Lie(G)$, $e^X$ lies in the Euclidean identity component $G^\circ$.
+	\end{itemize}
+\end{prop}
+
+\begin{proof}
+	The first part of~(a) is \cite[Theorem~3.20]{HallBook} and the second part is \cite[Corollary~3.46]{HallBook}. Item~(b) is \cite[Theorem~2.8]{Wallach}. Part~(c) is an immediate consequence of the definition, and part~(d) is \cite[Proposition~3.19]{HallBook}.
+\end{proof}
+
+\begin{example}[{\cite[Section~3.4]{HallBook}}] \label{ex:LieAlgebra} We list some common Lie algebras.
+	\begin{enumerate} \itemsep 1pt
+		\item $\Lie \big( \GL_m(\KK) \big) = \KK^{m \times m}$
+		
+		\item $\Lie \big( \SL_m(\KK) \big) = \{ X \in \KK^{m \times m} \mid \tr(X) = 0 \}$
+		
+		\item $\Lie \big( \GT_m(\KK) \big) = \lbrace X \in \KK^{m \times m} \mid X \text{ diagonal matrix} \rbrace$
+		
+		\item $\Lie \big( \Orth_m(\KK) \big) = \{ X \in \KK^{m \times m} \mid X\T = -X \}$, the space of skew-symmetric matrices. Note that $\Lie \big( \Orth_m(\KK) \big) = \Lie \big( \SO_m(\KK) \big)$ as any skew symmetric matrix has trace zero.
+		
+		\item $\Lie (\Un_m) = \lbrace X \in \CC^{m \times m} \mid X\HT = -X \rbrace = \imag \Sym_m(\CC)$, the space of skew-Hermitian matrices. Here, $\imag \in \CC$ denotes the imaginary unit and $\Sym_m(\CC)$ the space of $m \times m$ Hermitian matrices.
+		
+		\item \label{item:LieOfGTCapUn}
+		Consider $\GT_m(\CC) \cap \Un_m$. Using Proposition~\ref{prop:LieAlgebraProperties}(c) we obtain that
+		\begin{equation*}\label{eq:LieOfGTCapUn}
+			\Lie (\GT_m(\CC) \cap \Un_m) = \big\{ \imag \diag(x) \mid x = (x_1,\ldots,x_m) \in \RR^m \big\}.
+		\end{equation*}
+		Hence, we can identify $\imag \Lie(\GT_m(\CC) \cap \Un_m) = \{ \diag(x) \mid x \in \RR^m \}$ with $\RR^m$. Note that under this identification the Frobenius norm becomes the usual Euclidean norm on $\RR^m$.
+		
+		\item \label{item:LieOfTK}
+		Set $T_K := \ST_m(\CC) \cap \Un_m$. Similarly to \eqref{eq:LieOfGTCapUn} we obtain that
+			\begin{equation*}\label{eq:LieOfTK}
+				\Lie (T_K) = \big\{ \imag \diag(x) \mid x = (x_1,\ldots,x_m) \in \RR^m, \, x_+ = x_1 + \ldots + x_m = 0 \big\}.
+			\end{equation*}
+		Thus, we can identify $\imag \Lie(T_K) = \{ \diag(x) \mid x \in \RR^m, x_+ = \langle \ones_m, x \rangle = 0 \}$ with $\onePerp$, the orthogonal complement of the all-ones vector $\ones_m$ in $\RR^m$.
+		\hfill\exSymbol
+	\end{enumerate}
+\end{example}
+
+Given real Lie algebras $\mathfrak{g}$ and $\mathfrak{h}$, a \emph{morphism of Lie algebras}\index{morphism!of Lie algebras} is a $\RR$-linear map $\Pi \colon \mathfrak{g} \to \mathfrak{h}$ such that $\Pi([X,Y]) = [\Pi(X), \Pi(Y)] \;$ holds for all $X, Y \in \mathfrak{g}$. Given a morphism of matrix Lie groups one naturally obtains a morphism of the respective Lie algebras by considering the differential at the identity.
+
+\begin{theorem}[{\cite[Theorem~3.28]{HallBook}}] \label{thm:Differential}
+	Let $G$ and $H$ be matrix Lie groups, and $\pi \colon G \to H$ a Lie group morphism. Then there exists a unique $\RR$-linear map $\Pi \colon \Lie(G) \to \Lie(H)$ such that
+		$\pi(e^X) = e^{\Pi(X)}$
+	holds for all $X \in \Lie(G)$. The map $\Pi$ has the following additional properties:
+		\begin{enumerate}\itemsep 1pt
+			\item $\Pi(gXg^{-1}) = \pi(g)\Pi(X)\pi(g)^{-1} \;$ for all $X \in \Lie(G)$, $g \in G$.
+			
+			\item $\Pi([X,Y]) = [\Pi(X), \Pi(Y)] \;$ for all $X, Y \in \Lie(G)$.
+			
+			\item $\Pi(X) =  \left.  \frac{d}{dt} \right\vert_{t=0}   \pi(e^{tX}) \;$ for all $X \in \Lie(G)$.
+		\end{enumerate}
+\end{theorem}
+
+
+
+\subsubsection{Self-adjoint Groups}
+
+We review Zariski closed self-adjoint groups. This is motivated by the fact that reductive subgroups of $\GL_m(\KK)$ are, up to conjugation, the Zariski closed self-adjoint subgroups; compare Theorem~\ref{thm:ReductiveGroupActionToSelfAdjoint} below. 
+At the end, we present important connections to Riemannian geometry. 
+
+\begin{defn}[Self-adjoint Group]\label{defn:SelfAdjoint}
+	A subgroup $G \subseteq \GL_m(\KK)$ is \emph{self-adjoint}, if for all $g \in G$ one has $g\HT \in G$. (Note that $g\HT = g\T$ if $\KK = \RR$).
+
+	More generally, let $V$ be a $\KK$-vector space equipped with an inner product $\langle \cdot , \cdot \rangle$. A subgroup $G \subseteq \GL(V)$ is called \emph{self-adjoint}\index{self-adjoint}\index{group!self-adjoint} if for all $g \in G$ the adjoint $g\adj$ with respect to $\langle \cdot , \cdot \rangle$ is contained in $G$.
+	Thus, $G \subseteq \GL_m(\KK)$ is self-adjoint if it is self-adjoint with respect to the standard inner product on $\KK^m$.
+	\hfill\defnSymbol
+\end{defn}
+
+\begin{example}\label{ex:ZClosedSelfAdjoint}
+	The following groups are Zariski closed self-adjoint.
+	\begin{enumerate}
+		\item The groups $\GL_m(\KK), \SL_m(\KK), \GT_m(\KK), \ST_m(\KK), \Orth_m(\KK)$ and $\SO_m(\KK)$ are all Zariski closed self-adjoint subgroups of $\GL_m(\KK)$.
+		
+		\item The intersection $G \cap H$ of two Zariski closed self-adjoint subgroups $G,H \subseteq \GL_m(\KK)$ is Zariski closed and self-adjoint.
+		
+		\item \label{item:DirectProductZClosedSelfAdjoint}
+		Let $G \subseteq \GL_{m_1}(\KK)$, $H \subseteq \GL_{m_2}(\KK)$ be Zariski closed and self-adjoint. Similar to Example~\ref{ex:MatrixLieGroup} Item~\ref{item:DirectProductMatrixLie}, the direct product $G \times H$ becomes via block-diagonal embedding a Zariski closed self-adjoint subgroup of $\GL_{m_1 + m_2}(\KK)$.
+		\hfill\exSymbol
+	\end{enumerate}
+\end{example}
+
+\begin{remark}\label{rem:Wallach}
+	For the following compare \cite[p.~39]{Wallach}.
+	One can identify $\GL_m(\CC)$ canonically with $\GL_{2m}(\RR)$ via 
+		\[ \GL_m(\CC) \to \GL_{2m}(\RR), \quad g = a + ib \mapsto \begin{pmatrix} a & -b \\ b & a \end{pmatrix} \]
+	where $a, b \in \RR^{m \times m}$. Note that under this identification the Hermitian transpose becomes the transpose, and that the group of unitary matrices $\Un_m$ is mapped to the group $\Orth_{2m}(\RR)$ of orthogonal matrices.
+	Moreover, under the above identification any (Zariski closed) self-adjoint subgroup $G \subseteq \GL_m(\CC)$ can be viewed as a (Zariski closed) self-adjoint subgroup of $\GL_{2m}(\RR)$.
+	
+	Note that Zariski closed self-adjoint subgroups $G \subseteq \GL_m(\KK)$ are called \emph{symmetric} in \cite{Wallach}. We refrain from using the latter term to avoid confusion with the usual symmetric groups consisting of permutations.
+	\hfill\remSymbol
+\end{remark} 
+
+In the following we deal with some important properties of Zariski closed self-adjoint subgroups. We denote by $\Sym_m(\KK) := \{ X \in \KK^{m \times m} \mid X\HT = X\}$ the space of symmetric respectively Hermitian matrices.
+Recall that $\KK^{m \times m}$ is equipped with the trace inner product, if not stated otherwise.
+
+\begin{prop}\label{prop:SelfAdjointProperties}
+	Let $G \subseteq \GL_m(\KK)$ be a Zariski closed self-adjoint subgroup. Set $K := \{ g \in G \mid g\HT g = \Id_m \}$
+	and $\mathfrak{p} := \Lie(G) \cap \Sym_m(\KK)$. Then 
+	\begin{itemize}\itemsep 1pt
+		\item[(a)] $K$ is a maximal compact subgroup of $G$.
+		
+		\item[(b)] If $\KK = \CC$, then $T := (G \cap \GT_m(\KK))^\circ$ is a maximal torus of $G$, and $T_K := T \cap K$ is a maximal compact torus of $K$.
+		%if $G$ not connected then T not necessarily a torus
+		\item[(c)] $\Lie(G) = \Lie(K) \oplus \mathfrak{p}$ is an orthogonal decomposition with respect to the \emph{Euclidean} inner product $(X,Y) \mapsto \mathrm{Re}(\tr(X\HT Y))$ on $\KK^{m \times m}$.\footnote{Here $\mathrm{Re}$ denotes the real part. For $\KK = \RR$, this is the usual inner product on $\RR^{m \times m}$. Over $\CC$ we need to adjust as $\tr(X\HT Y) \in \imag \RR$ for $X$ Hermitian and $Y$ skew-Hermitian.}
+		If $\KK = \CC$ then $\mathfrak{p} = \imag \Lie(K)$.
+	\end{itemize}
+\end{prop}
+
+\begin{proof}
+	Part~(a) is a consequence of \cite[Theorem~2.29]{Wallach} and part~(b) follows from \cite[Theorem~2.21]{Wallach}. For~(c), note that $\mathfrak{p}$ consists of symmetric (respectively Hermitian) matrices while $\Lie(K)$ consists of skew-symmetric (respectively skew-Hermitian) matrices. If $\KK = \CC$, then $\Lie(G) = \Lie(K) \oplus \imag \Lie(K)$ by \cite[Theorem~2.12]{Wallach} and $\imag \Lie(K)$ consists of Hermitian matrices. Hence, $\imag \Lie(K) = \Lie(G) \cap \Sym_m(\KK) = \pfrak$.
+\end{proof}
+
+\begin{example}
+	Let $G := \GL_m(\KK)$. Then $K := \{ g \in G \mid g\HT g = \Id_m \}$ equals $\Orth_m(\RR)$ if $\KK=\RR$, and $K = \Un_m$ if $\KK = \CC$. Moreover, $\Lie(K)$ is the set of skew-symmetric respectively skew-Hermitian matrices, compare Example~\ref{ex:LieAlgebra}, while $\mathfrak{p} = \Sym_m(\KK)$ is the set of symmetric respectively Hermitian matrices. So indeed, if $\KK = \CC$ then $\mathfrak{p} = \Sym_m(\KK) = \imag \Lie(K)$.
+	\hfill\exSymbol
+\end{example}
+
+Next, we recall the polar decomposition \cite[Section~2.5]{HallBook}. We denote by $\PD_m(\CC)$ the cone of positive definite Hermitian matrices, and by $\PD_m(\RR)$ the cone of symmetric positive definite matrices. The map
+	\[ \Sym_m(\KK) = \{ X \in \KK^{m \times m} \mid X\HT = X\} \to \PD_m(\KK), \quad X \to e^X \]
+is a diffeomorphism. In particular, the \emph{logarithm}\index{logarithm of positive definite matrix} $\log(\Psi) \in \Sym_m(\KK)$ is well-defined for all $\Psi \in \PD_m(\KK)$.
+For $G = \GL_m(\KK)$ set $K := \{ g \in G \mid g\HT g = \Id_m \}$. Then the polar decomposition is given by the homeomorphism
+	\[ K \times \Sym_m(\KK) \to \GL_m(\KK) , \quad (k,X) \mapsto k e^X. \]
+In particular, any $g \in G$ can be uniquely written as $g = kp$, where $k \in K$ and $p \in \PD_m(\KK)$. 
+The polar decomposition holds more generally for any Zariski closed self-adjoint subgroup.
+
+\begin{theorem}[Polar Decomposition, {\cite[Theorems~2.12 and~2.16]{Wallach}}]  \label{thm:PolarDecomposition}
+	\ \index{polar decomposition}\\
+	Let $G \subseteq \GL_m(\KK)$ be Zariski closed and self-adjoint, $K = \{g \in G \mid g\HT g = \Id_m\}$ and $\mathfrak{p} = \Lie(G) \cap \Sym_m(\KK)$.
+	Then
+	\begin{equation}\label{eq:PolarDecompositionMap}
+		K \times \mathfrak{p} \to G, \quad (k,X) \mapsto k e^{X}
+	\end{equation}
+	is a homeomorphism. In particular, any $g \in G$ can be uniquely written as $g = kp$, where $k \in K$ and $p \in P := G \cap \PD_m(\KK)$. Moreover, $G$ is connected if and only if $K$ is connected.
+\end{theorem}
+
+As an interesting consequence any (not necessarily Zariski closed) subgroup lying in between $G^\circ$ and $G$ is self-adjoint.
+
+\begin{cor}\label{cor:PolarDecompositionSubgroup}
+	Let $G \subseteq \GL_m(\KK)$ be Zariski closed and self-adjoint. Consider a subgroup $H subseteq G$ with $G^\circ \subseteq H$. Then $H$ is self-adjoint and the polar decomposition can be carried out in $H$.
+\end{cor}
+
+\begin{proof}
+	Define $K$ and $\pfrak$ as in Theorem~\ref{thm:PolarDecomposition} and consider $h \in H \subseteq G$. By Theorem~\ref{thm:PolarDecomposition}, there exist $k \in K$ and $X \in \pfrak$ such that $h = k \exp(X)$.
+	 We have $\exp(X) \in G^\circ \subseteq H$ by Proposition~\ref{prop:LieAlgebraProperties}(d) and hence $k = h \exp(X)^{-1} \in H$. We deduce $h\HT = \exp(X\HT) k\HT = \exp(X) k^{-1} \in H$.
+\end{proof}
+
+Now, we briefly recall some Riemannian geometry of $\PD_m(\KK)$; see \cite{bhatia2007positive} or \cite[Chapter~II.10]{BridsonHaefligerBook}. We denote by $\Psi^{1/2} \in \PD_m(\KK)$ (or by $\sqrt{\Psi}$) the \emph{square root}\index{square root of positive definite matrix} of $\Psi \in \PD_m(\KK)$; that is the unique matrix in $\PD_m(\KK)$ which square equals $\Psi$. Viewing $\PD_m(\KK)$ as an open real submanifold of $\Sym_m(\KK)$ one can define a Riemannian metric on $\PD_m(\KK)$ via 
+	\[ \langle X, Y \rangle_{\Psi} := \tr \big( \Psi^{-1}X\Psi^{-1}Y \big) , \]
+where $X,Y$ are in the tangent space $T_{\Psi} \PD_m(\KK) \cong \Sym_m(\KK)$ at $\Psi$. Note that
+	\[ \langle X, X \rangle_{\Id_m} = \|X\|^2 \quad \text{ and } \quad 
+	\langle X, Y \rangle_{\Psi} = \left\langle \Psi^{-1/2} X \Psi^{-1/2},  \Psi^{-1/2} Y \Psi^{-1/2} \right\rangle_{\Id_m}. \]
+For $\Psi, \Theta \in \PD_M(\KK)$, the Riemannian manifold $\PD_m(\KK)$ has a unique \emph{geodesic line}
+\index{geodesic!line} with $\gamma(0) = \Psi$ and $\gamma(1) = \Theta$:
+	\begin{equation}\label{eq:GeodesicPDm}
+		\gamma \colon \RR \to \PD_m(\KK), \quad t \mapsto \Psi^{1/2} e^{tX} \Psi^{1/2}
+	\end{equation}
+where $X := \log(\Psi^{-1/2} \Theta \Psi^{-1/2})$. We call $\gamma([0,1])$ the \emph{geodesic segment}\index{geodesic!segment} between $\Psi$ and $\Theta$.\footnote{One should think of the geodesic segment as a curve representing the shortest path between $\Psi$ and $\Theta$.}
+Consequently, the induced distance function on $\PD_m(\KK)$ is 
+	\[ d(\Psi, \Theta) = \big\| \log \big( \Psi^{-1/2} \Theta \Psi^{-1/2} \big) \big\|. \]
+In particular, we have $d(\Id_m, \Psi) = \|\log(\Psi)\|$.
+
+A subset $B \subseteq \PD_m(\KK)$ is called \emph{geodesically convex}\index{geodesically convex!subset}, if it contains the geodesic segment between any two point in $B$.
+We say an embedded submanifold $M \subseteq \PD_m(\KK)$ is \emph{totally geodesic}\footnote{also called \emph{geodesically complete}}
+\index{totally geodesic (sub)manifold}, if any geodesic \emph{line} of $\PD_m(\KK)$ that intersects $M$ in two points is entirely contained in $M$.
+
+Note that $\GL_m(\KK)$ acts transitively (from the right) on $\PD_m(\KK)$ via $(\Psi, g) \mapsto g\HT \Psi g$ and the stabilizer of $\Id_m$ is $K = \{ g \in \GL_m(\KK) \mid g\HT g = \Id_m \}$.\footnote{Of course, one can also consider the left action $g \cdot \Psi  =  g \Psi g\HT$. However, the right action appears naturally}
+Furthermore, $\PD_m(\KK) = \{ g\HT g \mid g \in \GL_m(\KK) \} = \GL_m(\KK) \cdot \Id_m$.
+From this one can deduce that the Riemannian manifold $G/K$ is isometric to $\PD_m(\KK)$.
+More generally, we have the following.\footnote{I thank Harold Nieuwboer for pointing out the reference \cite[Theorem~II.10.58]{BridsonHaefligerBook}.}
+
+\begin{theorem}[{\cite[Theorem~II.10.58]{BridsonHaefligerBook}}] \label{thm:GmodKtotallyGeodesicSymmetric}
+	Let $G \subseteq \GL_m(\KK)$ be a Zariski closed self-adjoint subgroup. Set $P := G \cap \PD_m(\KK)$, $K := \{g \in G \mid g\HT g = \Id_m\}$ and $\mathfrak{p} := \Lie(G) \cap \Sym_m(\KK)$. Then
+	\begin{itemize}\itemsep 1pt
+		\item[(i)] $P = \exp(\mathfrak{p}) = \{ g\HT g \mid g \in G\}$.
+		
+		\item[(ii)] $P$ is a totally geodesic submanifold of $\PD_m(\KK)$ and diffeomorphic to $G/K$.
+		
+		\item[(iii)] $P$ is a CAT(0) symmetric space.\footnote{We do not give a definition but point out that such spaces have a rigid geometry that is very useful for optimization techniques.}
+	\end{itemize}
+	Conversely, if $P'$ is a totally geodesic submanifold of $\PD_m(\KK)$ with $\Id_m \in P'$, then $G := \{g \in \GL_m(\KK) \mid g\HT P' g = P'\}$ is a Euclidean closed self-adjoint subgroup of $\GL_m(\KK)$ such that $P' = G \cap \PD_m(\KK)$.
+\end{theorem}
+
+\begin{remark}
+	For consulting \cite{BridsonHaefligerBook} we point out the following.
+	In \cite{BridsonHaefligerBook} a reductive subgroup $G \subseteq \GL_m(\RR)$ is a Euclidean closed self-adjoint subgroup in our sense, see \cite[Definition~10.56]{BridsonHaefligerBook}.
+	Moreover, the assumptions in \cite[Theorem~II.10.58]{BridsonHaefligerBook} are different from ours. First, \cite[Theorem~II.10.58]{BridsonHaefligerBook} is only stated over $\RR$, but the complex case is actually a special case by Remark~\ref{rem:Wallach}, also see \cite[Example~II.10.57~(2)]{BridsonHaefligerBook}. Second, the assumptions on $G$ are slightly different, but this is justified by \cite[Lemma~II.10.59]{BridsonHaefligerBook}.
+	\hfill\remSymbol
+\end{remark}
+
+An important application of Theorem~\ref{thm:GmodKtotallyGeodesicSymmetric} is that norm minimization under $G$ is a geodesically convex optimization problem as follows.
+
+\begin{defn}\label{defn:GeodesicConvex}
+	Let $M \subseteq \PD_m(\KK)$ be a totally geodesic embedded submanifold, and $f \colon M \to \RR$ a smooth map. We say $f$ is \emph{geodesically convex}\index{geodesically convex!function}, if it is convex along all geodesics contained in $M$.
+	\hfill\defnSymbol
+\end{defn}
+
+
+\begin{example}\label{ex:GeodesicConvexFunctions}
+	The following two functions are geodesically convex on $\PD_m(\KK)$, and hence on all totally geodesic submanifolds of $\PD_m(\KK)$.
+	\begin{enumerate}\itemsep1pt
+		\item For a fixed vector $v \in \KK^m$, consider 
+		\[ f_v \colon \PD_m(\KK) \to \RR, \; \Psi \mapsto \langle v, \Psi v \rangle = \| \Psi^{1/2} v\|^2. \]
+		Then $F_v := \log f_v$ is geodesically convex \cite[Proposition~3.13]{GradflowArXiv}, and hence also $f_v$ is.\footnote{A logarithmically convex function is convex.}
+		Thus, for fixed $v \in \KK^m$ and $G \subseteq \GL_m(\KK)$ a Zariski closed self-adjoint subgroup the optimization problems
+			\[ \inf_{g \in G} \|gv\|^2 = \inf_{g \in G} \langle v, g\HT g v \rangle \quad \text{ and } \quad
+			\inf_{g \in G} \log \big( \|gv \|^2 \big)	\]
+		are geodesically convex on $P = \{ g\HT g \mid g \in G \}$.
+		This observation is important in Section~\ref{sec:KempfNess} and Part~\ref{part:CompComplexity}.
+		
+		\item The function $\PD_m(\KK) \to \RR, \; \Psi \mapsto \log \det(\Psi)$ is geodesically convex. Indeed, for a geodesic line $\gamma$ as in \eqref{eq:GeodesicPDm} consider
+			\[ h(t) := \log \det(\gamma(t)) = \log \det(\Psi) + \log \det \big( e^{tX} \big) . \]
+		Using $\det(\exp(tX)) = \exp(t \tr(X))$ one computes that $h'(t) = \tr(X)$ and $h''(t) = 0$ for all $t \in \RR$. The latter yields that $h$ is convex.
+		\hfill\exSymbol
+	\end{enumerate}
+\end{example}
+
+
+
+
+
+
+
+
+%---------- Representation Theory -----------------
+\section{Representation Theory} \label{sec:RepTheory}
+
+We recall the required knowledge on representation theory. First, we present examples of representations that are studied in this thesis. Afterwards, we connect reductive groups to Zariski closed self-adjoint subgroups, which justifies our restriction to the latter case. Finally, we review weights and roots. Further material on representation theory is provided, e.g., by \cite{borel2006lie, FultonHarris, HallBook, OnishchikVinbergBook, ProcesiBook}.
+
+
+\subsubsection{Basic Definitions and Examples}
+
+%content: rep's, subrep's, morphisms of rep's, equivalent reps, simple and semisimple, direct sum of two rep's
+We briefly recall some standard terminology on group representations. Consider a group $G$ (not necessarily endowed with further structure) and let $\KK \in \{\RR, \CC\}$.
+
+A \emph{representation}\index{representation!of a group} of $G$ on the $\KK$-vector space $V$ is a group morphism $\pi \colon G \to \GL(V)$. Equivalently, $G$ acts $\KK$-linearly on $V$ and we write $g \cdot v := \pi(g)(v)$, where $g \in G$ and $v \in V$. A representation $\pi$ is called \emph{faithful}\index{representation!faithful} if it is injective. If $G$ has further structure, then one usually requires additional properties on $\pi$: a \emph{representation of a matrix Lie group}\index{representation!of a matrix Lie group} is additionally assumed to be a Lie group morphism. If $G$ is an algebraic group over $\KK$, one considers rational representations as in Definition~\ref{defn:RationalRepresentation}. Note, that if we view an algebraic group over $\KK$ as a (matrix) Lie group, then any rational representation is smooth and hence a representation of the (matrix) Lie group.
+
+If $\varrho \colon G \to \GL(W)$ is a representation on the $\KK$-vector space $W$, then the \emph{direct sum}\index{direct sum of representations} of $\pi$ and $\varrho$ is defined as
+	\[ \pi \oplus \varrho \colon G \to \GL(V \oplus W), \quad g \mapsto \big( (v,w) \mapsto (\pi(v), \varrho(w)) \big). \]
+The $n$-fold direct sum of $\pi$ is denoted $\pi^{\oplus n}$. A \emph{morphism of representations}\index{morphism!of representations} is a $\KK$-linear map $f \colon V \to W$ that is \emph{$G$-equivariant}\index{Gequivariant@$G$-equivariant}, i.e., $f \big( \pi(g)(v) \big) = \varrho(g) \big( f(v) \big)$ holds for all $v \in V$ and all $g \in G$. The representations $\pi$ and $\varrho$ are \emph{isomorphic}\index{isomorphic representations}, if there exists a bijective morphism of representations between them.\footnote{Note that the inverse of such a morphism is automatically $\KK$-linear and $G$-equivariant.}
+
+A \emph{subrepresentation}\index{representation!sub-} is a $\KK$-vector subspace $W \subseteq V$ that is invariant under $G$, i.e., $g \cdot u \in U$ for all $g \in G$ and all $u \in U$.
+A representation $\pi \colon G \to \GL(V)$ is called \emph{simple}\index{representation!simple}\footnote{also called \emph{irreducible}}
+if its only subrepresentations are $\{0\}$ and $V$. It is called \emph{semisimple}\index{representation!semisimple}\footnote{also called a \emph{completely reducible} representation}
+if it is a direct sum of simple representations.
+
+\medskip
+
+Now, assume $G \subseteq \GL_m(\CC)$ is a matrix Lie group and $\pi \colon G \to \GL(V)$ a representation of . Then we obtain a Lie algebra morphism $\Pi \colon \Lie(G) \to \End(V)$ via the differential, compare Theorem~\ref{thm:Differential}. Such a morphism $\Pi$ is called a \emph{representation of the Lie algebra}\index{representation!of a Lie algebra} $\Lie(G)$. One can define the above concepts similarly for representations of Lie algebras, but this is not needed here. %todo: really?
+
+\medskip
+
+Of particular importance in representation theory is the adjoint representation.
+
+\begin{example}[Adjoint Representation] \label{ex:AdjointRep}
+	Let $G$ be a matrix Lie group. The \emph{adjoint representation}\index{adjoint representation!of a group} of $G$ is
+		\[ \mathrm{Ad} \colon G \to \GL(\Lie(G)), \quad g \mapsto (X \mapsto g X g^{-1}) .\]
+	It induces via the differential the \emph{adjoint representation}\index{adjoint representation!of a Lie algebra} of $\Lie(G)$
+		\[ \mathrm{ad} \colon \Lie(G) \mapsto \End(\Lie(G)), \quad X \mapsto (Y \mapsto [X,Y]) , \]
+	compare \cite[Proposition~3.34]{HallBook}.
+	\hfill\exSymbol
+\end{example}
+
+Next, we present several important examples of group representations, that are studied in this thesis. We point out that these are all rational representations defined over $\KK$ of a reductive group over $\KK$. We present these representations in terms of their $\KK$-linear algebraic action of $G$ on $V$. Moreover, we note that one can, of course, replace $\SL$ always with $\GL$ in these examples. However, the actions of (products of) $\SL$ are usually the ones we are interested in this thesis, also compare Example~\ref{ex:GLisUninteresting} below.
+
+%examples
+
+\begin{example}[Left Multiplication] \label{ex:RepLeftMult}
+	The group $G = \SL_m(\KK)$ acts algebraically on $\KK^{m}$ via left multiplication, i.e., $g \cdot v = gv$ for $g \in G$ and $v \in \KK^{m}$. Note that the $n$-fold direct sum of this representation is isomorphic (via $(\KK^m){\oplus n} \cong \KK^{m \times n}$) to the left multiplication of $G$ on $\KK^{m \times n}$: $g \cdot Y = gY$, where $Y \in \KK^{m \times n}$.
+	\hfill\exSymbol
+\end{example}
+
+\begin{example}[Left-right Action] \label{ex:RepLeftRight}
+	The \emph{left-right action}\index{left-right action} of $G = \SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$ on $V = (\KK^{m_1 \times m_2})^n$ is given by 
+		\[ g \cdot Y := \big( g_1 Y_1 g_2\T, \ldots, g_1 Y_n g_2\T \big), \]
+	where $g = (g_1,g_2) \in G$ and $Y = (Y_1,\ldots,Y_n) \in V$. We stress that the transpose $g_2\T$ is also considered for $\KK = \CC$ to ensure an \emph{algebraic} action. Using the Hermitian transpose $g_2\HT$ would involve complex conjugation, which prevents the action $G \times V \to V$ to be a polynomial function in the coordinates of $g$ and $Y$.
+	\hfill\exSymbol
+\end{example}
+
+It is convenient to use the Kronecker product for the upcoming example.
+
+\begin{defn}[Kronecker product of matrices] \label{defn:KroneckerProduct}	
+	The Kronecker product $A \otimes B$ of two matrices $A \in \KK^{m \times n}$ and $B \in \KK^{p \times q}$ is a matrix of size $m p \times n q$. It is defined as the following $m \times n$ block matrix, where each block has size $p \times q$,
+	\begin{align*}
+		A \otimes B := \begin{pmatrix}
+			A_{11} B & \cdots & A_{1n}B \\
+			\vdots & \ddots & \vdots \\
+			A_{m1} B & \cdots & A_{mn}B
+		\end{pmatrix} \in \KK^{(mp)\times(nq)}.
+	\end{align*} 
+	We index its rows by $(i,k)$ where $i \in [m]$ and $k \in [p]$, and its columns by $(j,l)$, where $j \in [n]$ and $l \in [q]$. Note that by definition the rows are ordered as follows: $(i_1,k_1) < (i_2,k_2)$ if and only if $i_1 < i_2$, or ($i_1 = i_2$ and $k_1 < k_2$). The same applies to the columns.
+	The entry of $A \otimes B$ at index $((i,k),(j,l))$ is $A_{ij} B_{kl}$.
+	
+	If one views $A$ and $B$ as linear maps, then the Kronecker product $A \otimes B$ is a representing matrix\footnote{With respect to certain ordered bases on $\KK^{m} \otimes \KK^{p}$ and $\KK^{n} \otimes \KK^q$.} for the tensor product of these linear maps.
+	\hfill\defnSymbol
+\end{defn}
+
+We are now able to introduce a natural action on tensors. It contains Examples~\ref{ex:RepLeftMult} and~\ref{ex:RepLeftRight} as special cases.
+
+\begin{example}[Tensor Scaling] \label{ex:RepTensorScaling}
+	The group $G = \SL_{m_1}(\KK) \times \cdots \times \SL_{m_d}(\KK)$  acts algebraically on $V = \KK^{m_1} \otimes \cdots \otimes \KK^{m_d}$ by $\KK$-linear extension of
+		\[ (g_1, \ldots, g_d) \cdot (v_1 \otimes \cdots \otimes v_d) = g_1(v_1) \otimes \cdots \otimes g_d(v_d), \]
+	where $g_i \in \SL_{m_i}(\KK)$ and $v_i \in \KK^{m_i}$. There is a unique way to identify $V \cong \KK^{m_1 \cdots m_d}$ such that the tensor scaling action corresponds to the representation
+		\[ \pi_{m_1 \otimes \cdots \otimes m_d} \colon G \to \GL_{m_1 \cdots m_d}(\KK), \quad (g_1,\ldots,g_d) \mapsto g_1 \otimes \cdots \otimes g_d, \]
+	where $g_1 \otimes \cdots \otimes g_d$ denotes the Kronecker product as introduced in Definition~\ref{defn:KroneckerProduct}.
+	Of course, the $n$-fold direct sum $\pi_{m_1 \otimes \cdots \otimes m_d}^{\oplus n}$ corresponds to the simultaneous action of $G$ on $n$ many tensors.
+	
+	We note that for $d=1$ this is just the action by left multiplication.
+	Moreover, if $d=2$ then $\pi_{m_1 \otimes m_2}^{\oplus n}$ is isomorphic to the left-right action from Example~\ref{ex:RepLeftRight}. This will be explained in Example~\ref{ex:LeftRightMatrixNormal}.
+	
+	We speak of the \emph{tensor scaling action}\index{tensor scaling action} if $d \geq 3$ and of the \emph{operator scaling action}\index{operator scaling action} if $d=2$. When restricting to the torus $T = \ST_{m_1}(\KK) \times \cdots \times \ST_{m_d}(\KK)$, we refer to this action as \emph{array scaling action}\index{array scaling action} if $d \geq 3$ and as \emph{matrix scaling action}\index{matrix scaling action} if $d=2$.
+	Finally, if $m = m_1 = \ldots = m_d$ we set $\pi_{m,d} := \pi_{m \otimes \cdots \otimes m}$.
+	\hfill\exSymbol
+\end{example}
+
+For the last example we first need to introduce quivers and their representations. Detailed information on quiver representations can be found in \cite{DerksenWeymanBook}.
+
+\begin{defn}[{\cite[Definition~1.1.1]{DerksenWeymanBook}}] \label{defn:Quiver}
+	A \emph{quiver} $Q = (Q_0,Q_1,h,t)$ consists of a finite set $Q_0$ of vertices, a finite set $Q_1$ of arrows, and two functions $h, t \colon Q_1 \to Q_0$. For $a \in Q_1$, $h(a)$ is the \emph{head} of $a$ and $t(a)$ is the \emph{tail} of $a$, i.e.,
+		\begin{center}
+			\begin{tikzcd}
+				t(a) \ar[r, "a"] & h(a)
+			\end{tikzcd}
+		\end{center}
+	We stress that multiple arrows and multiple loops are allowed.
+	\hfill\defnSymbol
+\end{defn}
+
+\begin{defn}[Quiver Representation]\label{defn:QuiverRepresentation}
+	Let $Q$ be a quiver with $Q_0 = [d]$. A \emph{representation}\index{representation!of a quiver}\index{quiver representation} of $Q$ is an assignment of a vector space $\KK^{m_i}$ to each vertex $i \in [d]$ and a matrix $Y_a \in \KK^{m_{h(a)} \times m_{t(a)}}$ to each arrow $a \in Q_1$. The matrix $Y_a$ represents a $\KK$-linear map $\KK^{m_{t(a)}} \to \KK^{m_{h(a)}}$. All information on the vertices is encoded by the \emph{dimension vector} $\alpha = (m_1,\ldots,m_d)$. The vector space
+		\[ \Rscr(Q, \alpha) := \bigoplus_{a \in Q_1} \KK^{m_{h(a)} \times m_{t(a)}} \]
+	is called the \emph{representation space}\index{representation space} of $\alpha$-dimensional representations of $Q$.
+	\hfill\defnSymbol
+\end{defn}
+
+\begin{example}[Action on Representations of a Quiver] \label{ex:QuiverRep}
+	Let $Q$ be a quiver with vertex set $Q_0 = [d]$ and fix a dimension vector $\alpha = (m_1, \ldots, m_d)$. Set
+		\[ \GL_\alpha(\KK) := \GL_{m_1}(\KK) \times \cdots \times \GL_{m_d}(\KK) \quad \text{and} \quad
+		\SL_\alpha(\KK) := \SL_{m_1}(\KK) \times \cdots \times \SL_{m_d}(\KK). \]
+	$\GL_\alpha(\KK)$ acts algebraically via base change on the representation space $\Rscr(Q,\alpha)$:
+		\[ g \cdot (Y_a)_{a \in Q_1} \, := \, \big( g_{h(a)} \, Y_a \, g_{t(a)}^{-1}  \big)_{a \in Q_1} , \]
+	where $g \in \GL_{\alpha}$ and $(Y_{a})_{a \in Q_1} \in \Rscr(Q,\alpha)$. We call this action the \emph{GLaction@$\GL$-action on the quiver}\index{$\GL$-action on a quiver} $Q$ with dimension vector $\alpha$.\footnote{This may be a non-standard name.}
+	If we restrict the action to the subgroup $\SL_{\alpha}(\KK)$ then we speak of the \emph{$\SL$-action on the quiver}\index{SLaction@$\SL$-action on a quiver} $Q$ with dimension vector~$\alpha$.
+	
+	For illustration we consider two examples. First, let $Q$ be the one loop quiver
+		\begin{center}
+			\begin{tikzcd}[cramped, sep=tiny] 1 \arrow[loop] \end{tikzcd}
+		\end{center}
+	and $\alpha = (m)$. Then $\GL_{\alpha}(\KK) = \GL_{m}(\KK)$ and $\Rscr(Q,\alpha) = \KK^{m \times m}$. As head and tail of the arrow in $Q$ are the same, we see that the $\GL$-action on the one loop quiver is the conjugation action. If $\varrho$ is the corresponding representation, then $\varrho^{\oplus n}$ is the simultaneous conjugation of $\GL_m(\KK)$ on $n$-many matrices. Note that the latter is the $\GL$ action on the quiver with one vertex and $n$ loops.
+	
+	Second, let $Q$ be the \emph{$n$-Kronecker quiver}\index{Kronecker quiver} with two vertices and $n$ arrows:
+	\begin{center}
+		\begin{tikzcd}
+			1  & 2 \ar[l, shift left = 4pt, bend left] \ar[l, draw=none, "\raisebox{+0.7ex}{\vdots}" description] \ar[l, bend right, shift right = 3pt]
+		\end{tikzcd}
+	\end{center}
+	and $\alpha = (m_1, m_2)$. Then $\GL_\alpha(\KK) = \GL_{m_1} \times \GL_{m_2}(\KK)$ and $\Rscr(Q,\alpha) = (\KK^{m_1 \times m_2})^n$. Since vertex~$1$ is the head and vertex~$2$ is the tail of all arrows, the $\GL$-action on $Q$ is given by
+		\[ g \cdot Y := \big( g_1 Y_1 g_2^{-1}, \ldots, g_1 Y_n g_2^{-1} \big), \]
+	where $g = (g_1,g_2) \in \GL_\alpha(\KK)$ and $Y = (Y_1,\ldots,Y_n) \in (\KK^{m_1 \times m_2})^n$. One verifies that pre-composition with the automorphism $(g_1,g_2) \mapsto (g_1, g_2^{-\mathsf{T}})$ of $\GL_{m_1}(\KK) \times \GL_{m_2}(\KK)$ transforms the $\GL$-action on the $n$-Kronecker quiver into the $\GL$-left-right action (Example~\ref{ex:RepLeftRight}), and vice versa. The same applies to the respective $\SL$-actions, i.e., when restricting to $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$.
+	\hfill\exSymbol
+\end{example}
+
+
+
+
+
+\subsubsection{Self-Adjoint and reductive groups}
+%this should come before roots and weights in order to work with Zclosed self-adjoint in there
+
+We connect the important concepts of self-adjoint groups and reductive groups to each other.
+Remember the definitions of semisimple representations from the beginning of this Section~\ref{sec:RepTheory}.
+
+A linear algebraic group $G$ is called \emph{linearly reductive}\index{group!linearly reductive}, if all its rational representations are semisimple.
+An important property of reductive groups in characteristic zero is that their rational representations are semisimple (also called completely reducible). In fact, in characteristic zero reductive and linearly reductive are equivalent notions.
+
+%todo keep the faithful part?
+\begin{theorem}[{\cite[Theorem~22.42 and Corollary~22.43]{MilneBook}}] \label{thm:ReductiveIsLinearlyReductive}
+	Let $G$ be a linear algebraic group over $\KK$. Then $G$ is reductive if and only if it admits a \emph{faithful} semisimple rational representation. 
+	Moreover, $G$ is reductive if and only if all finite-dimensional representations of $G$ are semisimple. 
+\end{theorem}
+
+Combining the latter theorem with results from \cite{MostowSelfAdjoint} links self-adjoint and reductive groups.
+
+\begin{theorem}[{\cite[Theorems~7.1 and 7.2]{MostowSelfAdjoint}}] \label{thm:ReductiveGroupActionToSelfAdjoint}
+	\ \\
+	Let $V$ be a finite dimensional $\KK$-vector space and let $G \subseteq \GL(V)$ be an algebraic subgroup over $\KK$. Then $G$ is reductive if and only if $G$ is self-adjoint with respect to some inner product on $V$.
+	Thus, if $V = \KK^m$ then $G \subseteq \GL_m(\KK)$ is reductive if and only if there exists some $h \in \GL_m(\KK)$ such that $hGh^{-1}$ is self-adjoint (with respect to the standard inner product).
+\end{theorem}
+
+As an upshot of the preceding theorem, the reductive subgroups of $\GL_m(\KK)$ are, up to conjugation, the Zariski closed self-adjoint subgroups.
+
+
+
+
+\subsubsection{Weights and Roots}
+
+%torus rep's: in discrete paper style and in gradflow style
+%weights for left multiplication, state them for left-right, for tensor scaling
+%adjoint representations Ad and ad, root spaces and Fundamental Lemma
+%positive Weyl chamber??
+
+We present necessary background on weights and roots. These concepts are only needed in the complex case and mainly used in Part~\ref{part:CompComplexity}. Thus, we restrict to $\KK = \CC$ and for an easier comparison we follow the conventions in \cite[Section~2]{GradflowArXiv}.
+For further information we refer to \cite{FultonHarris, GoodmanWallachBook, HallBook, KnappBook, ProcesiBook} and for a treatment over the reals to \cite{borel2006lie, OnishchikVinbergBook}.
+
+\medskip
+
+Thanks to Theorem~\ref{thm:ReductiveGroupActionToSelfAdjoint} we may, for the sake of concreteness, restrict to Zariski closed self-adjoint subgroups when working with reductive groups. Our setting for studying weights and roots is as follows.
+
+\begin{setting}\label{set:Weights}
+	Let $G \subseteq \GL_N(\CC)$ be a Zariski closed self-adjoint subgroup. Then $K := \{ g\in G \mid g\HT g = \Id_N \}$ is a maximal compact group of $G$, see Proposition~\ref{prop:SelfAdjointProperties}(a). Moreover, $T := (G \cap \GT_N(\CC) )^\circ$ is a maximal torus of $G$ and $T_K := T \cap K$ is a maximal compact torus in $K$, Proposition~\ref{prop:SelfAdjointProperties}(b). The $\RR$-space $\imag \Lie(T_K)$ lies in $\imag \Lie(\GT_N(\CC) \cap \Un_N)$ which can be identified with $\RR^N$, compare Example~\ref{ex:LieAlgebra} Item~\ref{item:LieOfGTCapUn}.
+	
+	Often, we study the concrete case where $G := \SL_m(\CC)^d$ is block-diagonally embedded in $\GL_{dm}(\CC)$ ($N = dm$). In that case $K = (\SU_m)^d$, $T = \ST_m(\CC)^d$ and $T_K = T \cap K$, which are as well block-diagonally embedded into $\GL_{dm}(\CC)$. Similarly, their Lie algebras are block-diagonally embedded into $\CC^{dm \times dm}$.
+	Considering Example~\ref{ex:LieAlgebra} Item~\ref{item:LieOfTK},  we frequently use the identification
+		\[ \imag \Lie(T_K) \cong (\onePerp)^d \subseteq (\RR^m)^d , \]
+	where $\onePerp$ is the orthogonal complement of $\ones_m$ in $\RR^m$.
+	\hfill\defnSymbol
+\end{setting}
+
+
+\begin{defn}[Weights and Weight Spaces] \label{defn:Weights}
+	Consider the Setting~\ref{set:Weights}.
+	Let $\pi \colon G \to \GL(V)$ be a complex rational representation and denote by $\Pi \colon \Lie(G) \to \End(V)$ its corresponding Lie algebra representation, compare Theorem~\ref{thm:Differential}.
+	
+	We call $\omega \in \imag \Lie(T_K)$ a \emph{weight}\index{weight} of $\pi$ (with respect to the maximal torus $T$) if there exists a \emph{non-zero} $v_\omega \in V$ such that
+	\begin{align*}
+		\forall X \in \Lie(T)  \colon \quad
+		\pi \left( e^X \right) v_\omega = e^{ \tr(X \omega)} v_\omega
+	\end{align*}
+	or, equivalently (see Theorem~\ref{thm:Differential}),
+	\begin{align*}
+		\forall X \in \Lie(T)  \colon \quad
+		\Pi \left( X \right) v_\omega =  \tr(X \omega) v_\omega \, .
+	\end{align*}
+	We say $v_\omega$ is a \emph{weight vector}\index{weight vector} for weight $\omega$. The \emph{weight space}\index{weight space} $V_\omega$ contains all weight vectors of $\omega$ and the zero vector. We denote by $\Omega(\pi)$ the set of weights of $\pi$.
+	\hfill\defnSymbol
+\end{defn}
+
+\begin{remark}\label{rem:WeightsAsCharacters}
+	The set of possible weights forms a lattice which is isomorphic to the character group $\Xfrak(T)$; compare Proposition~2.1.3 and Theorem~3.1.16 from \cite{GoodmanWallachBook} with each other.
+	Indeed, \cite[Proposition~2.1.3]{GoodmanWallachBook} follows the algebraic geometric point of view and defines weights via characters. The Lie group/algebra approach in Definition~\ref{defn:Weights}, which equals the approach in \cite[Theorem~3.1.16]{GoodmanWallachBook}, identifies the characters as points in $\imag \Lie(T_K)$.
+	
+	For example, $\Xfrak(\GT_m(\CC)) = \ZZ^m \subseteq \RR^m \cong \imag \Lie(\GT_m(\CC) \cap \Un_m)$. In the case $T = \ST_m(\CC)$ each character in $\Xfrak(T) = \ZZ^m / \ZZ \ones_m$ is identified via
+		\[ \Xfrak(T_K) \to \onePerp \cong \imag \Lie(T_K), \quad (\lambda_1, \ldots, \lambda_m) \mapsto (\lambda_1, \ldots, \lambda_m) - \frac{\lambda_+}{m} \ones_m\]
+	with a rational point in $\imag \Lie(T_K)$; also compare Example~\ref{exa:LeftMultSL} below.
+	\hfill\remSymbol
+\end{remark}
+
+We have the following important decomposition of $V$.
+
+\begin{theorem}[Weight Space Decomposition, {\cite[Theorem~3.1.16]{GoodmanWallachBook}}\footnote{Via rational characters it is \cite[Proposition~2.1.3]{GoodmanWallachBook}. Further references are \cite[Theorem~12.12]{MilneBook}, \cite[p.~141]{OnishchikVinbergBook}, \cite[Theorem~3.2.3]{SpringerBook}.}]
+	\label{thm:WeightSpaceDecomposition} \index{weight space decomposition}
+	\ \\
+	Consider Setting~\ref{set:Weights} and let $\pi \colon G \to \GL(V)$ be a rational representation. The weight spaces $V_{\omega}$ of $V$ with respect to the torus $T$ decompose $V$:
+		\begin{equation}\label{eq:WeightSpaceDecomp}
+			V = \bigoplus_{\omega \in \Omega(\pi)} V_\omega \, .
+		\end{equation}
+	In particular, the set of weights $\Omega(\pi)$ is finite.
+\end{theorem}
+
+\begin{remark}\label{rem:WeightsNfoldDirectSum}
+	Let $\pi \colon G \to \GL(V)$ be a rational representation with weight space decomposition as in \eqref{eq:WeightSpaceDecomp}.
+	Then its $n$-fold direct sum $\pi^{\oplus n} \colon G \to \GL(V^{\oplus n})$ has the weight space decomposition 
+		$V^{\oplus n} = \bigoplus_{\omega \in \Omega(\pi)} V_\omega^{\oplus n} . $
+	In particular, we see that $\Omega(\pi) = \Omega(\pi^{\oplus n})$
+	\hfill\remSymbol
+\end{remark}
+
+Next, we give the set of weights for several rational representations.
+
+\begin{example}[General Action of $\GT_d(\CC)$] \label{ex:GeneralGTaction}
+	In the following we discuss all \emph{rational} representations of $\GT_d(\CC)$ up to isomorphism. The notation is adjusted to the one used in Chapter~\ref{ch:LogLinearModels}.
+ 	
+ 	If $\pi \colon \GT_d(\CC) \to \GL(V)$ is a rational representation, then we can identify $V \cong \CC^m$ such that the canonical unit vectors $e_j$, $j \in [m]$ are weight vectors. Let $(a_{1j}, \ldots, a_{dj}) \in \ZZ^d$ be the weight with weight vector $e_j$. Then $t = \diag(t_1, \ldots, t_d) \in \GT_d(\CC)$ acts on the coordinates $v \in \CC^m$ via $v_j \mapsto t_1^{a_{1j}}  \cdots t_d^{a_{dj}} v_j$. That is, $t$ acts on $v$ by left-multiplication with the diagonal matrix
+ 	\begin{equation} \label{eq:torusd}
+ 		\begin{pmatrix} t_1^{a_{11}} t_2^{a_{21}} \cdots t_d^{a_{d1}} & & & \\ & t_1^{a_{12}} t_2^{a_{22}} \cdots t_d^{a_{d2}} & & \\ & & \ddots & \\ & & & t_1^{a_{1m}} t_2^{a_{2m}} \cdots t_d^{a_{dm}} \end{pmatrix} .
+ 	\end{equation}
+ 	We can encode this action uniquely by the \emph{weight matrix}\index{weight matrix}	$A = (a_{ij}) \in \ZZ^{d \times m}$, which contains the weights as columns. Of course, any such matrix $A$ defines an algebraic action via ~\eqref{eq:torusd}.
+	Thus, rational representations of $\GT_d(\CC)$ on $\CC^m$ are in one-to-one correspondence with their weight matrix $A$.
+	
+	For us, a \emph{linearization}\index{linearization} via $b \in \ZZ^m$ of the above action shifts all weights by the vector $-b$.\footnote{Linearizations are a concept from Geometric Invariant Theory \cite[Chapter~7]{DolgachevBook}. In our specific situation the general concept agrees with the definition of linearization presented here, see \cite[Remark~3.3]{DiscretePaper}.}
+	That is, $t \in \GT_d(\CC)$ acts on $v \in \CC^m$ via
+		 \begin{equation}
+		 	\label{eq:torusAction}
+		 	v_j \mapsto t_1^{a_{1j}-b_1}  \cdots t_d^{a_{dj}-b_d} v_j \, .
+		 \end{equation}
+	We refer to this action as the \emph{action of $\GT_d(\CC)$ given by matrix $A$ with linearization $b$}. Of course, the action in \eqref{eq:torusAction} is again encoded by a weight matrix, namely $A - \ones_m\T \otimes b = A - (b,\ldots,b) \in \ZZ^{d \times m}$.	However, it is instructive to work with linearizations in Chapter~\ref{ch:LogLinearModels}. There, the matrix $A$ will encode a \emph{statistical model}\footnote{namely, the log-linear model $\Mll_A$ defined by $A$}
+	and $b$ is a vector that depends on the \emph{observed data} and the matrix $A$.
+	\hfill\exSymbol
+\end{example}
+
+%\begin{remark}[{\cite[Remark~3.3]{DiscretePaper}}] %delete?!
+%	The name linearization comes from the setting of an algebraic group acting on a complex variety $X$, as follows. We fix a line bundle over~$X$, i.e. a map $p : L \to X$, with certain properties, whose fibers are copies of $\CC$. Given a group action on $X$, a linearization is an action on $L$ that agrees with the original action under projection under $p$, and that is a linear action on each fiber~\cite[Chapter 7]{DolgachevBook}.
+%	For example, the following projection map is a line bundle,
+%	\[p: \{ (x,v) \in \PP_\CC^{m-1} \times \CC^m \mid v \in \ell_x \} \to \PP_\CC^{m-1},\]
+%	where the fiber over each $x \in \PP_\CC^{m-1}$ corresponds to the line $\ell_x$ in $\CC^m$ that the point represents. That way, a linearization lifts an action on $\PP_\CC^{m-1}$ to an action on $\CC^m$.
+%	\hfill\remSymbol
+%\end{remark} 
+
+
+\begin{example}[Left Multiplication, {\cite[Example~B.2]{WeightMargin}}]  \label{exa:LeftMultSL}
+	Consider the rational representation $\pi \colon \SL_m(\CC) \to \GL_m(\CC), g \mapsto g$, which is the action of $G = \SL_m(\CC)$ on $\CC^m$ by left multiplication. For $i \in [m]$, we set
+	\begin{equation}\label{eq:defnEps-i} 
+		\eps_{i} := e_i - \frac{1}{m} \ones_m \in \onePerp \subseteq \RR^m
+	\end{equation}
+	where $e_i \in \RR^m$ is the $i^{th}$ canonical unit vector. Remember that we identify $\onePerp \cong \imag \Lie(T_K)$.
+	For all $X = \diag(x_1, \ldots, x_m) \in \Lie(T)$ and all $i \in [m]$
+	\begin{align*}
+		\pi \left( \exp(X)\right) e_i = \exp(x_i) e_i \overset{(*)}{=} \exp \big( \tr(X \diag(\eps_i)) \big) e_i \, ,
+	\end{align*}
+	where we used $x_1 + \ldots + x_m = 0$ in $(*)$. Thus, $\eps_i \in \onePerp \cong \imag \Lie(T_K)$ is a weight of $\pi$ with weight vector $e_i$. Since $\CC^m = \bigoplus_i \CC e_i$, we deduce
+	$\Omega(\pi) = \lbrace \eps_i  \mid i \in [m] \rbrace$.
+	
+	We stress that, although $\pi \left( \exp(X)\right) e_i = \exp \big( \tr(X \diag(e_i)) \big) e_i$ holds for all $X \in \Lie(T)$, we have $e_i \notin \onePerp \cong \imag \Lie(T_K)$ and hence $e_i$ cannot be a weight.
+	\hfill\exSymbol
+\end{example}
+
+\begin{example}[Tensor Scaling] \label{ex:WeightsTensorScaling}
+	Consider the tensor scaling action $\pi_{m,d}$, i.e., the natural action of $G = \SL_m(\CC)^d$ on $V = (\CC^m)^{\otimes d}$ from Example~\ref{ex:RepTensorScaling}. Using the argument from Example~\ref{exa:LeftMultSL} in each tensor factor, one verifies that $(\eps_{i_1}, \ldots, \eps_{i_d})$ is a weight of $\pi_{m,d}$ with weight vector $e_{i_1} \otimes \cdots \otimes e_{i_d}$. Therefore, we deduce
+		\[ \Omega(\pi_{m,d}) = \big\{ (\eps_{i_1}, \ldots, \eps_{i_d}) \mid i_1,\ldots,i_d \in [m] \big\}  \subseteq (\RR^m)^d ,\]
+	since the $e_{i_1} \otimes \cdots \otimes e_{i_d}$ span $V$.
+	\hfill\exSymbol
+\end{example}
+
+
+\begin{example}[Actions on Quivers] \label{ex:WeightsQuiverReps}
+	Recall the $\SL$-action on a quiver $Q$, i.e., the action of $\SL_{\alpha}(\CC)$ on $\Rscr(Q, \alpha) = \bigoplus_{a \in Q_1} \CC^{m_{h(a)} \times m_{t(a)}}$ from Example~\ref{ex:QuiverRep}. Since $\Rscr(Q, \alpha)$ is the direct sum of the matrix spaces associated to each arrow $a \in Q$, one can read off the weights for a general quiver by considering the two ``building blocks''. The latter refers to the two quivers
+		\begin{center}
+			\begin{tikzcd}[cramped]
+				1 \arrow[in = 45, out = -45, loop] & & \text{and} & 1 & 2. \arrow[l]
+			\end{tikzcd}
+		\end{center}
+	Let $\pi$ be the action of $G = \SL_m(\CC)^2$ on the right quiver with dimension vector $\alpha = (m_1, m_2)$, i.e., $(g_1,g_2) \cdot Y = g_1 Y g_2^{-1}$ where $Y \in \KK^{m_1 \times m_2}$.
+	For $i \in [m_1]$ and $j \in [m_2]$, denote by $E_{i,j} \in \CC^{m_1 \times m_2}$ the matrix with entry one at position $(i,j)$ and all other entries zero. %todo first appearance of E_ij
+	%
+	Then for all $i \in [m_1]$, $j \in [m_2]$ and all $X = \diag(x,y) \in \Lie(T)$
+		\begin{align*}
+			\exp(X) \cdot E_{i,j} &= \exp(x_i - y_j ) E_{i,j} \overset{(*)}{=} \exp \big( \langle x, \eps_i \rangle - \langle y, \eps_j \rangle \big) E_{i,j} \\
+			&= \exp \big( \tr ( X \diag(\eps_i,-\eps_j) ) \big) E_{i,j} ,
+		\end{align*}
+	where we used in $(*)$ that $x_+ = y_+ = 0$ (i.e., that $X \in \Lie(T)$).\footnote{By abuse of notation, $\eps_i = e_i - m_1^{-1} \ones_{m_1} \in \ones^\perp_{m_1}$ while $\eps_j = e_j - m_2^{-1} \ones_{m_2} \in \ones_{m_2}^\perp$.}
+	Therefore, $(\eps_i,-\eps_j)$ is a weight with weight vector $E_{i,j}$ and hence
+		\[ \Omega(\pi) = \{ (\eps_i,-\eps_j) \mid i \in [m_1], \, j \in [m_2]\} . \]
+	
+	Similar computations show that $\SL$-action on the one loop quiver, i.e., the conjugation action of $\SL_m(\CC)$ on $\CC^{m \times m}$ has the following weights. For $i,j \in [m]$ with $i \neq j$, $\eps(e_i - e_j)$ is a weight with weight vector $E_{i,j}$, and $0$ is a weight with weight space $\bigoplus_{i \in[m]} \CC E_{i,i}$.
+	\hfill\exSymbol
+\end{example}
+
+Finally, we define roots and root spaces.
+
+\begin{defn}[Roots and Root Spaces]\label{defn:Roots}
+	Let $G \subseteq \GL_m(\CC)$ be Zariski closed and self-adjoint. Set $T := G \cap \GT_m(\KK)$ and consider the adjoint representations $\Ad$ and $\ad$ from Example~\ref{ex:AdjointRep}. The \emph{non-zero} weights $\alpha \in \Omega(\mathrm{Ad})$ are called \emph{roots}\index{root} of $G$ and the weight spaces $\Lie(G)_{\alpha}$ are called \emph{root spaces}\index{root space}. Note that $Y \in Lie(G)$ satisfies $\ad(X)(Y) = [X, Y] = 0$ for all $X \in \Lie(T)$ if and only if $Y \in \Lie(T)$. Hence, $\Lie(T)$ is the weight space of $0 \in \Omega(\mathrm{Ad})$ and with Theorem~\ref{thm:WeightSpaceDecomposition} we obtain
+		\[ \Lie(G) = \Lie(T) \oplus \bigoplus_\alpha \Lie(G)_\alpha ,\]
+	the \emph{root space decomposition}\index{root space decomposition} of $\Lie(G)$.
+	\hfill\defnSymbol
+\end{defn}
+
+\begin{example}[{\cite[Example~B.3]{WeightMargin}}] \label{exa:Roots}
+	Let $G = \SL_m(\CC)$ and for $i,j \in [m]$ denote by $E_{i,j} \in \CC^{m \times m}$ the matrix with entry one at position $(i,j)$ and all other entries zero. For $i,j \in [m]$ with $i \neq j$ and for all $X = \diag(x_1, \ldots, x_m) \in \Lie(T)$ we compute
+	\begin{align*}
+		\mathrm{ad}(X)(E_{i,j}) &= [X,E_{i,j}] = (x_i - x_j) E_{i,j} = \tr \big( X \diag(e_i - e_j) \big) E_{i,j} .
+	\end{align*}
+	Since $e_i - e_j \in \onePerp \cong \imag \Lie(T_K)$, we deduce $e_i - e_j \in \Omega(\Ad)$ with weight vector $E_{i,j}$. Therefore, the set of roots of $G = \SL_m(\CC)$ is $\lbrace e_i - e_j \mid i,j \in [m], i\neq j \rbrace$, because $\Lie(G) = \Lie(T) \oplus \bigoplus_{i \neq j} \CC E_{i,j}$.
+	
+	More generally, one can deduce that the roots of $G = \SL_m(\CC)^d$ are the 
+	\begin{align*}
+		(e_i - e_j, 0_m, \ldots, 0_m), (0_m, e_i - e_j, 0_m, \ldots, 0_m), \ldots, (0_m, \ldots, 0_m, e_i - e_j) \in \left( \RR^m \right)^d
+	\end{align*}
+	for $i,j \in [m]$ with $i \neq j$.
+	\hfill\exSymbol
+\end{example}
+
+We need the following property of roots, which is proved like \cite[Lemma~6.5]{HallBook} and \cite[Proposition~5.4(c)]{KnappBook}.
+
+\begin{prop}[{\cite[Proposition~B.4]{WeightMargin}}] \label{prop:Roots}
+	Let $G \subseteq \GL_N(\CC)$ be a Zariski closed self-adjoint subgroup and let $\alpha$ be a root of $G$ with root space $\Lie(G)_\alpha$. Consider a rational representation $\pi \colon G \to \GL(V)$ and its induced differential $\Pi \colon \Lie(G) \to \End(V)$. If $V_\omega$ is the weight space of some weight $\omega \in \Omega(\pi)$, then
+	\begin{align*}
+		\Pi \big( \Lie(G)_\alpha \big) (V_\omega) \subseteq V_{\omega + \alpha},
+	\end{align*}
+	where $V_{\omega + \alpha} := \{0\}$, if $\omega + \alpha \notin \Omega(\pi)$.
+\end{prop}
+
+
+
+
+
+
+
+%---------- Stability Notions -----------------
+\section{Stability Notions} \label{sec:StabilityNotions}
+
+We introduce the (topological) stability notions that play a central role in this thesis. From the perspective of Geometric Invariant Theory (GIT), our definitions in terms of the Euclidean topology may seem unusual. However, this is needed for the Kempf Ness Theorem (Section~\ref{sec:KempfNess}) over $\RR$.
+We also comment on connections to GIT and point out that in the complex reductive setting our notions agree with the classical notions from GIT, see Remark~\ref{rem:UsualStabilityGIT}. We refer to
+\cite{DolgachevBook, hoskinsLectureModuli, KraftBook, mumford1977stability, MumfordGITbook, NewsteadBook, PopovVinberg}
+for further information on GIT.
+
+\medskip
+
+Let $G$ be a group\footnote{not necessarily endowed with further structure} and $V$ a finite dimensional $\KK$-vector space with an inner product. Given a representation $\pi \colon G \to \GL(V)$, define the \emph{capacity}\index{capacity} of $v \in V$ as
+\begin{equation}\label{eq:Capacity}
+	\capac_G(v) := \inf_{g \in G} \| g \cdot v \|^2 . 
+\end{equation}
+Note that $\capac_G(v) = \capac_G(g \cdot v)$ holds for all $g \in G$.
+
+\begin{defn}[Toplogical Stability Notions]\label{defn:StabilityGroupTopological}
+	Let $\pi \colon G \to \GL(V)$ be a representation of a group $G$, where $V$ a finite-dimensional $\KK$-vector space equipped with its Euclidean topology. For $v \in V$, denote its stabilizer by $G_v$ and its orbit by $G \cdot v$. We define the following stability notions under the action of $G$.\index{stability notions!topological}
+	\begin{itemize}
+		\item[(a)] $v$ is \emph{unstable}\index{unstable}, if $\;0 \in \overline{G \cdot v}$. Equivalently, $\capac_G(v) = 0$.
+		
+		\item[(b)] $v$ is \emph{semistable}\index{semistable}, if $\;0 \notin \overline{G \cdot v}$. Equivalently, $\capac_G(v) > 0$.
+		
+		\item[(c)] $v$ is \emph{polystable}\index{polystable}, if $v \neq 0$ and $G \cdot v$ is closed.
+		
+		\item[(d)] $v$ is \emph{stable}\index{stable}, if $v$ is polystable and $G_v$ is finite.
+	\end{itemize}
+	Note that polystable implies semistable.
+	The set $\Ncal$ of all unstable points is called \emph{(topological) null cone}\index{null cone!topological}.
+	\hfill\defnSymbol
+\end{defn}
+
+Usually, we consider the stability notions for a rational representation of an algebraic group over $\KK$. In Part~\ref{part:AlgebraicStatistics} on algebraic statistics we often restrict to the image and work with stability notions under $\pi(G)$.
+
+\begin{remark}\label{rem:StabilityGroupVsImageUnderRep}
+	We note that (a), (b) and (c) in Definition~\ref{defn:StabilityGroupTopological} only depend on the image $H := \pi(G)$, so these stability notions coincide for the action of $G$ and of $H$. However, the notion \emph{stable} may change as $H_v = G_v / \ker(\pi)$. Namely, if $\ker(\pi)$ is infinite (and hence $G \supseteq \ker(\pi)$ is), it may be that $H_v$ is finite. Still, if $\ker(\pi)$ is finite, then $H_v$ is finite if and only if $G_v$ is finite. Hence, also the notion of \emph{stable} coincides in this case.
+	\hfill\remSymbol
+\end{remark}
+
+\begin{example}\label{ex:GLisUninteresting}
+	Let $G = \GL_m(\KK)$ act on $V = \KK^{m \times n}$ via left multiplication. Then any $v \in V$ is unstable: for $\eps > 0$ we see that $(\veps \Id_m) \cdot v = \veps v \to 0$ as $\veps \to 0$. Therefore, this action is in a certain sense ``uninteresting'' when studying stability notions. This also applies to similar actions of (products of) GL, e.g., left-right action from Example~\ref{ex:RepLeftRight} or the tensor scaling action from \ref{ex:RepTensorScaling}.
+	\hfill\exSymbol
+\end{example}
+
+As a consequence of the preceding example, it is more natural to consider actions of (products of) SL.
+
+\begin{example}\label{ex:SLactionOnKmTimesn}
+	Let $G = \SL_m(\KK)$ act on $V = \KK^{m \times n}$ via left multiplication. We argue that $Y \in \KK^{m \times n}$ is either unstable or stable, depending on its row rank.
+	
+	If $Y$ does not have full row rank $m$, then by Gaussian elimination one can create a matrix $Y' \in G \cdot Y$ that has a zero row. To ease notation assume the first row of $Y'$ is zero. Then $\diag(\veps^{-m+1}, \veps, \ldots, \veps) \cdot Y' \to 0$ for $\veps \to 0$ and  
+	therefore $Y$ is $G$-unstable. In particular, if $m > n$ then all matrices are unstable.
+	
+	Now, assume $Y$ has full row rank $m$, so we must have $m \leq n$ and $Y \neq 0$. We argue that $Y$ is stable under $G$. If $g \in G_Y$, i.e., $gY = Y$, then $g$ has $m$ linearly independent eigenvectors, which are columns of $Y$, for eigenvalue one. Hence, we must have $g =\Id_m$ and this shows $G_Y = \{\Id_m\}$ is finite. To show that the orbit $G \cdot Y$ is Euclidean closed consider first $m = n$. Then
+		\[ G \cdot Y = \{ X \in \KK^{m \times m} \mid \det(X) = \det(Y)\}, \]
+	where ``$\supseteq$'' is clear, and conversely given $X$ with $\det(X) =\det(Y)$ just consider $g := XY^{-1} \in G$. We see that $G \cdot Y$ is even Zariski closed. For the general case $m \leq n$, the assumption on $Y$ means that $Y$ has a non-vanishing maximal minor. Without loss of generality assume it is given by the first $m$ columns $Y_1,\ldots,Y_m$. Set $Y_{(1..m)} := (Y_1, \ldots, Y_m) \in \KK^{m \times m}$. One verifies that
+		\begin{align*}
+			G \cdot Y = \big\{ X \in \KK^{m \times n} \mid &\det(X_{(1..m)}) = \det(Y_{(1..m)}), \\ 
+			&(X_{(1..m)})(Y_{(1..m)})^{-1} (Y_{m+1},\ldots,Y_n) = (X_{m+1},\ldots,X_n) \big\} ,
+		\end{align*}
+	which is again Zariski closed.
+	Altogether, $Y$ is stable if it has full row rank.
+	\hfill\exSymbol
+\end{example}
+
+In algebraic statistics one is usually interested in the real setting. For this, the next statement is very useful when working with \emph{reductive} groups.
+
+\begin{prop}[{\cite[Proposition~2.21]{DM21MatrixNormal}}]\label{prop:Prop2-21-DM}
+	Let $G$ be a connected, complex reductive $\RR$-group. Let $\pi \colon G \to \GL(V)$ be a rational representation of $G$ defined over $\RR$ and let $v \in V_\RR$. Then $v$ is un-/semi-/poly-/stable under $G_\RR$ if and only if $v$ is un-/semi-/poly-/stable under $G$.
+\end{prop}
+
+
+
+%reductive group implies: invariant ring finitely generated, any orbit closure contains a unique closed orbit, invariants separate orbit closure, latter implies topological unstable equals unstable  (mention that latter fails if non-reductivel; see example from AKRS referee correspondence)
+
+In the following, we comment on connections to Geometric Invariant Theory (GIT).
+In particular, we justify our topological notions of stability by showing that they agree with the ``usual'' stability notions from GIT, see Remark~\ref{rem:UsualStabilityGIT}. First, we need to recall the ring of invariants.
+
+In the following $\pi \colon G \to \GL(V)$ is always a rational representation of a complex reductive group.
+The representation $\pi$ induces a natural action of $G$ on the coordinate ring $\CC[V]$ of $V$ via 
+	\[ (g \cdot f)(v) := f(g^{-1} \cdot v), \quad \text{where } g\in G, f \in \CC[V], v \in V.\]
+The \emph{ring of invariants}\index{ring of invariants} is the set of all fixed points under the latter action:
+	\[\CC[V]^G := \big\{ f \in \CC[V] \mid \forall \, g \in G \colon \; g\cdot f = f \big\}. \]
+That is, $\CC[V]^G$ contains exactly those regular functions on $V$ that are constant on the $G$-orbits in $V$.
+We start with Hilbert's finiteness theorem \cite{Hilbert1890, Hilbert1893}. Modern references are \cite[Theorem~2.2.10]{DerksenKemperBook} and \cite[Theorem~3.5]{PopovVinberg}.
+
+\begin{theorem}[Hilbert] \label{thm:HilbertInvariantRing}
+	Let $\pi \colon G \to \GL(V)$ be a rational representation of a complex reductive group. Then $\CC[V]^G$ is a finitely generated $\CC$-algebra.
+\end{theorem}
+
+The \emph{invariant-theoretic null cone}\index{null cone!invariant-theoretic} is defined as
+	\[ \Ncal^{\text{inv}} := \big\{ v \in V \mid \forall \, f \in \CC[V]^G \colon \; f(v) = f(0)\big\} .\]
+In words, $\Ncal^{\text{inv}}$ contains all vectors that cannot be distinguished by invariants from the zero vector. A different characterization is obtained with the next theorem.
+
+\begin{theorem}\label{thm:GeneratingInvariantsSeparate}
+	Let $\pi \colon G \to \GL(V)$ be a rational representation of a complex reductive group. For $v,w \in V$ it holds that
+		\[ \overline{G \cdot v}^{\Zar} \cap \overline{G \cdot w}^{\Zar} = \emptyset \quad \Leftrightarrow \quad
+		\exists \, f \in \CC[V]^G \colon \; f(v) \neq f(w) . \]
+	Moreover, any orbit closure contains a unique Zariski closed orbit.
+\end{theorem}
+
+\begin{proof}
+	Note that any $f \in \CC[V]^G$ is constant on $G$-orbits and hence, by continuity, on Zariski closures of $G$-orbits. Therefore, $\overline{G \cdot v}^{\Zar} \cap \overline{G \cdot w}^{\Zar} \neq \emptyset$ implies that for all $f \in \CC[V]^G$ one has $f(v) = f(w)$. The other direction follows from \cite[Lemma~6.1]{DolgachevBook}, also see \cite[Theorem~3.12]{Wallach}.
+	
+	Let $x \in V$. Since invariants are constant on $\overline{G \cdot x} = \overline{G \cdot x}^{\Zar}$, the first part shows that there can be at most one Zariski closed orbit in $\overline{G \cdot x}$. Such an orbit always exists by Proposition~\ref{prop:OrbitStructure}.
+\end{proof}
+
+In the special case $w=0$, the above theorem shows that $v \in \Ncal^{\text{inv}}$ if and only if $0 \in \overline{G \cdot v}^{\Zar}$. A vector $v$ lying in $\Ncal^{\text{inv}}$ is called unstable (in the GIT sense). More generally, we have the following.
+
+\begin{remark}[Stability Notions in GIT]\label{rem:UsualStabilityGIT}
+	Let $\pi \colon G \to \GL(V)$ be a rational representation of a complex reductive group.
+	In Geometric Invariant Theory (GIT), when studying (affine) GIT quotients one usually considers the notions unstable, semistable and stable. They have different equivalent characterizations (as $G$ is reductive), see the excellent Table~1.1 in \cite[p.~41]{mumford1977stability}. One characterization is via the ring of invariants $\CC[V]^G$, e.g., as for $\Ncal^{\text{inv}}$. Another characterization is topological and exactly as in Definition~\ref{defn:StabilityGroupTopological}(a), (b) and (d), but using the Zariski topology instead of the Euclidean; also compare \cite[Appendix, p.~194]{MumfordGITbook}. Similarly, some modern literature (e.g., \cite{thomas2006notes}) defines polystable as in Definition~\ref{defn:StabilityGroupTopological}(c), again using the Zariski topology. Taking into account that Euclidean and Zariski closure of a $G$-orbit coincide (Corollary~\ref{cor:ClosureComplexCase}), we see that the classical stability notions from GIT agree with the ones in Definition~\ref{defn:StabilityGroupTopological}.
+	
+	We caution the reader to always check the definitions of stability in the literature. Over time the namings have changed: e.g., polystable is called ``stable'' in the main text of \cite{MumfordGITbook}, while stable is called there ``properly stable''. Moreover, polystable is ``Kempf-stable'' in \cite{DolgachevBook} and ``nice semistable'' in \cite{NessStratification}.
+	\hfill\remSymbol
+\end{remark}
+
+The next example stresses that $G$ being reductive is necessary for the equality of invariant-theoretic and topological null cone.
+
+\begin{example}\label{ex:NonReductiveDifferentNullCones}
+	Let $G = \CC$ be the  one-dimensional additive group, which is non-reductive (Example~\ref{ex:NonReductive}). Consider the rational representation
+		\[ \pi \colon G \to \GL_2(\CC), \quad g \mapsto \begin{pmatrix} 1 & g \\ 0 & 1 \end{pmatrix} \]
+	on $V = \CC^2$, i.e., $g$ acts on $(x,y) \in \CC^2$ via $g \cdot (x,y) = (x + gy, y)$. Denote the coordinate functions on $V$ by $X,Y \in \CC[V]$. Then $\CC[Y] \subseteq \CC[V]^G$ and one verifies that equality holds. Therefore, 
+		\[ \Ncal^{\text{inv}} = \big\{ (x,0) \mid x \in \CC \big\}. \]
+	Moreover, any orbit $G \cdot (x,y)$ is either a point (if $y=0$) or an affine line (if $y \neq 0$). In particular, all orbits are closed and hence the topological null cone is
+		\[ \Ncal = \big\{ (x,y) \in \CC^2 \mid 0 \in \overline{G \cdot (x,y)} \big\} = \{ 0 \} . \]
+	We see that $\Ncal \varsubsetneq \Ncal^{\text{inv}}$.
+	\hfill\exSymbol
+\end{example}
+
+
+
+
+
+
+
+
+

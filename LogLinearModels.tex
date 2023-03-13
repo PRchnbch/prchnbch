@@ -1,0 +1,715 @@
+
+
+%TODO change notation of weight polytope!!; change notation for vector q^{(2)} etc to ^{[2]}; change columns of A from a_j to A_j??; check again for i.e. and e.g.; change $\mathcal{M}_A$ to $\Mll_A$; always add \CC to \GT when missing; add subscript m to all-ones vector
+
+%todo
+%Change $\lambda$ to t???
+
+Log-linear models are widespread in statistics and play a fundamental role in categorical data analysis, with a wide range of applications \cite{bishop2007discrete}. They are discrete models, see Section~\ref{sec:DiscreteModels}, and include independence models and discrete graphical models \cite{LauritzenBook}. There is a long history of the study of log-linear models in statistics, with an emphasis on ML estimation \cite{MLEloglinear}. Log-linear models play a prominent role in algebraic statistics: the key link to algebra is that the Zariski closure of a log-linear model is a toric variety, defined by a monomial parametrization. Toric varieties have a foundational place among the algebraic varieties studied in algebraic geometry \cite{cox2011toric}.
+
+\medskip
+
+We study connections between toric invariant theory and maximum likelihood (ML) estimation for log-linear models. Concretely, we use notions of stability under a torus action to characterize existence of the maximum likelihood estimate (MLE), Theorem~\ref{thm:MLEpolystableTorus}. Moreover, we show that norm minimization over a torus orbit is equivalent to maximizing the log-likelihood in log-linear models, Theorem~\ref{thm:MLEviaMomentMapLogLinear}. This in turn allows to compare scaling algorithms from statistics and invariant theory.
+The whole chapter is based on \cite{DiscretePaper}, which is joint work with with Carlos Am\'endola, Kathl\'en Kohn and Anna Seigal.
+
+\medskip
+
+This is the first instance in this thesis which intimately links invariant theory and ML estimation. In Chapters~\ref{ch:GaussianModels}, \ref{ch:GaussianGroupModels} and~\ref{ch:RDAGs} we will encounter similar connections between invariant theory and ML estimation for \emph{Gaussian} models. Of special interest to the discrete setting here is the study of Gaussian group models in Chapter~\ref{ch:GaussianGroupModels}. The latter is based on \cite{SiagaPaper}, the companion paper of \cite{DiscretePaper}.
+We find remarkable similarities and differences between the discrete and Gaussian settings, which we discuss in Section~\ref{sec:DiscussionGaussian}. The discrete case is presented first, since the study of scaling algorithms for log-linear models motivates and contributes to the algorithmic consequences in Chapter~\ref{ch:GaussianGroupModels}. %todo perhaps more concrete reference
+
+
+
+\paragraph{Organization and Assumptions.}
+In Section~\ref{sec:LogLinearIntro} we review log-linear models and known results on their ML estimation. Afterwards, we present  the main results, Theorems~\ref{thm:MLEpolystableTorus} and~\ref{thm:MLEviaMomentMapLogLinear}, and illustrate them in examples, Section~\ref{sec:ToricInvTheoryLogLinear}. We compare iterative proportional scaling (IPS), a classical method to find the MLE for log-linear models, with approaches to norm minimization and scaling from invariant theory in Section~\ref{sec:ScalingLogLinear}. Finally, we give alternative characterizations of MLE existence via semistability in Section~\ref{sec:LogLinearSemistability}. %todo perhaps delete
+
+%ML estimation for log-linear models, what is known
+%toric invariant theory, moment map gives MLE
+% scaling algorithms on both sides
+%perhaps MLE existence via semistability
+
+
+
+%%abstract
+%	We establish connections between
+%	invariant theory and maximum likelihood estimation for discrete statistical models.
+%	We show that norm minimization over a torus orbit is equivalent to maximum likelihood estimation in log-linear models. 
+%	We use notions of stability under a torus action to characterize the existence of the maximum likelihood estimate, and 
+%	discuss connections to scaling algorithms.
+%
+%
+%%intro
+%Fruitful, sometimes unexpected, connections between algebra and statistics are constantly being discovered in the field of algebraic statistics. In this paper we unveil a connection between toric invariant theory and maximum likelihood estimation for log-linear models. Log-linear models are widespread in statistics and play a fundamental role in categorical data analysis, with a wide range of applications \cite{bishop2007discrete}. They consist of discrete probability distributions whose coordinatewise logarithm lies in a fixed linear space and include, for example, independence models and discrete graphical models \cite{LauritzenBook}. There is a long history of the study of log-linear models in statistics, with an emphasis on understanding their maximum likelihood inference \cite{MLEloglinear}. This concerns the existence of the maximum likelihood estimate (MLE), which maximizes the likelihood function given sample data, and statistical procedures for its computation.
+%
+%Log-linear models play a prominent role in algebraic statistics \cite{SullivantBook}. The key link to algebra is that the Zariski closure of a log-linear model is a toric variety, defined by a monomial parametrization. Toric varieties have a foundational place among the algebraic varieties studied in algebraic geometry \cite{cox2011toric}.
+%
+%In our companion work~\cite{SiagaPaper}, we establish a connection between finding the MLE and norm minimization along an orbit under a group action. We focus there on the setting of Gaussian group models, centered multivariate Gaussian models whose concentration matrices are of the form $g\T g$, where $g$ lies in a group. In this paper, we study the connection between invariant theory and maximum likelihood estimation in the setting of discrete exponential families. We find remarkable similarities and differences between the discrete and Gaussian settings.
+%
+%The paper is organized as follows. We introduce maximum likelihood estimation and our toric invariant theory setting in the expository Sections \ref{sec:MLE} and \ref{sec:InvariantTheory}.
+%Our main results are in Section \ref{sec:loglinear}. We give a characterization of MLE existence in terms of 
+%the existence of a vector of minimal norm in an orbit under a torus action (see Theorem~\ref{thm:MLEpolystableTorus}), and an explicit way to compute the MLE from such a vector (see Theorem~\ref{thm:MLEviaMomentMap}).
+%We provide an alternative characterization in terms of null cones in Propositions~\ref{prop:intersectNullCones} and~\ref{prop:intersectIrredComp}.
+%We compare iterative proportional scaling (IPS), a classical method to find the MLE for log-linear models, with approaches to  norm minimization in Section~\ref{sec:scaling}. We conclude the paper with a comparison with the multivariate Gaussian setting of \cite{SiagaPaper} in Section~\ref{sec:comparison} and outline a possible generalization for future research.
+
+
+
+
+\section{ML Estimation in log-linear Models} \label{sec:LogLinearIntro}
+
+%todo short intro
+
+First, we define log-linear models following \cite[Definition~6.2.1]{SullivantBook}.
+
+\begin{defn}\label{defn:LogLinearModel}
+	Let $A \in \ZZ^{d \times m}$.
+	The \emph{log-linear model}\index{log-linear model} given by matrix  $A$ is
+	\begin{equation}
+		\label{eq:logLinearModel}
+		\Mll_A := \big\{ p \in \relint(\Delta_{m-1}) \, \vert \, \log p \in \rsp(A) \big\}.
+	\end{equation}
+	where $\log p$ denotes the coordinatewise logarithm, which only applies to $p$ with strictly positive entries. Therefore, $\Mll_A \subseteq \relint(\Delta_{m-1})$.
+	\hfill\defnSymbol
+\end{defn}
+
+The superscript in $\Mll_A$ stresses that we deal with log-linear models and it distinguishes them from Gaussian models $\Mg_{\Aset}$ studied in Chapters~\ref{ch:GaussianModels}, \ref{ch:GaussianGroupModels} and~\ref{ch:RDAGs}.
+A parametrization of the model $\Mll_A$ is given by
+\begin{equation}
+	\label{eq:toricparam}
+	\begin{matrix} \phi^A: & \RR_{>0}^d & \longrightarrow & \Delta_{m-1} \\
+		& \theta & \longmapsto &  \left( \frac{1}{Z(\theta)} \prod_{i=1}^d \theta_i^{a_{ij}} \right)_{1 \leq j \leq m} \end{matrix}
+\end{equation}
+where $Z(\theta)$ is a normalization factor. Conversely, any discrete model obtained from such a monomial parametrization is a log-linear model.
+We observe a first connection between the statistical model and a torus action: the map $\phi^A$ is, up to normalization, the action~\eqref{eq:torusAction} of the real positive torus element $\theta$ on the all-ones vector $\ones_m$.
+Furthermore, with respect to the parametrization~\eqref{eq:toricparam} the vector $Au$ is a sufficient statistics for the model $\Mll_A$, which follows, e.g., by considering $\ell_{u}(\phi(\theta))$.
+
+\begin{remark}[Assumption $\ones_m \in \rsp(A)$] \label{rem:AssumptionAllOnes}
+	For the log-linear model $\Mll_A$, we assume that the vector $\ones_m$ is in the row span of $A$; this is
+	a common assumption for statistical, as well as algebraic, reasons. First, such log-linear models are equivalent to discrete exponential families \cite[Section 6.2]{SullivantBook}. Second, the assumption means the uniform distribution $\frac{1}{m}\ones_m$ is in the model. Moreover, consider the  Zariski closure of~$\Mll_A$ in $\CC^m$, defined by the toric ideal
+	\begin{equation}
+		\label{eq:ZarMA}
+		I_A = \langle p^x - p^y \, \vert \, x,y \in \ZZ_{\geq 0}^m \text{ such that } Ax = Ay \rangle 
+	\end{equation}
+	in the polynomial ring $\CC[p_1,\dots,p_m]$, where $p^x := \prod_{j=1}^m p_j^{x_j}$ for $x \in \ZZ_{\geq 0}^m$; compare \cite[Proposition~6.2.4]{SullivantBook}.
+	If $\ones_m \in \rsp(A)$, this becomes a homogeneous ideal: if $r\T A = \ones_m $ for some $r \in \RR^d$ then multiplying $Ax = Ay$ by this vector results in $\ones_m x = \ones_m y$.
+	\hfill\remSymbol
+\end{remark}
+%todo add transpose to make ones_m a row vector??
+
+We point out that log-linear models are examples of so-called discrete exponential families, \cite[Section~6.2]{SullivantBook}.
+Furthermore, log-linear models contain undirected discrete graphical models as a special case via hierarchical log-linear models, see \cite{LauritzenBook} and \cite[Proposition~13.2.5]{SullivantBook}.  In particular, the independence model is a log-linear model, compare Examples~\ref{ex:indep} and~\ref{ex:indep2}, and we study another small discrete graphical model in Example~\ref{ex:DiscreteGraphical} below.
+
+\begin{example}[based on {\cite[Examples~4.1 and~4.9]{DiscretePaper}}]
+	\label{ex:indep}
+	The independence model of two discrete random variables with $m_1$ respectively $m_2$ states is
+	\begin{equation*}
+		\begin{split}
+			\Mcal_{X \ci Y} &= \big\{ \alpha\T \beta \mid \alpha \in \Delta_{m_1 - 1}, \, \beta\in \Delta_{m_2 - 1} \big\} \subseteq \RR^{m_1 \times m_2},
+		\end{split}
+	\end{equation*}
+	see Example~\ref{ex:IndependenceModel}. For $p = (p_{ij}) \in \Mcal_{X \ci Y}$, we see that the monomial parametrization $p_{ij} = \alpha_i \beta_j$, where $i \in [m_1]$ and $j \in [m_2]$, yields a log-linear model $\Mll_A$ with $A \in \ZZ_{\geq 0}^{(m_1 + m_2) \times (m_1 m_2)}$, compare~\eqref{eq:toricparam}. The matrix $A$ has one row for each of the parameters $\alpha_i$ and $\beta_j$, and one column for each state $(i,j)$ of the pair of random variables. For the concrete case $m_1 = 2$ and $m_2 = 3$, we have
+		\begin{align*}
+			& \quad {\footnotesize \begin{matrix}
+					11\!\!\!\! & 12\!\!\!\! & 13\!\!\!\! & 21\!\!\!\! & 22\!\!\!\! & 23
+				\end{matrix}} \\
+			A = &\begin{pmatrix}
+				1 & 1 & 1 & 0 & 0 & 0 \\
+				0 & 0 & 0 & 1 & 1 & 1 \\
+				1 & 0 & 0 & 1 & 0 & 0 \\
+				0 & 1 & 0 & 0 & 1 & 0 \\
+				0 & 0 & 1 & 0 & 0 & 1 \\
+			\end{pmatrix} \quad \begin{matrix} \alpha_1 \\ \alpha_2 \\ \beta_1 \\ \beta_2 \\ \beta_3 \end{matrix} \;\;.
+		\end{align*}
+	In general, if we use the same ordering of the parameters and states, we obtain
+		\begin{equation}\label{eqn:Aforindependence}
+			A = \begin{pmatrix} & & \\ & \Id_{m_1} \otimes \ones\T_{m_2} & \\ & &  \\ 
+				& & \\ 
+				& \ones\T_{m_1} \otimes \Id_{m_2} & \\ & &  \end{pmatrix}
+			= \begin{pmatrix}
+				\ones\T_{m_2} & & \\ & \ddots & \\ & & \ones\T_{m_2}  \\ 
+				& & \\ \Id_{m_2} & \cdots & \Id_{m_2} \\ & &
+			\end{pmatrix}
+		\in \ZZ^{(m_1 + m_2) \times (m_1 m_2)},
+		\end{equation}
+	where we use the Kronecker product as introduced in Definition~\ref{defn:KroneckerProduct}. Since $\Mll_A$ lies in the relative interior of $\Delta_{m_1 m_2 -1}$, it equals the relative interior of $\Mcal_{X \ci Y}$. We recover the independence model as the extended log-linear model $\overline{\Mll_A} = \Mcal_{X \ci Y}$, compare Definition~\ref{defn:ExtendedMLE}.
+	
+	As mentioned after parametrization~\eqref{eq:toricparam}, $\Mll_A$ is the intersection of $\relint(\Delta_{m_1 m_2 -1})$ with orbit of the all-ones matrix under the action of $\GT_{2m}(\RR)$ on $\RR^{m \times m}$ given by the matrix $A$ in~\eqref{eqn:Aforindependence}.
+	Equivalently, $\Mll_A$ is the orbit of the all-ones matrix under the left-right action of $\GT_m(\RR) \times \GT_m(\RR)$ on $\RR^{m \times m}$, again intersected with $\relint(\Delta_{m_1 m_2 -1})$.
+	
+	We illustrate this for the special case $m_1 = 2$ and $m_2=3$.
+	The action of $\GT_5(\RR)$ on $\RR^{3 \times 3}$ given by~\eqref{eq:torusd}, is as follows. The torus element 
+	\[ \left( \begin{matrix} t_1 & t_2 & t_3 & t_4 & t_5 \end{matrix} \right) = \left( \begin{matrix} \lambda_1 & \lambda_2 & \nu_1 & \nu_2 & \nu_3 \end{matrix} \right) \]
+	acts on a matrix $x \in \RR^{3 \times 3}$ by multiplying the entry $x_{ij}$ by $\prod_{k = 1}^5 t_k^{A_{(i,j)}}$ where $A_{(i,j)}$ denotes the column of $A$ with  index $(i,j)$.
+	This is the left-right action of $\GT_2(\RR) \times \GT_3(\RR)$ on the space of $2 \times 3$ matrices; it sends $M_{ij}$ to $\lambda_i \nu_j M_{ij}$.
+	\hfill\exSymbol
+\end{example}
+
+Now, we consider ML estimation for log-linear models. Since the model $\Mll_A$ is not closed, the MLE may not exist. To ensure existence, recall from Definition~\ref{defn:ExtendedMLE} the notion of an \emph{extended log-linear model}\index{log-linear model!extended} $\overline{\Mll_A} \subseteq \Delta_{m-1}$, and the one of an extended MLE $\hat{p} \in \overline{\Mll_A}$ of $\Mll_A$, which \emph{always} exists. In fact, for a log-linear model there is a unique extended MLE \cite[Proposition~4.7]{LauritzenBook}.\footnote{It is known that the likelihood function~\eqref{eq:LikelihoodDiscreteAndLog} is \emph{strictly} concave on $\Mll_A$, see \cite[Corollary~7.3.8]{SullivantBook}.}
+
+By \cite[Theorem~4.8]{LauritzenBook}, the extended MLE given $u$ is the point $\hat{p}  \in \overline{\Mll_A}$ such that $\pi_L(\hat{p}) = \pi_L(\bar{u})$, where $L := \rsp(A) \subseteq \RR^m$ and $\pi_L$ is the orthogonal projection onto $L$. Note that $\ker(\pi_L) = L^\perp = \im(A\T)^\perp = \ker(A)$ and therefore $\pi_L(\hat{p}) = \pi_L(\bar{u})$ holds if and only if $\bar{u} - \hat{p} \in \ker(A)$. Thus, the extended MLE given $u$ is the point $\hat{p} \in \overline{\Mll_A}$ satisfying
+\begin{equation}\label{eq:Birch}
+	A\hat{p}  = A\bar{u} .
+\end{equation}
+We point out that \eqref{eq:Birch} is also the sufficient condition for the MLE given $u$ \emph{if it exists},
+see \cite[Proposition 2.1.5]{LecturesAlgebraicStatistics} or \cite[Corollary 7.3.9]{SullivantBook}. In particular, if the MLE given u exists, it is also the extended MLE. Therefore, the MLE given $u$ exists if and only if the extended MLE $\hat{p}$ has positive entries (so that $\hat{p} \in \Mll_A$).
+
+We give some historical notes on \eqref{eq:Birch}.
+Birch \cite{birch1963} was the first to rigorously study MLE existence in the context of multi-way tables, where he observed that $u$ having all entries strictly positive is a sufficient condition for the MLE to exist and derived condition \eqref{eq:Birch}, sometimes known as Birch's Theorem, see~\cite[Theorem 1.10]{ASCB}.
+The fact that some entries could still be zero without affecting MLE existence was not fully understood until the work of Haberman, who gave the first characterization of MLE existence in her paper~\cite{haberman1974}.
+
+A modern necessary and sufficient condition is the following, which is stated in \cite{DiscretePaper} as Proposition~4.2. 
+The convex hull of the columns $A_j \in \ZZ^d$ of the matrix $A$ is the polytope
+\begin{equation}\label{eq:DeltaA}
+	\Delta_A := \conv\{ A_1, \ldots, A_m \}  \subseteq \RR^d.
+\end{equation}%todo adjust
+For this, recall from \eqref{eq:DeltaA} that $\Delta_A \subseteq \RR^d$ denotes the convex hull of the columns of $A$.
+
+\begin{prop}[{\cite[Theorem 8.2.1]{SullivantBook}}]
+	\label{prop:relativeInt}
+	Let $A \in \ZZ^{d \times m}$ be such that $\ones_m \in \rsp(A)$ and let $u \in \ZZ^m_{\geq 0}$ be a vector of counts for the log-linear model $\Mll_A$. Then the MLE given $u$ exists in $\Mll_A$ if and only if $A \bar{u} \in \relint(\Delta_A)$.
+\end{prop}
+
+In particular, we see that, indeed, if all entries of $u$ are positive then the MLE always exists. The above proposition allows us to link ML estimation in $\Mll_A$ to stability notions.
+
+
+
+\section{Toric Invariant Theory for ML estimation}\label{sec:ToricInvTheoryLogLinear}
+
+%todo delete the whole Section~\ref{sec:LogLinearSemistability} and refer to \cite{DiscretePaper} somewhere in this section??
+
+We give equivalent characterizations ML estimation in via stability under a torus action, Theorem~\ref{thm:MLEpolystableTorus}. Furthermore, we show that a point where the moment map vanishes yields the (extended) MLE in the log-linear model, see Theorem~\ref{thm:MLEviaMomentMapLogLinear}, and we illustrate the results in examples.
+
+\medskip
+
+Recall from Example~\ref{ex:GeneralGTaction} the concept of a $\GT_d(\CC)$-action on $\CC^m$ via a weight matrix $A \in \ZZ^{d \times m}$ and a linearization $b \in \ZZ^d$. This allows to obtain the following characterization from Proposition~\ref{prop:relativeInt}.
+
+\begin{theorem}[{\cite[Theorem~4.3]{DiscretePaper}}]
+	\label{thm:MLEpolystableTorus}
+	Consider a vector of counts $u \in \ZZ^{m}_{\geq 0}$ with sample size $u_+ = n$, a matrix $A \in \ZZ^{d \times m}$ with $\ones_m \in \rsp(A)$, and vector $b := Au \in \ZZ^d$. 
+	The stability under the action of the torus $\GT_d(\CC)$ given by matrix $n A$  with linearization $b$ is related to ML estimation in $\Mll_A$ as follows.
+	\[\begin{matrix}
+		(a) & \ones_m \text{ unstable} &  & \text{does not happen} \\
+		(b) & \ones_m \text{ semistable} & \Leftrightarrow & \text{extended MLE exists and is unique} \\
+		(c) & \ones_m \text{ polystable} &  \Leftrightarrow & \text{MLE exists and is unique} \\
+		(d) & \ones_m \text{ stable} &  & \text{does not happen}
+	\end{matrix}
+	\]
+\end{theorem}
+
+\begin{remark}
+	We note that the weight matrix $nA$ encodes the \emph{model} $\Mll_A = \Mll_{nA}$, while the linearization $b = Au$ depends on the \emph{observed data}. Furthermore, we always consider stability notions for $\ones_m$, which neither depends on the model nor the data. We stress that this differs from the Gaussian case. There we always consider the action via left-multiplication, while the stability notions are in terms of the observed data; compare the corresponding discussion in Section~\ref{sec:DiscussionGaussian}.
+	\hfill\remSymbol
+\end{remark}
+
+\begin{proof}[Proof of Theorem~\ref{thm:MLEpolystableTorus}]
+	Remember that the Hilbert-Mumford Criterion in Theorem~\ref{thm:HMtorusWeightPolytope} characterizes stability of $\ones_m$ under $\GT_d(\CC)$ in terms of the weight polytope $\Delta_{nA}(\ones_m)$ and the linearization $b$. We have $\Delta_{nA}(\ones_m) = \Delta_{nA}$ since $\ones_m$ has full support.
+	By Proposition~\ref{prop:relativeInt}, the MLE given $u$ exists if and only if $A \bar{u} = n^{-1} Au \in \relint(\Delta_{A})$. The latter is equivalent to $b = Au \in \relint(\Delta_{nA})$, which is the condition for $\ones_m$ being polystable from Theorem~\ref{thm:HMtorusWeightPolytope}. This shows part~(c). 
+	
+	Moreover, an extended MLE always exists and it is unique for log-linear models, compare the discussion around Equation~\eqref{eq:Birch}.
+	Thus, it remains to see that the cases of unstable and stable do not occur. First, $b = Au = nA \bar{u}$ lies in the polytope $\Delta_{nA}$ and hence $\ones_m$ is semistable under $\GT_d(\CC)$ by Theorem~\ref{thm:HMtorusWeightPolytope}.
+	Second, the stable case cannot arise as follows. There exists some $r \in \RR^d$ with $r\T A = \ones_m$, by the assumption $\ones_m \in \rsp(A)$. Thus, the columns $A_j$ of $A$ all lie on the affine hyperplane $r_1 x_1 + \cdots + r_d x_d = 1$. Therefore, the polytope $\Delta_A$ has empty interior in $\RR^d$, and so has $\Delta_{nA}$.
+\end{proof}
+
+We remark that we could take any other vector of full support in Theorem~\ref{thm:MLEpolystableTorus}. 
+The theorem shows that MLE existence can be tested by checking polystability under the group action. Note that we actually need all four stability notions when characterizing ML estimation of certain Gaussian models, compare, e.g., Theorem~\ref{thm:StrongFullCorrespondence}.
+
+Next, we link the moment map to ML estimation in log-linear models. For this, recall Kempf-Ness Theorem~\ref{thm:KempfNessAKRS}: a vector $v$ is polystable (respectively semistable) if and only if the moment map vanishes at a non-zero vector $w$ contained in the orbit (closure) of $v$; equivalently, the capacity of $v$ is positive and attained at $w$. 
+On the other hand, the (extended) MLE maximizes the likelihood function on the (extended) log-linear model.
+
+Therefore, considering the two optimization problems of maximizing the likelihood function in a (extended) log-linear model and of norm minimization in an orbit (closure) under the torus action, Theorem~\ref{thm:MLEpolystableTorus} states that one problem attains its optimum if and only if the other one does.
+The next theorem describes how these two optima are related via the moment map $\mu$. 
+
+\begin{theorem}[{\cite[Theorem~4.7]{DiscretePaper}}]
+	\label{thm:MLEviaMomentMapLogLinear} %formerly thm:MLEviaMomentMap
+	Let $A \in \ZZ^{d \times m}$ with $\ones_m \in \rsp(A)$ and let $u \in \ZZ_{\geq 0}^m$ be a vector of counts for $\Mll_A$ with $u_+ = n$.
+	Consider the torus action of $\GT_d(\CC)$ given by matrix $n A$ with linearization $b = Au$. If $w \in \overline{\GT_d(\CC) \cdot \ones_m} \backslash \{0\}$ is such that $\mu(w) = 0$, then the extended MLE given $u$ is
+		\begin{equation}\label{eq:orbitMLE} 
+			\hat{p} = \frac{1}{\|w\|^2} \, w^{[2]} = \frac{1}{\|w\|^2} \left( |w_1|^2, |w_2|^2, \ldots, |w_m|^2 \right) \in \overline{\Mll_A}.
+		\end{equation}
+	If $\ones_m$ is polystable, i.e., if $w \in \GT_d(\CC) \cdot \ones_m$, then $\hat{p}$ is the MLE given $u$.
+\end{theorem}
+
+\begin{proof}
+	First, recall from Equation~\eqref{eq:MomentMapTorusA-b} in Example~\ref{ex:MomentMapTorus}	that, for the torus action given by matrix $nA$ and linearization $b$, the moment map at $w \in \CC^m$ is given by
+		\begin{equation}\label{eq:MomentMapLogLinear}
+			\mu(w) = \frac{1}{\|w\|^2} \big( nAw^{[2]} - \|w\|^2 b \big) .
+		\end{equation}
+	Hence, $\mu(w) = 0$ and $b = Au$ yield that
+		\[ nAw^{[2]} = \| w \|^2 Au \quad \text{, equivalently, } \quad 
+		A \frac{w^{[2]}}{\|w\|^2} = A \frac{u}{n} = A \bar{u} . \]
+	Setting $\hat{p} := w^{[2]}/ \|w\|^{2}  \in \Delta_{m-1}$, we see that $\hat{p}$ satisfies the condition~\eqref{eq:Birch} for the extended MLE given $u$. It remains to ensure that $\hat{p} \in \overline{\Mll_A}$.
+	
+	For this, let $\overline{\Mll_A}^{\Zar}$ be the smallest Zariski closed subset of $\Delta_{m-1}$ containing $\Mll_A$, i.e., the Zariski closure of $\Mll_A$ in $\RR^m$ intersected with the simplex $\Delta_{m-1}$. By \cite[Theorem 3.2]{GeigerMeekSturmfels}, we have $\overline{\Mll_A}^{\Zar} = \overline{\Mll_A}$, so it suffices to show that $\hat{p}$ satisfies the equations in \eqref{eq:ZarMA}. 
+	
+	First, we show that $w$ obeys these equations. To do so, recall that $A^{(i)}$ is the $i^{th}$ row of $A$. For $t \in \GT_d(\CC)$ and $x \in \ZZ_{\geq 0}^m$, we compute
+		\begin{align*}
+			(t \cdot \ones_m)^x = \prod_{j=1}^m \left( t^{nA_j  - b} \right)^{x_j}
+			 = \prod_{j=1}^m \prod_{i=1}^d t_i^{n A_{ij} x_j - x_j b_i} 
+			 = \prod_{i=1}^d t^{nA^{(i)} x - x_+ b} = t^{nAx - x_+ b},
+		\end{align*}
+	Therefore, $t \cdot \ones_m$ satisfies $(t \cdot \ones_m)^x = (t \cdot \ones_m)^y$ for all $x,y \in \ZZ_{\geq 0}^m$ with $n A x - x_+ b = n A y - y_+ b$, and the same is true for $w \in \overline{\GT_d(\CC) \cdot \ones_m}$ by continuity. 
+	Now, if $x,y \in \ZZ_{\geq 0}^m$  are such that $Ax = Ay$, then $x_+ = y_+$ as $\ones_m$ is in the row span of $A$, compare Remark~\ref{rem:AssumptionAllOnes}. Thus, we have $n A x - x_+ b = n A y - y_+ b$ and we see that $w$ indeed satisfies equations~\eqref{eq:ZarMA}, i.e., $w^x = w^y$ for all $x,y \in \ZZ_{\geq 0}^m$  with $Ax = Ay$.
+	
+	Finally, for each equation $w^x = w^y$, we can take the absolute value squared on both sides to get $(w^{[2]})^x = (w^{[2]})^x$. Multiplying the latter with $\| w \|^{-2 x_+}$ and using the equality $x_+ = y_+$ shows that $(\hat{p})^x = (\hat{p})^y$. This proves $\hat{p} \in \Mll_A$.
+	
+	In the polystable case, the vector $w$ lies in the orbit of $\ones_m$. Hence, all its entries are positive, and so are the entries of $\hat{p}$. Consequently, $\hat{p} \in \Mll_A$ and therefore it is the MLE given $u$.
+\end{proof}
+
+Theorem~\ref{thm:MLEviaMomentMapLogLinear} shows that the (extended) MLE can be obtained from norm minimization on an orbit (closure). It suggests to use algorithms from invariant theory for the Norm Minimization Problem~\ref{comp:NormMinim} and Scaling Problem~\ref{comp:Scaling} to approximately compute the MLE. We discuss this approach in Section~\ref{sec:ScalingLogLinear} and we motivate the study of these algorithms in the next two examples.
+
+\begin{example}[{\cite[Example~4.8]{DiscretePaper}}]
+	\label{ex:loglinear}
+	Consider the log-linear model $\Mll_A$ and vector of counts $u$ with $n = u_+ = 4$, where
+		\[ A = \begin{pmatrix} 2 & 1 & 0 \\ 0 & 1 & 2 \end{pmatrix} , \qquad 
+		u = \begin{pmatrix} 2 \\ 1 \\ 1 \end{pmatrix}, \qquad b = Au = \begin{pmatrix} 5 \\ 3 \end{pmatrix}. \]
+	This model is the plane conic $x_2^2 = x_1x_3$ in $\relint(\Delta_{2}) \subseteq \RR^3$, compare \eqref{eq:toricparam}. As usual, we consider the action of $\GT_2(\CC)$ on $\CC^3$ via matrix $nA$ and linearization $b$.
+	Since $A\bar{u} \in \relint(\Delta_{A})$, the MLE given $u$ exists (Proposition~\ref{prop:relativeInt}). Equivalently, the vector $\ones_3$ is polystable under $\GT_2(\CC)$ by Theorem~\ref{thm:MLEpolystableTorus}. Thus, there is a vector $w$ of minimal norm in the orbit of $\ones_3$ by Kempf-Ness, Theorem~\ref{thm:KempfNessAKRS}. We illustrate how the MLE given $u$ can be obtained from $w$, by Theorem~\ref{thm:MLEviaMomentMapLogLinear}.
+	
+	Since $w$ lies in the orbit of $\ones_3$, its entries are $w_j = t_1^{n a_{1j} - b_1} t_2^{n a_{2j} - b_2}$, where $t_i \in \CC^\times$. One computes that
+	$w = \begin{pmatrix} \lambda^3 & \lambda^{-1} & \lambda^{-5} \end{pmatrix}\T$ where $\lambda = t_1/t_2$. 
+	Moreover, the moment map vanishes at $w$, so we have $n A w^{[2]} = \| w \|^2 b$. Combining these, gives $3 |\lambda|^{6} - |\lambda|^{-2} - 5 |\lambda|^{-10} = 0$, or equivalently, the condition 
+	$ 3 \nu^2 - \nu - 5 = 0 $ for $\nu = |\lambda|^{8}$. We obtain
+		\[	\hat{p} = \frac{w^{[2]}}{\|w\|^2} \frac{|\lambda|^{10}}{|\lambda|^{10}} = \frac{1}{\nu^2 + \nu + 1}\begin{pmatrix} \nu^2 \\ \nu \\ 1 \end{pmatrix} =\begin{pmatrix}\frac{31+\sqrt{61}}{4 \sqrt{61}+52}\cr \frac{3+3 \sqrt{61}}{4 \sqrt{61}+52}\cr \frac{9}{2 \sqrt{61}+26}\end{pmatrix}
+		\sim  \begin{pmatrix} 0.4662 \\ 0.3175 \\ 0.2162 \end{pmatrix} \]
+	as the MLE given $u$.
+	\hfill\exSymbol
+\end{example}
+
+
+\begin{example}[based on {\cite[Example~4.9]{DiscretePaper}}]
+	\label{ex:indep2}
+	We revisit the independence model $\Mcal_{X \ci Y}$ in terms of log-linear models as in Example~\ref{ex:indep}. Remember that $\Mcal_{X \ci Y}$ is the extended log-linear model $\overline{\Mll_A}$, where $A$ is given by \eqref{eqn:Aforindependence}. As a sanity check, we apply Theorem~\ref{thm:MLEviaMomentMapLogLinear} to $\overline{\Mll_A}$ and recover the knowledge on the MLE in $\Mcal_{X \ci Y}$ from Example~\ref{ex:IndependenceModel}.
+	
+	Given a data matrix $u \in \ZZ_{\geq0}^{m_1 \times m_2}$, we consider the orbit of the all-ones matrix $\ones_{m_1 \times m_2} := \ones_{m_1} \otimes \ones\T_{m_2} \in \CC^{m_1 \times m_2}$, under the action of $\GT_{m_1 + m_2}(\CC)$ given by the matrix $nA$ with linearization $b = Au \in \ZZ^{m_1 + m_2}$, where the sample size is $n = u_{++}$.
+	We seek a matrix $w \in \CC^{m_1 \times m_2}$ in the orbit closure of $\ones_{m_1 \times m_2}$ at which the moment map $\mu$ for the action vanishes. Identifying $w \in \CC^{m_1 \times m_2} \cong \CC^{m_1 m_2}$, the descriptions of $\mu$ in \eqref{eq:MomentMapLogLinear} and of $A$ in \eqref{eqn:Aforindependence} yield
+		\begin{equation}\label{eq:MomentMapIndependenceModel}
+			n \begin{pmatrix} w^{[2]}_{1,+} \\ \vdots \\ w^{[2]}_{m_1,+} \\[3pt] w^{[2]}_{+,1} \\ \vdots \\ w^{[2]}_{+,m_2} \end{pmatrix} = \| w \|^2 \begin{pmatrix} u_{1,+} \\ \vdots \\ u_{m_1,+} \\ u_{+,1} \\ \vdots \\ u_{+,m_2} \end{pmatrix} ,
+		\end{equation}
+	where we recall that $w^{[2]}_{ij} = |w_{ij}|^2$.
+	By Theorem~\ref{thm:MLEviaMomentMapLogLinear}, the extended MLE given data $u$ is $\hat{p} = w^{[2]} / \|w\|^2 \in \overline{\Mll_A}$. Note that $\hat{p}$ is the MLE in $\Mcal_{X \ci Y}$ given data $u$, because $\overline{\Mll_A} = \Mcal_{X \ci Y}$.
+	Now, Equation~\eqref{eq:MomentMapIndependenceModel} shows that the marginal distributions of $\hat{p}$ are	
+		\[ \hat{p}_{i,+} = \frac{w^{2}_{i,+}}{\|w\|^2} = \frac{u_{i,+}}{n} , \; i \in [m_1] \qquad \text{and} \qquad
+		\hat{p}_{+,j} = \frac{w^{2}_{+,j}}{\|w\|^2} = \frac{u_{+,j}}{n} , \; j \in [m_2].  \]
+	Since $\hat{p} \in \Mcal_{X \ci Y}$, its entries are given by the product of the corresponding marginals, compare Example~\ref{ex:IndependenceModel}. Hence, we obtain
+		\[ \hat{p}_{i,j} = \hat{p}_{i,+} \hat{p}_{+,j} = \frac{u_{i,+} u_{+,j}}{n^2}, \]
+	which recovers the knowledge on the MLE in $\Mcal_{X \ci Y}$ from Example~\ref{ex:IndependenceModel}. 
+	
+	Finally, we note that if $w \in \GT_{m_1 + m_2}(\CC) \cdot \ones_{m_1 \times m_2}$, then all entries of $\hat{p}$ are positive and so $\hat{p}$ is the MLE in $\Mll_A$ given $u$; also compare Theorem~\ref{thm:MLEviaMomentMapLogLinear}.
+	\hfill\exSymbol
+\end{example}
+
+
+
+
+
+
+\section{Scaling Algorithms for log-linear Models}\label{sec:ScalingLogLinear}
+
+
+This section presents different possibilities of MLE computation in independence models and, more generally, log-linear models. We focus on known algorithms in the statistics community, and on computational consequences of Theorem~\ref{thm:MLEviaMomentMapLogLinear}.
+Thereby, we connect ML estimation to scaling algorithms from invariant theory (see Section~\ref{sec:ScalingAlgorithms}). The purpose of this section is ``storytelling''.
+In particular, the following discussion contributes to algorithmic consequences in Chapter~\ref{ch:GaussianGroupModels} by comparing Figures~\ref{fig:DiscreteAlgorithms} and~\ref{fig:GaussianAlgorithms}.\footnote{It naturally motivates to regard geodesic convex methods from invariant theory as iterative proportional scaling for so-called Gaussian group models (where the group is Zariski closed and self-adjoint).}
+
+We saw in Theorem~\ref{thm:MLEviaMomentMapLogLinear} that the (extended) MLE in a log-linear model can be obtained from a point of minimal norm in an orbit (closure).
+This connects two problems:
+\begin{enumerate}
+	\item norm minimization in a complex orbit (closure) under a torus action
+	\item maximum likelihood estimation in a (extended) log-linear model.
+\end{enumerate}
+
+Algorithms exist for both problems: the former can be approached with convex optimization methods, and the latter with an algorithm called iterative proportional scaling (IPS). In fact, both families of algorithms can be thought of as generalizations of Sinkhorn scaling. 
+We explain these different generalizations, and how Theorem~\ref{thm:MLEviaMomentMapLogLinear} completes the circle of algorithms, see Figure~\ref{fig:DiscreteAlgorithms}.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{tikzpicture}[
+		roundnode/.style={ellipse, draw=black, very thick, minimum size=7mm},
+		squarednode/.style={rectangle, draw=black, very thick, minimum size=7mm},
+		description/.style={rectangle, very thick, minimum size=5mm},
+		]
+		%Nodes
+		\node[roundnode] (sinkhorn){Sinkhorn};
+		\node[squarednode] (doubly)[above=of sinkhorn] {scale to doubly stochastic};
+		\node[squarednode] (target) [below=of sinkhorn] {scale to target marginals};
+		\node[squarednode] (norm) [right=1.8cm of doubly] {norm minimization};
+		\node[squarednode] (ips) [right=1.8cm of target, below=2.85cm of norm] {$\qquad \quad \;$ IPS $\qquad \quad \;$};
+		\node[description] (left) [above=0.3cm of doubly] {Left-right action};
+		\node[description] (torus) [above=0.3cm of norm] {General torus action};
+		\node[description] (inv) [left=0.3cm of doubly] {Invariant Theory:};
+		\node[description] (stat) [left=0.3cm of target] {Statistics:};
+		
+		%Lines
+		\draw[thick] (sinkhorn.north) -- (doubly.south);
+		\draw[thick] (sinkhorn.south) -- (target.north);
+		\draw[->, thick] (doubly.east) -- (norm.west);
+		\draw[->, thick] (target.east) -- (ips.west);
+		\draw[->, dashed, thick] (norm.south) -- node[anchor=east, align=center] {$\text{MLE} = \frac{w^{[2]}}{\|w\|^2}$} (ips.north) ;
+	\end{tikzpicture}
+	
+	\caption{{\cite[Figure~4]{DiscretePaper}} Overview of different scaling algorithms.  The historical progression is from left to right. The dashed line is Theorem~\ref{thm:MLEviaMomentMapLogLinear}.}
+	\label{fig:DiscreteAlgorithms}
+\end{figure}
+
+%TODO use \RR or \CC for \GT_d.... ??
+
+\subsubsection*{Sinkhorn Scaling}
+
+We recall that the classical scaling algorithm of Sinkhorn in \cite{sinkhornClassical1964}, Algorithm~\ref{algo:SinkhornClassical} (approximately) scales a square matrix $M \in \RR^{m \times m}$ with non-negative entries to a doubly stochastic matrix. That is, Sinkhorn scaling is a method for matrix scaling as discussed in the extended example of Section~\ref{sec:CompProblems}. This is achieved by alternately scaling the row and column marginals to one, see Algorithm~\ref{algo:SinkhornClassical}. 
+
+A natural extension is to scale the matrix $M$ to other fixed row sums and column sums~\cite{sinkhorn1967concerning}.
+Both versions of Sinkhorn scaling are depicted on the left of Figure~\ref{fig:DiscreteAlgorithms}.
+These algorithms involve the left-right action of a pair of tori $\GT_{m_1} \times \GT_{m_2}$ on an $m_1 \times m_2$ matrix: the algorithms iterate between updates via the left torus and via the right torus. 
+
+Alternately scaling of the rows and columns of a matrix to fixed marginals is an instance of a scaling algorithm which, in the statistics literature, goes back to Deming and Stephan in \cite{IPForiginal}. For the independence model $\Mcal_{X \ci Y}$ on two variables, the algorithm finds the MLE by alternating between scaling the row sums and the column sums to match the marginals of the empirical distribution.
+Given an observed matrix of counts $u \in \ZZ_{\geq 0}^{m \times m}$ with sample size $u_{++} = n$, and
+initialized at the uniform distribution, the algorithm has two steps. The $(i,j)$ entry for the two steps is:
+\begin{equation}
+	\label{eqn:IPS_two_steps}
+	\frac{1}{m^2} \, \mapsto \,  \frac{1}{m} \cdot \frac{u_{i+}}{n} \, \mapsto \,   \frac{u_{i+}}{n} \cdot \frac{u_{+j}}{n}.
+\end{equation} 
+Its output is the MLE in $\Mcal_{X \ci Y}$ given $u$, which is extended MLE of the corresponding log-linear model, compare Examples~\eqref{ex:indep} and~\ref{ex:indep2}.
+This is the first example of {\em iterative proportional scaling} (IPS), which we describe next.
+
+\subsubsection*{Iterative Proportional Scaling (IPS)}
+\index{iterative proportional scaling}\index{IPS|see {iterative proportional scaling} }
+
+We have just seen that alternating scaling of a matrix to fixed row and column sums gives the MLE to the independence model, when initialized at the uniform distribution.
+This is scaling under a product of tori $\GT_{m_1} \times \GT_{m_2}$.
+We saw in Examples~\ref{ex:indep} and~\ref{ex:indep2} how the independence model fits into the framework of log-linear models. In terms of the group action, the left-right action of a pair of tori $\GT_{m_1} \times \GT_{m_2}$ is the action of $\GT_{m_1 + m_2}$, acting via~\eqref{eq:torusd}, where $A$ is the matrix in~\eqref{eqn:Aforindependence}.
+
+In the following, we explain how Sinkhorn scaling extends to algorithms for ML estimation for a general log-linear model, the bottom arrow of Figure~\ref{fig:DiscreteAlgorithms}. 
+
+Alternating between matching row and column sums can be extended to hierarchical models, which summarize data by contingency tables \cite{fienberg1970}, by iteratively updating the various marginals.
+The approach was extended to more general log-linear models by 
+Darroch and Ratcliff in~\cite{IPS-DR}.
+
+For the log-linear model $\Mll_A$, the MLE $\hat{p}$ must satisfy the equation $A\hat{p} = A \bar{u}$, \eqref{eq:Birch}, from Birch's theorem, where $\bar{u} = \frac{u}{n}$ is the empirical distribution. 
+IPS finds the extended MLE in $\Mll_A$ given an empirical distribution $\bar{u} \in \Delta_{m-1}$.
+We define IPS for a log-linear model given by a matrix $A \in \ZZ_{\geq 0}^{d \times m}$ whose column sums are all equal. 
+Starting at the uniform distribution $p^{(0)}= \frac{1}{m} \ones_m$, we iterate until the $k^{th}$ update $p^{(k)}$ has sufficient statistics $b^{(k)} = A p^{(k)}$ close to the target sufficient statistics $b = A \bar{u}$, i.e., until \eqref{eq:Birch} holds approximately.
+The update step is:
+\begin{equation}
+	\label{eq:ipsupdate}
+	p^{(k+1)}_j = \prod_{i = 1}^d \left( \frac{(A\bar{u})_i}{(Ap^{(k)})_i} \right)^{\nicefrac{a_{ij}}{\alpha}} p^{(k)}_j,
+\end{equation}
+where $\alpha$ is the common column sum of $A$; see \cite[Algorithm 7.3.11]{SullivantBook}.\footnote{\cite[Algorithm 7.3.11]{SullivantBook} involves $\phi_i^{A,h}(\theta)$, which is defined in \cite[Definition~6.2.2]{SullivantBook}. Note that $\phi^{A,h}$ in \cite{SullivantBook} does \emph{not} involve the normalization factor $Z(\theta)$ like in our Equation~\eqref{eq:toricparam}.}
+This is the action of a torus element (obtained by componentwise division of $A \bar{u}$ by $A p^{(k)}$
+and then componentwise exponentiation by $\nicefrac{1}{\alpha}$)
+on the vector $p^{(k)}$.
+Here the torus action is given by the matrix $A$ with linearization $b=0$.
+
+The IPS method is a minimization approach: at each step it minimizes the KL divergence to the MLE.
+%We can view maximum likelihood estimation as a norm minimization problem in a different way to Theorem~\ref{thm:MLEviaMomentMap}, by interpreting IPS as minimizing KL divergence.
+
+\begin{prop}[{\cite[Proposition~5.1]{DiscretePaper}}]
+	\label{prop:cap_KL}
+	Consider the log-linear model $\Mll_A$ where $A \in \ZZ^{d \times m}$ has $\ones_m$ in its row span. Then there exists a matrix $\tilde{A} \in \mathbb{Q}_{\geq 0}^{(d+1) \times m}$, with all column sums equal, such that  $\Mll_A = \Mll_{\tilde{A}}$, iterative proportional scaling in~\eqref{eq:ipsupdate} with matrix $\tilde A$ converges, and at each update step the KL divergence to the MLE decreases.
+\end{prop}
+
+\begin{proof}
+	The proof of convergence of IPS is given in~\cite[Theorem~1]{IPS-DR}
+	in the case where the entries of $A$ are real and non-negative with each column of $A$ summing to one.
+	There, the authors show that each step of IPS decreases the KL divergence $\KL(\hat{p} \| p^{(k)})$ from the $k^{th}$ iterate $p^{(k)}$ to the MLE $\hat{p}$.  Since replacing $A$ by $\frac{1}{\alpha}A$ does not change the update step \eqref{eq:ipsupdate}, the KL divergence also decreases for any matrix with real and non-negative entries and all column sums equal.
+	
+	We explain how this covers log-linear models defined by integer matrices with $\ones_m$ in the row span.
+	We modify $A$ without changing its row span, i.e., without changing the model $\Mll_A$.
+	First, we add a sufficiently large positive integer to every entry of $A$. For a general choice of integer, this does not change $\rsp(A)$ since it adds a multiple of the vector $\ones_m$, which belongs to $\rsp(A)$, to every row. 
+	Second, let $\alpha$ be the maximum of the column sums $A_{+,j}$. 
+	Add another row to the matrix, with entries $\alpha - A_{+,j}$. 
+	The extra row is a linear combination of $\ones_m$ and the rows of $A$, so the augmented matrix has the same row span as $A$. By construction, the column sums of the augmented matrix $\tilde{A}$ are all equal to $\alpha$. 
+\end{proof}
+
+\begin{remark}[{\cite[Remark~5.2]{DiscretePaper}}]
+	We saw in Equation~\eqref{eq:LogLikelihoodDiscreteKL} from Section~\ref{sec:DiscreteModels} that $\hat{p} = {\rm argmin}_{p \in \Mll_A} \KL ( \bar{u} \| p )$. Here, we use KL divergence differently, measuring the KL divergence from iterate $p^{(k)}$ to the MLE: $\KL( \hat{p} \| p^{(k)} )$.
+	\hfill\remSymbol
+\end{remark}
+
+Curiously, when  IPS for log-linear models in~\eqref{eq:ipsupdate} is applied to the independence model, we do not recover the classical IPS with Sinkhorn updates, because the column sums of the integer matrix $A$ for the independence model in \eqref{eqn:Aforindependence} are $\alpha = 2$, hence there is a square root in the update step. 
+If, instead, we did IPS with the same matrix $A$ but $\alpha=1$ in~\eqref{eq:ipsupdate} we would recover the two steps in~\eqref{eqn:IPS_two_steps} in a single step. 
+This leads naturally to the question of which exponents $\alpha$ achieve convergence, and how the choice of $\alpha$ affects the convergence rate. This is the essence of an open problem in algebraic statistics, see \cite[Section~7.3]{LecturesAlgebraicStatistics}.
+
+\subsubsection*{Norm Minimization}
+
+We explain/recall how Sinkhorn scaling generalizes to norm minimization for torus actions in invariant theory;
+see the top arrow of Figure~\ref{fig:DiscreteAlgorithms}.
+
+For this, the extended example on matrix scaling from Section~\ref{sec:CompProblems} is crucial. We recall that given a matrix $v \in \CC^{m \times m}$ the left-right action of $T := \ST_m(\CC)^2$ relates to matrix scaling of $M_v = \big( |v_{ij}|^2 \big)$. By Proposition~\ref{prop:MatrixScalingMomentMap}, $M_v$ is (approximately) scalable if and only if the moment map vanishes at some non-zero vector $w$ in the orbit (closure) of $v$ under $T$. By Kempf-Ness Theorem~\ref{thm:KempfNessAKRS}, the vanishing of the moment map at $w$ is equivalent to the capacity $\capac_T(v) = \inf_{t \in T} \|t \cdot v\|^2$ being positive and attained at $w$. Therefore, an appropriate normalization\footnote{similarly to Algorithm~\eqref{algo:OperatorScaling} to ensure the determinant one conditions of $\ST_m(\CC)^2$}
+of the update steps in Sinkhorn scaling (Algorithm~\ref{algo:SinkhornClassical}) solve the Norm minimization Problem~\ref{comp:NormMinim} and Scaling Problem~\ref{comp:Scaling} for $v$ under the action of $T$.
+
+We have seen in ??? %todo reference
+that norm minimization for any algebraic action of a torus is a convex optimization problem.
+In the specific situation of log-linear models, the action of $\GT_d(\CC)$ is given by matrix $A' = nA - \ones\T_m \otimes b \in \ZZ^{d \times m}$.\footnote{This is the action given by $nA$ with linearization $b$, compare Definition~\ref{defn:KroneckerProduct}.}
+The vector $\ones_m$ is always semistable, see Theorem~\ref{thm:MLEpolystableTorus}. By Kempf-Ness, norm minimization converges to a non-zero vector $w \in \overline{\GT_d(\CC) \cdot \ones_m}$ at which the moment map vanishes. Hence, common algorithms from the vast literature on convex optimization can be used to approximate the capacity and find the (extended) MLE, using Theorem~\ref{thm:MLEviaMomentMapLogLinear}. In particular, one can use the methods mentioned in the paragraph on the commutative case in Section~\eqref{sec:ScalingAlgorithms}.
+%
+%For a torus element $(t_1, \ldots, t_d)$, the coordinate change $y_i := \log \vert t_i \vert^2$ gives
+%\[
+%\capac(\ones_m) = \inf_{t \in \GT_d(\CC)} \, \| t \cdot \ones_m \|^2 
+%=  \inf_{t \in \GT_d(\CC)} \, \sum_{j=1}^m \prod_{i=1}^d \vert t_i \vert^{2 {A'_{ij}}}
+%= \inf_{y \in \RR^d} \, \sum_{j=1}^m \exp \langle y, A'_{j} \rangle ,
+%\]
+%an unconstrained geometric program.
+
+Finally, we recall that the alternating minimization idea from Sinkhorn's algorithm generalizes to operator scaling, Algorithm~\ref{algo:OperatorScaling}. The latter solves norm minimizatio(and scaling) for the left-right action of $\SL_{m_1}(\CC) \times \SL_{m_2}(\CC)$ on the space of matrix tuples $(\CC^{m_1 \times m_2})^n$.
+We discuss connections between operator scaling and statistics in Subsection~\ref{subsec:FlipFlopVsOperatorScaling}.
+
+
+\subsubsection*{Comparison of Algorithms}
+
+We have seen in the previous paragraphs that IPS and norm minimization can be viewed as generalizations of Sinkhorn scaling.
+Theorem~\ref{thm:MLEviaMomentMapLogLinear} closes the cycle of algorithms from different communities, by showing how to obtain the (extended) MLE from a complex point of minimal norm in an orbit (closure); see Figure~\ref{fig:DiscreteAlgorithms}.
+
+This bridges several differences between IPS and norm minimization.
+We summarize these differences here.
+First, when computing the capacity of $\ones_m$, the norm is minimized along a \emph{complex} orbit closure (see Theorem~\ref{thm:MLEviaMomentMapLogLinear}), whereas every step in IPS involves \emph{real} numbers.
+Secondly, the torus action given by  matrix $n A$ that is used for computing the capacity is linearized by  $b = Au$ (see Theorem~\ref{thm:MLEviaMomentMapLogLinear}), whereas IPS uses the action given by matrix $A$ with trivial linearization $b=0$.
+Finally,
+the objective functions differ: the capacity is defined in terms of the Euclidean norm, which does not appear in IPS; instead 
+IPS minimizes KL divergence (see Proposition~\ref{prop:cap_KL}). In the following example we see that, while IPS decreases the KL divergence to the MLE, it may increase the Euclidean norm.
+
+\begin{example}[{\cite[Example~5.3]{DiscretePaper}}]
+	Consider the matrix $A$ and vector of counts $u$ from Example~\ref{ex:loglinear}, i.e.,
+		\[ A = \begin{pmatrix} 2 & 1 & 0 \\ 0 & 1 & 2 \end{pmatrix} , \qquad 
+		u = \begin{pmatrix} 2 \\ 1 \\ 1 \end{pmatrix} . \]
+	We use IPS to compute the MLE in $\Mll_A$.
+	We start at the uniform distribution $p^{(0)} = \frac13 \ones_3$ and do update steps as in~\eqref{eq:ipsupdate} with matrix $A$. These IPS steps converge by Proposition~\ref{prop:cap_KL}, since the matrix $A$ has real non-negative entries and all column sums are equal. 
+	We obtain 
+	$ p^{(1)} = \frac{1}{12} \begin{bmatrix} 5 & \sqrt{15} & 3 \end{bmatrix}\T $. Note that the sum of the entries of $p^{(1)}$ is strictly less than one.
+	The KL divergence from the uniform distribution to the MLE is $\KL(\hat{p} \| p^{(0)}) \sim 0.047$, and after the first update it is $\KL(\hat{p} \| p^{(1)}) \sim 0.016$. 
+	However, we have $\| p^{(1)} \|^2 = \frac{49}{144}$, which exceeds $\| p^{(0)} \|^2 = \frac13$.
+	\hfill\exSymbol
+\end{example}
+
+
+
+
+\section{MLE Existence via Semistability} \label{sec:LogLinearSemistability}
+
+\red{Still todo, perhaps delete}
+
+Comment: not clear whether the main results (Propositions 4.4 and 4.5 from \cite{DiscretePaper}) are worth it; or whether this section can/should be skipped.
+
+%todo place somewhere here
+We define sub-polytopes that depend on an indexing set $J \subseteq [m]$
+\[\Delta_A(J) := \conv\{ a_j \mid j \in J \}.\]
+For $v \in \CC^m$, let $\supp(v):= \{ j \mid v_j \neq 0\} \subseteq [m]$. 
+
+\bigskip
+
+We give alternative characterizations for MLE existence, which involve semistability instead of polystability. 
+
+%todo
+%begin copy paste invariant polynomials for torus action (from DiscretePaper)
+
+\begin{remark}[{\cite[Remark~3.2]{DiscretePaper}}] %todo likely move to Section on Stability Notions
+	\label{rem:realnullcone} %formerly rmk:realnullcone
+	An action of a group $G$ on $\CC^m$ induces an action on the polynomial ring $\CC[x_1,\ldots,x_m]$ by
+	$g \cdot f(x) := f\big( \, g^{-1} \cdot x \big),$
+	where $x = (x_1,\ldots,x_m)\T$. For the action of the torus $\GT_d$ given by matrix $A$, the map on indeterminates is $x_j \mapsto \lambda_1^{-a_{1j}}  \cdots \lambda_d^{-a_{dj}} x_j$.
+	\hfill\remSymbol
+\end{remark}
+
+
+%or perhaps skip, or move it to section in chapter 7 that treats the two propositions for log-linear models separately
+The null cone is defined by the vanishing of all homogeneous invariants of positive degree. The monomials from Proposition~\ref{prop:vanishing_monomials} give the square-free part of the generators of the null cone. We describe how to take powers of the indeterminates appearing in the monomials, in order to turn them into invariants.
+Let $J \subseteq [m]$ index a minimal sub-polytope of $\Delta_A$ containing $b$. Then $0$ can be written as a strictly positive convex combination of 
+$\{ (a_j -b) \mid j \in J \}$.
+Since the entries of the matrix $A$ and the vector $b$ are integers, the convex combination is rational. Multiplying by the lowest common denominator gives a positive integer linear combination
+\begin{equation}
+	\label{eqn:convex_zero}
+	\sum_{j \in J} r_j (a_j -b) = 0 ,  \qquad r_j \in \ZZ_{>0}.
+\end{equation}
+The monomials $\prod_{j \in J} x_j^{r_j}$ are invariants under the group action, since
+\[ \lambda \cdot \left( \prod_{j \in J} x_j^{r_j} \right) = \prod_{j \in J} \left( \lambda^{-(a_j - b)} x_j \right)^{r_j} = \prod_{j \in J} x_j^{r_j} \cdot \lambda^{- \sum_{j \in J} r_j (a_j - b)} =  \prod_{j \in J} x_j^{r_j} , \]
+where the first equality follows from Remark~\ref{rem:realnullcone} and the last equality follows from~\eqref{eqn:convex_zero}. 
+
+%end copy paste invariant polynomials for torus action (from DiscretePaper)
+
+%begin Prop 3.6 and 3.7 from DiscretePaper
+
+The set of unstable points under a group action on a vector space is the null cone, see Definition~\ref{defn:StabilityGroupTopological}. In many settings of interest, the null cone is a Zariski closed set, the vanishing locus of all homogeneous invariants of positive degree.
+It is a classical object of interest, studied by Hilbert~\cite{Hilbert1890}.
+
+We recall the setting of the action of the complex torus $\GT_d$ on $\CC^m$ given by a matrix $A \in \ZZ^{d \times m}$ with linearization $b \in \ZZ^d$. The stability of $v \in \CC^m$ is determined by its support $\supp(v)$; see Theorem~\ref{thm:HMtorusWeightPolytope}. In particular the null cone, as a set, is a union of coordinate linear spaces. 
+We describe it in terms of the standard basis vectors in $\CC^m$, denoted $e_1, \ldots, e_m$.
+The linear space spanned by $\{ e_j \mid j \in J \}$ is denoted $\langle e_j \mid j \in J \rangle$. 
+
+A vector $b$ in $\Delta_A$ can be written as a convex combination of the $m$ columns of $A$. We consider the maximal sub-polytope of $\Delta_A$ that does not contain $b$, as well as the minimal sub-polytope of $\Delta_A$ that contains $b$. Both minimality and maximality are taken with respect to inclusion in the set $[m]$.
+
+In Proposition~\ref{prop:null_cone_linear_spaces}, we see the connection between irreducible components of the null cone and maximal sub-polytopes of $\Delta_A$ not containing $b$, see Figure~\ref{fig:max_not_containing_b}. Then, in Proposition~\ref{prop:vanishing_monomials}, we see that minimal sub-polytopes containing $b$ give set-theoretic defining equations for the null cone, see Figure~\ref{fig:minimal_containing_b}.
+
+\begin{prop}[{\cite[Proposition~3.6]{DiscretePaper}}]
+	\label{prop:null_cone_linear_spaces}
+	Consider the action of $\GT_d$ on $\CC^m$ given by matrix $A \in \ZZ^{d \times m}$ with linearization $b \in \ZZ^d$. 
+	The irreducible components of the null cone are the linear spaces 
+	$\langle e_j \mid j \in J \rangle$, where $\Delta_A(J)$ is a maximal sub-polytope of $\Delta_A$ with $b \notin \Delta_A(J)$.
+\end{prop}
+
+\begin{proof}
+	Assume that a point $v \in \CC^m$ lies in a linear space $\langle e_j \mid j \in J \rangle$ where $b \notin \Delta_A(J)$. Then $\supp(v) \subseteq J$, hence $b \notin \Delta_A(v)$, and $v$ is unstable by Theorem~\ref{thm:HMtorusWeightPolytope}(a). Conversely, assume that $v \in \CC^m$ is not contained in any linear space $\langle e_j \mid j \in J \rangle$ as in the statement. Since the $\Delta_A(J)$ are maximal with $b \notin \Delta_A(J)$, we have $b \in \Delta_A(v)$ and $v$ is semistable.
+\end{proof}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=2.9cm]{squares1_1} \qquad 
+	\includegraphics[width=2.9cm]{squares2_1}
+	\qquad
+	\includegraphics[width=2.9cm]{squares3_1}
+	\qquad
+	\includegraphics[width=2.9cm]{squares4_1a}
+	\caption{{\cite[Figure~1]{DiscretePaper}} The maximal sub-polytopes of $\Delta_A$ not containing $b$, for four different $b \in \ZZ^2$.
+		For example, the leftmost picture displays $\Delta_A(J)$ for $J$ equal to $\{1,2,3\}$, $\{1, 2, 4\}$, and $\{3, 4\}$.
+		Each sub-polytope corresponds to an irreducible component of the null cone, see Proposition~\ref{prop:null_cone_linear_spaces}. For $b$ on the boundary of $\Delta_A$, all maximal sub-polytopes intersect, see Proposition~\ref{prop:intersectIrredComp}.}
+	\label{fig:max_not_containing_b}
+\end{figure}
+
+\begin{prop}[{\cite[Proposition~3.7]{DiscretePaper}}]
+	\label{prop:vanishing_monomials}
+	Consider the action of $\GT_d$ on $\CC^m$ given by matrix $A \in \ZZ^{d \times m}$ with linearization $b \in \ZZ^d$. 
+	A vector $v \in \CC^m$ is in the null cone if and only if all products $\prod_{j \in J} v_j$ vanish, where $J \subseteq [m]$ indexes a minimal sub-polytope of $\Delta_A$ containing $b$.
+\end{prop}
+
+\begin{proof}
+	Denote $v_J := \prod_{j \in J} v_j$. If some $v_J$ is non-zero, i.e. $J \subseteq \supp(v)$, then $b \in \Delta_A(J)$ implies $b \in \Delta_A(v)$, hence $v$ is semistable by Theorem~\ref{thm:HMtorusWeightPolytope}(b). Conversely, if $v$ is semistable then $b \in \Delta_A(v)$. By minimality of the minimal sub-polytopes $\Delta_A(J)$ containing $b$ we have, for some $J$ in the statement, the containment $\Delta_A(J) \subseteq \Delta_A(v)$, i.e. $J \subseteq \supp(v)$, hence $v_J \neq 0$. 
+\end{proof}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=2.9cm]{squares1_2} \qquad 
+	\includegraphics[width=2.9cm]{squares2_2}
+	\qquad 
+	\includegraphics[width=2.9cm]{squares3_2and3.png}
+	\qquad 
+	\includegraphics[width=2.9cm]{squares4_2.png}
+	\caption{{\cite[Figure~2]{DiscretePaper}} The minimal sub-polytopes of $\Delta_A$ containing $b$, for four choices of $b \in \ZZ^2$.
+		For example, the leftmost picture displays $\Delta_A(J)$ for $J$ equal to $\{1,3,4\}$ and $\{2,3, 4\}$.
+		Each sub-polytope corresponds to a generator of the null cone, see Proposition~\ref{prop:vanishing_monomials}.}
+	\label{fig:minimal_containing_b}
+\end{figure}
+
+%end Prop 3.6 and 3.7 from DiscretePaper
+
+
+%main results + example
+%todo intro mle existence via semistable
+The semistability of a vector $v$ can be checked by evaluating invariant polynomials, that generate the null cone, at $v$. If all generators vanish then $v$ is unstable, otherwise it is semistable. %todo recall from ??
+
+\begin{prop}[{\cite[Proposition~4.4]{DiscretePaper}}]
+	\label{prop:intersectNullCones}
+	For a vector of counts $u \in \ZZ^m_{\geq 0}$ with $u_+ = n$  and $A \in \ZZ^{d \times m}$, the MLE given $u$ exists if and only if there is some $b \in \ZZ^d$, of the form $b = Av$ for $v \in \RR_{>0}^m$, such that $u$ is semistable for the torus action given by matrix $n A$ with linearization $b$. 
+\end{prop}
+
+\begin{proof}
+	First, recall that $\Delta_{nA}(u) = \conv\{n A_j \mid u_j \neq 0\}$, so $Au \in \relint(\Delta_{nA}(u))$. By Theorem~\ref{thm:HMtorusWeightPolytope}(b), the vector $u \in \ZZ_{\geq 0}^m$ is semistable (actually, even polystable) for the action given by matrix $n A$ with linearization $Au$.
+	
+	If the MLE given $u$ exists then Proposition~\ref{prop:relativeInt} implies $Au \in \relint(\Delta_{nA})$. The latter ensures that $Au$ is of the form $Av$ for some $v \in \RR_{>0}^m$. 
+	
+	Conversely, if the MLE given $u$ does not exist, then $Au$ lies on the boundary of the polytope $\Delta_{nA}$. However, as $Au \in \relint(\Delta_{nA}(u))$ the polytope $\Delta_{nA}(u)$ has to be a proper face of $\Delta_{nA}$.
+	Thus, for any $b \in \ZZ^d$ of the form $b = Av$ for  $v \in \RR_{>0}^m$, we have $b \notin \Delta_{nA}(u)$. In that case, $u$ is unstable under the torus action given by matrix $nA$ with linearization~$b$, by Theorem~\ref{thm:HMtorusWeightPolytope}(a).
+\end{proof}
+
+To test MLE existence with Proposition~\ref{prop:intersectNullCones}, we need to test null cone membership for multiple linearizations.
+We now discuss a different approach, involving one null cone.
+For a vector $b \in \Delta_{A}$ we denote by $F_b(A)$ the minimal face of the polytope $\Delta_{A}$ that contains~$b$; see Figure~\ref{fig:faces_Fb}.
+
+\begin{prop}[{\cite[Proposition~4.5]{DiscretePaper}}]
+	\label{prop:intersectIrredComp}
+	Consider a vector of counts $u \in \ZZ^m_{\geq 0}$ with $u_+ = n$ and $A \in \ZZ^{d \times m}$.
+	The intersection of the irreducible components of the null cone for the torus action given by matrix $n A$ with linearization $b = Au$
+	is $\langle e_j \mid  n A_j \notin F_b(nA) \rangle$. 
+	
+	Moreover, the MLE given $u$ exists in $\Mll_A$ if and only if the intersection of the irreducible components of the null cone is~$\lbrace 0 \rbrace$.
+\end{prop}
+
+\begin{proof}
+	Define $A' := n A$ and consider the polytope $\Delta_{A'}$, the convex hull of $a_j' := n a_j$.
+	We consider the null cone under the torus action given by matrix $A'$ with linearization $b$. 
+	A linear space $\langle e_j \mid j \in J \rangle$ is in the null cone if and only if $b \notin \Delta_{A'}(J)$, by Proposition~\ref{prop:null_cone_linear_spaces}.
+	
+	We will show that $e_j$ is contained in every irreducible component of the null cone if and only if $a_j' \notin F_b(A')$.
+	From this, the second paragraph of the statement follows because the MLE given $u$ exists if and only if $b = Au$ is in the relative interior of the polytope $\Delta_{A'}$, i.e., $b$ does not lie on a proper face, and $F_b(A') = \Delta_{A'}$.
+	
+	Consider an index $j$ with $a_j' \notin F_b(A')$. 
+	All possible expressions for $b$ as $b = Av$ for some $v\geq 0$ have $v_j = 0$, since $F_b(A')$ is a face of $\Delta_{A'}$.
+	Let $J \subseteq [m]$ be
+	such that $b \notin \Delta_{A'}(J)$, 
+	i.e., $\langle e_j \mid j \in J \rangle$ is in the null cone.
+	Taking $J' = J \cup \{ j \}$, the polytope $\Delta_{A'}(J')$ still does not contain~$b$.
+	Hence, $e_j$ lies in an irreducible component of the null cone that contains $\langle e_{j'} \mid j' \in J' \rangle$;
+	so $e_j$ lies in every irreducible component.
+	
+	Conversely, consider an index $j$ with $a_j' \in F_b(A')$. We show that there exists an irreducible component of the null cone that does not contain $e_j$. For each facet $F \subseteq F_b(A')$, let $v_F$ be a vector with $\supp(v_F) = \{ k \mid a_k' \in F \}$, and take $w_F$ with $\supp(w_F) = \supp(v_F) \cup \{ j \}$. The union of $\Delta_{A'}(w_F)$ over facets $F \subseteq F_b(A')$ is the whole polytope $F_b(A')$, so $b \in \Delta_{A'}(w_F)$ for some facet~$F$. 
+	By the minimality of $F_b(A')$, we have $b \notin \Delta_{A'}(v_F)$.
+	Hence $\langle e_k \mid a_k' \in F \rangle$ is contained in an irreducible component of the null cone but, since $b \in \Delta_{A'}(w_F)$, the irreducible component does not contain $e_j$. 
+\end{proof}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=2.9cm]{squares1_3} \qquad 
+	\includegraphics[width=2.9cm]{squares2_3}
+	\qquad
+	\includegraphics[width=2.9cm]{squares3_2and3.png}
+	\qquad
+	\includegraphics[width=2.9cm]{squares4_3.png}
+	\caption{{\cite[Figure~3]{DiscretePaper}} The face $F_b(A)$ of $\Delta_A$, for four choices of $b \in \ZZ^2$. 
+		For example, the leftmost picture displays the face $\Delta_A(J)$ for $J = \{1,2,3,4\}$.
+		The vectors $a_i$ outside of the face are in the intersection of all the irreducible components of the null cone, see Proposition~\ref{prop:intersectIrredComp}. For the corresponding components of the null cone, see Figure~\ref{fig:max_not_containing_b}.}
+	\label{fig:faces_Fb}
+\end{figure}
+
+
+
+\begin{example}[{\cite[Example~4.6]{DiscretePaper}}] \label{ex:DiscreteGraphical}
+	We illustrate Proposition~\ref{prop:intersectIrredComp} for the log-linear model $\Mll_A$, where
+	\[
+	A = \begin{blockarray}{ccccccccc}
+		& p_{000} & p_{001} & p_{010} & p_{011} & p_{100} & p_{101} & p_{110} & p_{111} \\ 
+		\begin{block}{c(cccccccc)}
+			p_{00+} & 1 & 1 &   &   &   &   &   &   \\ 
+			p_{01+} &   &   & 1 & 1  &  &   &   &   \\ 
+			p_{10+} &   &   &   &  & 1  & 1 &   &   \\ 
+			p_{11+} &   &   &   &   &   &   & 1 & 1 \\ 
+			p_{+00} & 1 &   &   &  & 1  &   &   &   \\ 
+			p_{+01} &   & 1 &   &   &   & 1 &   &   \\ 
+			p_{+10} &   &   & 1 &   &   &   & 1 &   \\ 
+			p_{+11} &   &   &   &  1 &  &   &   & 1 \\
+		\end{block}
+	\end{blockarray}\]
+	This is
+	the graphical model on three binary random variables $X_i$ given by the path graph
+	\begin{tikzcd}[cramped, sep=small] 1 \ar[r, no head] & 2 \ar[r, no head] & 3 \end{tikzcd}
+	defined by the conditional independence relation $X_1 \ci X_3 | X_2$. 
+	To identify the graphical model with $\Mll_A$, we identify $\RR^8$ with $\RR^{2 \times 2 \times 2}$ and label the columns of $A$ by entries $p_{ijk}$.
+	The sufficient statistics of the model are the eight marginals $p_{ij+} := p_{ij0} + p_{ij1}$ and $p_{+ij} := p_{0ij} + p_{1ij}$, where $(i,j) \in \{ 0, 1\}^2$.
+	
+	We compute the irreducible components of the null cone for
+	the torus action given by matrix $nA$ with linearization $Au$, for
+	various $u \in \ZZ^8$.
+	The null cone is 
+	the zero locus of those monomials in the ring $\CC[x_1, \ldots, x_8]$ such that the supports of their exponent vectors index minimal sub-polytopes of $\Delta_{nA}$ that contain $b$, as in Proposition~\ref{prop:vanishing_monomials}.
+	
+	
+	Let $u = \begin{bmatrix} 1 & 0 & 1 & 0 & 0 & 1 & 0 & 1 \end{bmatrix}\T$. Then $b = \ones_8 \in \RR^8$ and the null cone  is the vanishing locus of
+	$x_1 x_3 x_6 x_8$, 
+	$ x_1 x_4 x_6 x_7$, 
+	$ x_2 x_3 x_5 x_8$, and
+	$x_2 x_4 x_5 x_7$.
+	The irreducible components only intersect at $\{ 0 \}$, hence the MLE given $u$ exists in $\Mll_A$. 
+	
+	Let $u = \begin{bmatrix} 1 & 1 & 1 & 1 & 0 & 1 & 1 & 0 \end{bmatrix}\T$. Then $b = \begin{bmatrix} 2 & 2 & 1 & 1 & 1 & 2 & 2 & 1\end{bmatrix}$ and the null cone is the vanishing locus of
+	$x_1 x_2 x_3 x_4 x_6 x_7$,
+	$x_2^2 x_3 x_4 x_5 x_7$, 
+	$x_1 x_2 x_3^2 x_6 x_8$, and 
+	$x_2^2 x_3^2 x_5 x_8$.
+	The irreducible components only intersect at $\{ 0 \}$, so the MLE given $u$ exists in $\Mll_A$. 
+	
+	When $u = \begin{bmatrix} 1 & 0 & 1 & 0 & 0 & 1 & 0 & 0 \end{bmatrix}\T$, the null cone is the vanishing locus of
+	$x_1 x_3 x_6$ and $x_2 x_3 x_5$. 
+	The irreducible components intersect at $\langle e_4, e_7, e_8 \rangle$, hence the MLE given $u$ does not exist in $\Mll_A$. We can also see this from Theorem~\ref{prop:relativeInt}, as follows. The vector $b = Au = \begin{bmatrix} 1 & 1 & 1 & 0 & 1 & 1 & 1 & 0 \end{bmatrix}\T$ has some zero entries. As $\Delta_A$ only contains non-negative points, $b$ must lie on the boundary of $\Delta_A$.
+	\hfill\exSymbol
+\end{example}
+
+
+
+
+
+
+
+

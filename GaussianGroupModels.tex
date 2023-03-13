@@ -1,0 +1,1618 @@
+
+\index{Gaussian group model|(}
+
+
+\begin{center}
+	\emph{``Und jedem Anfang wohnt ein Zauber inne''}
+\\ \bigskip
+Hermann Hesse in his poem \emph{Stufen}
+\end{center}
+
+\vspace{1cm}
+
+Building upon the theory from Chapter~\ref{ch:GaussianModels} we study Gaussian group models and deepen the connections between invariant theory and maximum likelihood (ML) estimation. Recall from Definition~\ref{defn:GaussianModelMA} that a Gaussian group model is a Gaussian model via symmetrization $\Mg_G$, where $G$ is a subgroup of $\GL_m(\KK)$. The group situation allows to use many further tools, especially since the group $G$ acts on the samples via left multiplication. In particular, we may use different criteria for stability from Chapter~\ref{ch:CriteriaForStability}.
+
+We remark that the starting point of this theory were similarities between operator scaling (Algorithm~\ref{algo:OperatorScaling}) from invariant theory and the flip-flop algorithm for computing MLEs in matrix normal models (Subsection~\ref{subsec:FlipFlopVsOperatorScaling}). This algorithmic view stimulated the search for connections between invariant theory and algebraic statistics. Eventually, this lead to a dictionary, like in Equation~\eqref{eq:Dictionary}, between stability notions and ML estimation for matrix normal models (Theorem~\ref{thm:bigTheoremMatrixNormal}). That in turn fostered research on the existence of such a dictionary at different levels of generality and/or for different assumptions. The current state of this research for Gaussian models is presented in Chapters~\ref{ch:GaussianModels}, \ref{ch:GaussianGroupModels} and~\ref{ch:RDAGs}.
+
+This chapter is mainly based on \cite{SiagaPaper}, which is joint work with Carlos Am\'endola, Kathl\'en Kohn and Anna Seigal. Several  results in Section~\ref{sec:MLEsStabilizer} were stimulated by discussions with my collaborators Gergely B\'erczi, Eloise Hamilton, Visu Makam and Anna Seigal, or are implicitly contained in \cite{SiagaPaper}. Moreover, Section~\ref{sec:TDAGs} also takes further knowledge from \cite{RDAG} (see Chapter~\ref{ch:RDAGs}) into account. Finally, we note that \cite{SiagaPaper} is the companion paper of \cite{DiscretePaper}, which studies log-linear models via toric invariant theory and is presented in Chapter~\ref{ch:LogLinearModels}. We will compare log-linear models and Gaussian group models at the end of this chapter.
+
+
+% some historic remarks: actually operator scaling versus flip flop was starting point, i.e., very algorithmic view; then came strong/full correspondence for matrix normal models; then generalized to Gaussian group models with G Zariski closed and self-adjoint
+% content of this chapter
+%now, $G$ really acts on tuple of samples (not fake action as for \Aset)
+
+
+
+\paragraph{Main Results.} 
+
+First, we collect basic properties of Gaussian group models in Propositions~\ref{prop:TransitiveActionOnMgG}, \ref{prop:MLEsViaAction} and \ref{prop:MLEsStabilizer}. In particular, Gaussian group models are transformation families (Definition~\ref{defn:TransformationFamily}), and the stabilizer of a tuple of samples $Y$ naturally acts on the set of MLEs given $Y$.
+
+Thanks to the group structure, the conditions to work with $\GSL$ in the weak correspondence (Theorem~\ref{thm:WeakCorrespondence}) simplify, compare Theorem~\ref{thm:GroupWeakCorrespondence}.
+Remember that the weak correspondence casts maximizing the log-likelihood function as a norm minimization problem. The latter means, in the case of a Gaussian group model $\Mg_G$, to compute the capacity~\eqref{eq:Capacity}.
+Moreover, the weak correspondence yields a first dictionary between stability notions and ML estimation.
+We extend this for two classes of Gaussian group models to a full list as in Equation~\eqref{eq:Dictionary}.
+
+In the first case, the group is assumed to be Zariski closed and self-adjoint, see Theorem~\ref{thm:StrongFullCorrespondence}. For $\KK = \CC$ we obtain an exact equivalence between the four notions of stability and the four properties of ML estimation as in the dictionary~\eqref{eq:Dictionary}. We call this the \emph{full correspondence}. If $\KK = \RR$ one implication is missing and we speak of the \emph{strong correspondence} instead.\footnote{Like the name \emph{weak correspondence}, the names \emph{strong correspondence} respectively \emph{full correspondence} where coined by Anna Seigal during discussions with Gergely B\'erczi, Eloise Hamilton, Visu Makam and myself.}
+Furthermore, the natural action of the stabilizer on the set of MLEs is transitive for Zariski closed self-adjoint groups, Proposition~\ref{prop:MLEsTransitiveStabilizerAction}. 
+
+The second case in which we obtain the full correspondence is the situation of Gaussian graphical models on transitive DAGs (TDAGs), see Theorem~\ref{thm:FullCorrespondenceTDAG}. We deduce this correspondence by proving equivalences between stability notions and linear independence conditions on the sample matrix, Theorem~\ref{thm:StabilityLinearIndepTDAG}. Remarkably, for TDAGs the stabilizer of a tuple of samples is even in bijection with the set of MLEs, compare Proposition~\ref{prop:StabilizerMLEsTDAG}, 
+
+
+\paragraph{Applications of the Dictionary.}
+We point out three applications of a dictionary between stability notions and ML estimation. In this chapter this is specifically showcased for matrix normal models.
+
+First, such a dictionary may allow to obtain new characterizations and recover known results via an invariant theory perspective. For Example, Theorem~\ref{thm:nullconeLeftRight} and Corollaries~\ref{cor:knownMLEbound} and~\ref{cor:newMLEboundWeaker} recover known results, while Theorem~\ref{thm:ComplexMatrixNormalKing} is a new characterization for complex matrix normal models; see Subsection~\ref{subsec:MatrixNormalBoundedness}.
+
+Second, one can tackle questions on ML thresholds via invariant theory: the problem of computing the three ML thresholds essentially translates to generic semi/poly/stability, respectively.
+Indeed, we use descriptions of the null cone to give improved bounds on the boundedness threshold $\mlt_b$ for matrix normal models, see Theorem~\ref{thm:nullconeFills} and Corollary~\ref{cor:newMLEbound}. These results were new at their time. In the meantime, the theory from Section~\ref{sec:MatrixNormalModels} was successfully used to completely determine the ML thresholds for matrix normal models \cite{DM21MatrixNormal}. We state their result in Theorem~\ref{thm:MatrixNormalThresholdsDM21}. In fact, this was generalized to tensor normal models in \cite{DMW22TensorNormal}.
+
+Third, the connections lead to algorithmic consequences. We can compare scaling algorithms from invariant theory and ML estimation with each other. In Subsection~\ref{subsec:FlipFlopVsOperatorScaling} we show that operator scaling (Algorithm~\ref{algo:OperatorScaling}) and the Flip-Flop Algorithm~\ref{algo:flipflop} for matrix normal models are essentially the same.
+Furthermore, we can regard the geodesically convex methods from \cite{GradflowArXiv} as iterative proportional scaling for Gaussian group models given by Zariski closed self-adjoint groups, see Subsection~\ref{subsec:AlgorithmsSelfAdjoint}.
+
+
+
+
+
+\paragraph{Organization and Assumptions.}
+In Section~\ref{sec:ModelsViaAction} we describe how a rational representation of an algebraic group induces a Gaussian group model, and we state several examples of Gaussian group models. Then we collect several basic properties and the weak correspondence in Section~\ref{sec:MLEsStabilizer}. Afterwards, we study the case of Zariski closed self-adjoint groups in Section~\ref{sec:SelfAdjointMgG} and illustrate the theory in detail for matrix normal models in Section~\ref{sec:MatrixNormalModels}. We connect Gaussian graphical models on transitive DAGs to Gaussian group models in Section~\ref{sec:TDAGs}.
+Finally, we discuss related literature and compare Gaussian group models with log-linear models from Chapter~\ref{ch:LogLinearModels}, Section~\ref{sec:DiscussionGaussian}.
+
+As in Section~\ref{sec:GaussianModelsMLestimation} we work over $\KK \in \{\RR, \CC\}$, and $(\cdot)\HT$ denotes the Hermitian transpose, which equals the transpose $(\cdot)\T$ if $\KK = \RR$.
+
+
+
+
+
+
+%------ Models via Group Actions ------------------------
+
+\section{Models via Group Actions}\label{sec:ModelsViaAction}
+
+Recall from Definition~\ref{defn:GaussianModelMA} that for $\KK \in \{\RR, \CC\}$ and a subgroup $G \subseteq \GL_m(\KK)$ the Gaussian group model given by $G$ is
+	\[\Mg_G = \left\lbrace g\HT g \mid g \in G  \right\rbrace \subseteq \PD_m(\KK).\]
+We have already seen in Example~\ref{ex:FullGuassianAsMgA} that the saturated model $\PD_m(\KK)$ can be seen as a Gaussian group model in several ways, e.g., as $\Mg_{\GL_m(\KK)}$ or as $\Mg_{\Bor_m(\KK)}$. Another example of a Gaussian group model is the following.
+
+\begin{example}\label{ex:mUnivariateGaussiansAsMgG}
+	For the group $G = \GT_m(\KK)$ of invertible diagonal matrices we obtain $\Mg_{G} = \{\Psi \in \PD_m(\KK) \mid \Psi \text{ is diagonal}\}$, the model of $m$ independent univariate Gaussians from Example~\ref{ex:mUnivariateGaussiansModel}.
+	\hfill\exSymbol
+\end{example}
+
+The group $G$ naturally acts on the sample space $\KK^m$ via left-multiplication. From an invariant theory perspective it is natural to study \emph{general} group actions and associate Gaussian group models to these. This is always possible as follows. Let $G$ be a group acting linearly on an $m$-dimensional $\KK$-vector space~$V$, i.e., we are given a morphism $\pi \colon G \to \GL(V)$ of groups. After choosing an ordered basis of $V$, or equivalently an isomorphism\footnote{Recall that, if not mentioned otherwise, we always equip $\KK^m$ with the standard inner product and the standard ordered basis $(e_1, \ldots, e_m)$.}  $V \cong \KK^m$, we can view $\pi(G)$ as a subgroup of $\GL_m(\KK)$ and obtain a corresponding Gaussian group model $\Mg_{\pi(G)} \subseteq \PD_m(\KK)$.
+
+\begin{remark}\label{rem:ModelsViaAction}
+	It is important to note that statistics naturally requires a choice how to measure data, e.g., a choice of coordinates as above.
+	We stress that choosing different coordinates affects the statistical meaning. Indeed, a different isomorphism $V \cong \KK^m$ gives a different inner product on $V$ by pullback of the standard inner product.
+	In this regard, if $V$ already comes with an inner product then it is natural to choose an ordered \emph{orthonormal} basis, or equivalently an \emph{isometric} isomorphism $V \cong \KK^m$.\\
+	For an illustration of this remark we refer to Example~\ref{ex:AKRS-Example3-12}.
+	\hfill\remSymbol
+\end{remark}
+
+\begin{example}\label{ex:GeneralTorusActionMgG}
+	Let $\pi \colon T \to \GL(V)$ be a rational representation of a complex torus. We identify $T \cong \GT_d(\CC)$, where $d = \dim T$. Remember that $V$ decomposes into weight spaces by Theorem~\ref{thm:WeightSpaceDecomposition} and, as in Example~\ref{ex:GeneralGTaction} we can identify $V \cong \CC^m$ such that the $e_j$, $j \in [m]$ are weight vectors. Let  $(a_{1j},\ldots,a_{dj}) \in \ZZ^d$ be the corresponding weights. Then $t  = \diag(t_1,\ldots,t_d) \in \GT_d(\CC)$ acts on $V \cong \CC^m$ by left multiplication with the diagonal matrix from \eqref{eq:torusd}, i.e.,
+		\[ \pi(t) = \diag \big( t_1^{a_{11}} \cdots t_d^{a_{d1}}, \: t_1^{a_{12}} \cdots t_d^{a_{d2}},\:  \ldots,\:  t_1^{a_{1m}} \cdots t_d^{a_{dm}}  \big) \in \GL_m(\CC) \cong \GL(V) . \]
+	We get the Gaussian group model $\Mg_{\pi(T)} = \{ \pi(t)\HT \pi(t) \mid t \in \GT_d(\CC) \} \subseteq \PD_m(\CC)$. If the torus $T$ is $\RR$-split and $\pi$ is defined over $\RR$, then all identifications can be done in a way that is compatible with the $\RR$-structures. We obtain a similar Gaussian group model over the reals: $\{ \pi(t)\T \pi(t) \mid t \in \GT_d(\RR) \} \subseteq \PD_m(\RR)$.
+	\hfill\exSymbol
+\end{example}
+
+In Section~\ref{sec:SelfAdjointMgG} we study models $\Mg_G$, where $G \subseteq \GL_m(\KK)$ is a Zariski closed self-adjoint subgroup. Similar to the above construction, the next remark provides a class of group actions that naturally give rise to such Gaussian group models.
+
+\begin{remark}[based on {\cite[Remark~2.4]{SiagaPaper}}]\label{rem:ReductiveToSelfAdjointMgG}
+	Let $G$ be a reductive group over $\CC$ and $\pi \colon G \to \GL(V)$ a rational representation on an $m$-dimensional $\CC$-vector space. Then $\pi(G) = \pi(G)_\CC \subseteq \GL(V)$ is a Zariski closed subgroup by Proposition~\ref{prop:ZClosedAlgebraicImage}, and if $G$ and $\pi$ are defined over $\RR$ then $\pi(G)$ is defined over $\RR$. Hence, $\pi(G)_\RR \subseteq \GL(V_\RR)$ is a Zariski closed subgroup as well.
+	
+	Since $G$ is reductive, $\pi$ is semisimple by Theorem~\ref{thm:ReductiveIsLinearlyReductive} and hence $\pi(G)_\KK \subseteq \GL(V_\KK)$ is a faithful semisimple representation.
+	Therefore, there exists an inner product $\langle \cdot, \cdot \rangle$ on $V_\KK$ to which $\pi(G)_\KK \subseteq \GL(V_\KK)$ is self-adjoint, by Theorem~\ref{thm:ReductiveGroupActionToSelfAdjoint}. Thus, after fixing an ordered orthonormal basis with respect to $\langle \cdot , \cdot \rangle$ we can view $\pi(G)_\KK$ as a Zariski closed self-adjoint subgroup of $\GL_m(\KK)$. We obtain a Gaussian group model $\Mg_{\pi(G)_\KK}$.
+	
+	Remember that for $\KK = \RR$ we may have $\pi(G_\RR) \varsubsetneq \pi(G)_\RR$, see Example~\ref{ex:BorelRealPoints}. Still, Corollary~\ref{cor:ImageRealPoints} yields $\pi(G)_\RR^\circ \subseteq \pi(G_\RR) \subseteq \pi(G)_\RR$. The polar decompositions of $\pi(G)_\RR$ and its subgroup $\pi(G_\RR)$, Theorem~\ref{thm:PolarDecomposition} and Corollary~\ref{cor:PolarDecompositionSubgroup}, show that they yield the same Gaussian group model: $\Mg_{\pi(G)_\RR} = \Mg_{\pi(G_\RR)}$.\footnote{In \cite[Remark~2.4]{SiagaPaper} it is stated that ``$\varrho(G) \subseteq \GL(V)$ is a closed algebraic subgroup'' giving a reference to \cite[Theorem~5.39]{MilneBook} ($\varrho$ is called $\pi$ in Remark~\ref{rem:ReductiveToSelfAdjointMgG}). This is certainly true over $\RR$ in the \emph{scheme theoretic sense}. However, we actually would like that the image of the $\RR$-rational points of $G$ (i.e., $\varrho(G_\RR)$ respectively $\pi(G_\RR)$) is Zariski closed in the $\RR$-rational points of $\GL(V)$. This fails in general as Example~\ref{ex:BorelRealPoints} shows. We adjusted the remark correspondingly.}
+	
+	``$\varrho(G) \subseteq \GL(V)$ is a closed algebraic subgroup; see, e.g., [31, Theorem 5.39]''. This is true in the scheme theory sense, however we want the $\RR$-rational points to be Zariski closed in the $\RR$-rational points of $\GL(V)$. This may fail in general as Example~\ref{ex:BorelRealPoints} below shows. This somewhat also affects \cite[Remark~3.11]{SiagaPaper}, and the proof of \cite[Theorem~4.1]{SiagaPaper}. However, everything can be repaired and all main results in \cite{SiagaPaper} are unchanged
+	
+	We stress once more that the statistical meaning depends on the inner product on $V$, compare Remark~\ref{rem:ModelsViaAction} and see Example~\ref{ex:AKRS-Example3-12} for an illustration.
+	\hfill\remSymbol
+\end{remark}
+
+We showcase the above construction for matrix and tensor normal models.
+
+\begin{example}[Matrix and Tensor Normal Models] \label{ex:MatrixTensorAsMgG}
+	\index{matrix normal model|(}\index{tensor normal model}
+	Consider the natural group action of the reductive group $\GL_{m_1}(\KK) \times \cdots \times \GL_{m_d}(\KK)$ on $\KK^{m_1} \otimes \cdots \otimes \KK^{m_d}$ via $\KK$-linear extension of
+		\[ (g_1, \ldots, g_d) \cdot (v_1 \otimes \cdots \otimes v_d) = g_1(v_1) \otimes \cdots \otimes g_d(v_d). \]
+	Recall that this is the \emph{tensor scaling action}\index{tensor scaling action} from Example~\ref{ex:RepTensorScaling}. It induces the Gaussian group model $\Mg_G$ given by the subgroup
+		\[G = \left\lbrace g_1 \otimes \cdots \otimes g_d \mid g_i \in \GL_{m_i}(\KK) \right\rbrace \subseteq \GL_{m_1 \cdots m_d}(\KK) , \]
+	where we used the Kronecker product, see Definition~\ref{defn:KroneckerProduct}. Note that the use of the Kronecker product implicitly identifies $\KK^{m_1} \otimes \cdots \otimes \KK^{m_d} \cong \KK^{m_1 \cdots m_d}$.
+	Under this identification the group $G \subseteq \GL_{m_1 \cdots m_d}(\KK)$ is self-adjoint (with respect to the standard inner product on $ \KK^{m_1 \cdots m_d}$). Moreover, $G$ is Zariski closed in $\GL_{m_1 \cdots m_d}(\KK)$, even if $\KK = \RR$.\footnote{This may fail in general, compare Remark~\ref{rem:ReductiveToSelfAdjointMgG}.} One can deduce Zariski closedness of $G$ for $\KK = \RR$ by using that Segre embeddings are surjective on $\RR$-rational points.\footnote{Note that $G$ is the intersection of $\GL_{m_1 \cdots m_d}(\KK)$ with the affine cone of a Segre variety.}
+	
+	With the properties of the Kronecker product we compute
+		\[ (g_1 \otimes \cdots \otimes g_d)\HT (g_1 \otimes \cdots \otimes g_d)
+		= g_1\HT g_1 \otimes \cdots \otimes g_d\HT g_d \]
+	and see that $\Mg_G$ is the tensor normal model $\MTK(m_1, \ldots, m_d)$ from \eqref{eq:TensorNormalModel} in Example~\ref{ex:MatrixTensorNormalModel}. In the special case $d=2$ we obtain the matrix normal model.
+	\hfill\exSymbol
+\end{example}
+
+It is convenient to study matrix normal models via the left-right action. We introduce this viewpoint, which is used in Section~\ref{sec:MatrixNormalModels}, in the following example.\footnote{In \cite{DM21MatrixNormal} the left-right action was used to determine the ML thresholds of matrix normal models.}
+
+\begin{example}[Left-right Action and Matrix Normal Models]\label{ex:LeftRightMatrixNormal}
+	\ \\
+	The group $G := \GL_{m_1}(\KK) \times \GL_{m_2}(\KK)$ acts algebraically on $\KK^{m_1 \times m_2}$, which we equip with the Frobenius norm, via
+		\begin{equation}\label{eq:LeftRightMatrixNormal}
+			(g_1, g_2) \cdot m = g_1 M g_2\T,
+		\end{equation}
+	where $g = (g_1,g_2) \in G$ and $M \in \KK^{m_1 \times m_2}$. This is the left-right action from Example~\ref{ex:RepLeftRight}. We stress that also for $\KK = \CC$ the transpose $g_2\T$ (and \emph{not} the Hermitian transpose $g_2\HT$) is used to get an \emph{algebraic} action. Furthermore, this allows for a natural identification via the $\KK$-linear isomorphism
+		\begin{equation}\label{eq:IdentificationMatrices2Tensors}
+			\KK^{m_1} \otimes \KK^{m_2} \overset{\sim}{\longrightarrow} \KK^{m_1 \times m_2}, \quad v \otimes w \mapsto v w\T
+		\end{equation}
+	which is induced by the $\KK$-bilinear map $(v,w) \mapsto v w\T$. Indeed, \eqref{eq:IdentificationMatrices2Tensors} identifies the standard orthonormal bases $e_i \otimes e_j \leftrightarrow E_{i,j}$
+	and writing $M = \sum_{i=1}^k v_i w_i\T \leftrightarrow \sum_{i=1}^k v_i \otimes w_i$, where $v_i \in \KK^{m_1}$ and $w_i \in \KK^{m_2}$, we compute
+		\begin{align*}
+			(g_1, g_2) \cdot M = \sum_{i=1}^k g_1 v_i w_i\T g_2\T = \sum_{i=1}^k (g_1 v_i) (g_2 w_i)\T
+			\quad \leftrightarrow \quad \sum_{i=1}^k g_1(v_i) \otimes g_2(w_i).
+		\end{align*}
+	The latter shows that the identification from \eqref{eq:IdentificationMatrices2Tensors} is $G$-equivariant, where $G$ acts on $\KK^{m_1} \otimes \KK^{m_2}$ as in Example~\ref{ex:MatrixTensorAsMgG}. Therefore, under the identification~\eqref{eq:IdentificationMatrices2Tensors} the left-right action induces the matrix normal model
+		\[ \MTK(m_1,m_2) = \big\{ \Psi_1 \otimes \Psi_2 \mid \Psi_j \in \PD_{m_j}(\KK) \big\} \]
+	from Examples~\ref{ex:MatrixTensorNormalModel} and~\ref{ex:MatrixTensorAsMgG}.
+	
+	Finally, let us compute the log-likelihood~\eqref{eq:GaussianLogLikelihood} in terms of the Kronecker factors $\Psi_j$. To do so, we need to isometrically identify $\KK^{m_1 \times m_2} \cong \KK^{m_1} \otimes \KK^{m_2}$ with the space of column vectors $\KK^{m_1 m_2}$. By Definition~\ref{defn:KroneckerProduct} of the Kronecker product, there is an isomorphism $\vect \colon \KK^{m_1 \times m_2} \to \KK^{m_1 m_2}$ such that
+		\begin{equation}\label{eq:VectKronecker}
+			\forall g_j \in \GL_{m_j}(\KK), \, M \in \KK^{m_1 \times m_2} \colon \quad  \vect \big( g_1 M g_2\T \big) = (g_1 \otimes g_2) \vect(M) .
+		\end{equation}
+ 	For $A,B \in \KK^{m_1 \times m_2}$, one verifies that $\vect$ is an isometry:
+ 		\begin{equation}\label{eq:VecIsIsometry}
+ 			\tr \big( A\HT B \big) = \tr \big( \vect(A)\HT \vect(B) \big) \, .
+ 		\end{equation}
+ 	Given a tuple of samples $Y = (Y_1, \ldots, Y_n) \in (\KK^{m_1 \times m_2})^n$, we consider the sample covariance matrix $S_{\vect(Y)}$ for $\vect(Y) := (\vect(Y_1), \ldots, \vect(Y_n))$ and compute
+ 		\begin{align*}
+ 			n \tr \big( (\Psi_1 \otimes \Psi_2) S_{\vect(Y)} \big) &= \tr \bigg( (\Psi_1 \otimes \Psi_2) \sum_{i=1}^n \vect(Y_i) \vect(Y_i) \HT\bigg) \\
+ 			& \overset{\eqref{eq:VectKronecker}}{=} \sum_{i=1}^n \tr \big( \vect \big(\Psi_1 Y_i \Psi_2\T \big) \vect(Y_i)\HT \big)
+ 			\overset{\eqref{eq:VecIsIsometry}}{=} \sum_{i=1}^{n} \tr \big( \Psi_1 Y_i \Psi_2\T Y_i\HT \big) .
+ 		\end{align*}
+ 	As a consequence, the log-likelihood~\eqref{eq:GaussianLogLikelihood} becomes
+ 		\begin{align*}
+ 			\ell_Y(\Psi_1 \otimes \Psi_2) &= \log \det (\Psi_1 \otimes \Psi_2) - \tr \big( (\Psi_1 \otimes \Psi_2) S_{\vect(Y)} \big) \\
+ 			&=  \, m_2 \, \log \det (\Psi_1) +  \, m_1 \, \log \det (\Psi_2) - \frac{1}{n} \tr \left( \Psi_1 \sum_{i=1}^n Y_i \Psi_2\T Y_i\HT \right).
+ 		\end{align*}
+ 	We use the latter in Section~\ref{sec:MatrixNormalModels}.
+ 	\index{matrix normal model|)}
+	\hfill\exSymbol
+\end{example}
+
+Keeping the constructions of this section in mind, we work with the setting $G \subseteq \GL_m(\KK)$ in the next two sections.
+
+%------ MLEs, Stabilizers and weak Correspondence ------------------------
+
+\section{MLEs, Stabilizers and weak Correspondence}\label{sec:MLEsStabilizer}
+
+
+By convention of this thesis a Gaussian model $\Mcal \subseteq \PD_m(\KK)$ is parametrized by its concentration matrices, i.e., the inverses of the covariance matrices. Thus, the set of covariance matrices of a Gaussian group model $\Mg_G$ is
+\begin{equation}\label{eq:CovarianceMatricesGaussianGroupModel}
+	\left\lbrace (g\HT g)^{-1} = g^{-1} (g^{-1})\HT \mid g \in G \right\rbrace = \big\{h h\HT \mid h \in G \big\}
+\end{equation}
+via the reparametrization $h = g ^{-1} \in G$. A simple but very useful property of a Gaussian group model $\Mg_G$ is that it admits transitive $G$-actions on its covariance respectively concentration matrices.
+
+\begin{prop}\label{prop:TransitiveActionOnMgG}
+Let $G \subseteq \GL_m(\KK)$ be a subgroup. The action of $G$ on $\KK^m$ via left multiplication induces a transitive left action on
+	\begin{itemize}
+		\item[(i)] the set of covariance matrices from \eqref{eq:CovarianceMatricesGaussianGroupModel} via $(g, \Sigma) \mapsto g\Sigma g\HT$.
+		
+		\item[(ii)] the set of concentration matrices $\Mg_G$ via $(g, \Psi) := (g^{-1})\HT \Psi g^{-1}$.
+	\end{itemize}
+\end{prop}
+
+\begin{proof}
+	Let $Y \sim \Ncal(0, \Sigma)$ be a random vector, where $\Sigma = h h\HT$ and $h \in G$. Then for any $g \in G$ we have $g \cdot Y \sim \Ncal(0, g \Sigma g\HT)$, by Lemma~\ref{lem:AffineLinearTransformationOfGaussian}. Hence, the left action of $G$ on $\KK^m$ induces the $G$-action on the set of covariance matrices given in~(i). We compute $g \Sigma g \HT = (gh) (gh)\HT$ and note that $G \to G, g \mapsto gh$ is surjective. Thus, the action from part~(i) is transitive. Similarly, we get an induced transitive action on the level of concentration matrices $\Psi := \Sigma^{-1}$, since $g \cdot Y$ has concentration matrix $(g \Sigma g\HT)^{-1} = (g^{-1})\HT \Psi g^{-1}$. 
+\end{proof}
+
+\begin{remark}\label{rem:TransitiveActionOnMgG}
+	Regarding Proposition~\ref{prop:TransitiveActionOnMgG} we remark the following.
+	\begin{itemize}
+		\item[(a)] Part~(i) shows that Gaussian group models are \emph{transformation families} in the sense of \cite{ExponentialTransformationModels}, compare Definition~\ref{defn:TransformationFamily}.
+		
+		\item[(b)] Instead of the left action given in part~(ii) we often consider the analogous transitive \emph{right} action on $\Mg_G$ via $(\Psi, g) \mapsto g\HT \Psi g$. It has the same orbits as the left action.
+		
+		\item[(c)] The $G$-actions from Proposition~\ref{prop:TransitiveActionOnMgG} and part~(b) are usually not free. For example, the identity $\Id_m \in \Mg_G$ is fixed by all elements in the compact group $K = \{g \in G \mid g\HT = g^{-1}\}$. Furthermore, for $\KK = \CC$ these $G$-actions are \emph{not} algebraic due to the Hermitian transpose $(\cdot)\HT$.\hfill\remSymbol
+	\end{itemize}
+\end{remark}
+
+
+In the following we study how the transitive group actions of $G$ on $\Mg_G$ relate to ML estimation for a given tuple of samples $Y \in (\KK^m)^n \cong \KK^{m \times n}$.\footnote{Note that Equation~\eqref{eq:MLEsViaAction} appears in \cite{SiagaPaper} in the proofs of Theorems~3.10 and~3.15.}
+
+\begin{prop}\label{prop:MLEsViaAction}
+	Let $G \subseteq \GL_m(\KK)$ be a subgroup and consider the model $\Mg_G$ with sample matrix $Y \in \KK^{m \times n}$. Fix some $h \in G$ with $|\det(h)|=1$. Then:
+		\begin{itemize}
+			\item[(i)] The supremum of $\ell_Y$ equals the supremum of $\ell_{h \cdot Y}$.
+			\item[(ii)] There exists an MLE given $Y$ if and only if there exists an MLE given $h \cdot Y$. Acting with $h$ on $Y$ changes the set of MLEs according to the left action of $h$ on $\Mg_G$ from Proposition~\ref{prop:TransitiveActionOnMgG}(ii), i.e.,
+			\begin{equation}\label{eq:MLEsViaAction}
+				\{ \text{MLEs given } h \cdot Y \} = (h^{-1})\HT \{ \text{MLEs given } Y \} h^{-1} .
+			\end{equation}
+		\end{itemize}
+\end{prop}
+
+\begin{proof}
+	Recall from Equation~\eqref{eq:MgALogLikelihoodNorm} that for any $g \in G$ we have
+	\begin{align*}
+		\ell_Y(g\HT g) = \log \big( |\det(g)|^2 \big) - \frac{1}{n} \| g \cdot Y\|^2 .
+	\end{align*}
+	Since $\vert \det(h) \vert = 1$, it holds that $\log \big( |\det(h^{-1})|^2 \big) = 0$. We compute
+		\begin{align*}
+			\sup_{g \in G} \; \ell_Y(g\HT g) &= \sup_{g \in G} \; \log \big( |\det(g)|^2 \big) + \log \big( |\det(h^{-1})|^2 \big) - \frac{1}{n} \| g \cdot Y\|^2 \\
+			&= \sup_{g \in G} \; \log \big( \det \big( (gh^{-1})\HT gh^{-1} \big) \big) - \frac{1}{n} \| (g h^{-1}) \cdot (h \cdot Y)\|^2 \\
+			&= \sup_{\tilde{g} \in G} \; \log \big( \det \big( \tilde{g}\HT \tilde{g} \big) \big) - \frac{1}{n} \| \tilde{g} \cdot (h \cdot Y)\|^2
+			= \sup_{\tilde{g} \in G} \; \ell_{h \cdot Y}(\tilde{g}\HT \tilde{g}),
+		\end{align*}
+	where we used the reparametrization $\tilde{g} = gh^{-1}$, equivalently $g = \tilde{g}h$, in the penultimate equality. This proves~(i). Moreover, the above computation shows that $g\HT g = h\HT (\tilde{g}\HT \tilde{g}) h$ is an MLE given $Y$ if and only if $\tilde{g}\HT \tilde{g} = (h^{-1})\HT	(g\HT g) h^{-1}$ is an MLE given $h \cdot Y$. This proves the second part including Equation~\eqref{eq:MLEsViaAction}.
+\end{proof}
+
+In the setting of Gaussian group models it is a natural question to ask, which role is played by group elements stabilizing $Y$. Given the preceding proposition we study the stabilizer of $Y$ under the group $H := \{g \in G \mid |\det(g)| = 1\}$. Equation~\eqref{eq:MLEsViaAction} for $h \in H_Y$ shows that the right action of $H_Y$ on $\Mg_G$ via $(\Psi, h) \mapsto h\HT \Psi h$ restricts to an action on the set of MLEs given $Y$. Consequently, the set of MLEs given $Y$ is the disjoint union of its $H_Y$-orbits. The latter is also a consequence of the following statement.
+
+\begin{prop}\label{prop:MLEsStabilizer}
+	Let $G \subseteq \GL_m(\KK)$ be a subgroup and consider the right action $(\Psi, g) \mapsto g\HT \Psi g$ on $\Mg_G$. Set $H := \{g \in G \mid |\det(g)| = 1\}$ and fix some $h \in H_Y$, where $Y \in \KK^{m \times n}$ is a sample matrix. Then:
+		\begin{equation}\label{eq:ell-Y-constantOnOrbits}
+			\forall \, \Psi \in \Mg_{G} \colon \quad \ell_Y(h\HT \Psi h) = \ell_Y(\Psi) .
+		\end{equation}
+	In particular, $\ell_Y$ is constant on the $H_Y$-orbits of $\Mg_G$ and $H_Y$ acts on the set of MLEs given $Y$.
+	The statement also holds for the subgroups $(\GSLpm)_Y$ and $(\GSL)_Y$ of $H_Y$.
+\end{prop}
+
+\begin{proof}
+	As $h \in H_Y$ we have $h \cdot Y = Y$ and $|\det(h)| = 1$. Thus, for all $g \in G$
+	\begin{align*}
+		\ell_Y(h\HT( g\HT g) h) &= \ell_{Y}((gh)\HT gh) = \log \big( |\det(gh)|^2 \big) - \frac{1}{n} \| (gh) \cdot Y \|^2 \\
+		&= \log \big( |\det(g)|^2 \big) + \log \big( |\det(h)|^2 \big) - \frac{1}{n} \| g \cdot (h \cdot Y) \|^2 \\
+		&= \log \big( |\det(g)|^2 \big) - \frac{1}{n} \| g \cdot Y \|^2 = \ell_{Y}(g\HT g).
+	\end{align*}
+	Since any $\Psi \in \Mg_G$ is of the form $g\HT g$ for some $g \in G$, this shows \eqref{eq:ell-Y-constantOnOrbits}.
+	Hence, $\ell_Y$ is constant on the $H_Y$-orbits of $\Mg_G$. Since the MLEs given $Y$ are exactly the $\hat{\Psi} \in \Mg_G$ with $\ell_{Y}(\hat{\Psi})  = \sup_{\Psi \in \Mg_{G}} \ell_{Y}(\Psi)$, we see that $H_Y$ acts on the set of MLEs given $Y$. Alternatively, this can be seen via \eqref{eq:MLEsViaAction} as discussed before this proposition.
+	The arguments are valid for any subgroup of $H_Y$ - in particular for $(\GSLpm)_Y$ and $(\GSL)_Y$.
+\end{proof}
+
+We note that in general there may exist an MLE $\hat{\Psi}$ given $Y$ and $h \in H_Y$ such that $h\HT \hat{\Psi} h = \hat{\Psi}$. In other words, the $H_Y$-action on the set of MLEs need not to be free, compare Example~???. %todo forward reference to matrix normal models
+Furthermore, the following example shows that the $H_Y$-action neither needs to be transitive.
+
+\begin{example}\label{ex:MLEsStabilizer}
+	Consider the Gaussian group model $\Mg_G$ from Example~\ref{ex:EasyCounterexampleASLpm}:
+	\[G := \{ \tau \Id_2,  \tau M \mid \tau \in \KK^{\times} \} \quad \text{ and } \quad M := \begin{pmatrix}
+		\nicefrac{1}{2} & 3 \\ \nicefrac{1}{4} & - \nicefrac{1}{2}
+	\end{pmatrix}. \]
+	Assume that the sample size $n=2$ and that the sample matrix is
+		\[ Y = \begin{pmatrix}
+			6 & 2 \\ 1 & -1
+		\end{pmatrix}. \]
+	For $\KK = \RR$, we have that $H = \GSLpm = \{\pm \Id_2, \pm M\}$, compare Example~\ref{ex:EasyCounterexampleASLpm}. Since $M \cdot Y_1 = Y_1$ and $M \cdot Y_2 = -Y_2$, we have $H_Y = \{\Id_2\}$ and $\| \pm Y\|^2 = \|\pm M \cdot Y \|^2 = 42$. Therefore, all elements of the orbit $\GSLpm \cdot Y$ have the same norm. Hence by Theorem~\ref{thm:WeakCorrespondence}, the MLEs given $Y$ are determined by $\lambda h\T h$, where $h \in \GSLpm$ and $\lambda = \nicefrac{2}{21}$ is the unique global minimum of $x \mapsto 21x - 2\log(x)$. As $M$ is not orthogonal there are exactly two MLEs given $Y$, namely $\lambda \Id_2$ and $\lambda M\T M$. Thus, the set of MLEs given $Y$ consists of two $H_Y$-orbits, because $H_Y$ is trivial. In particular, the $H_Y$-action is not transitive.
+	
+	For $\KK = \CC$, $H = \{g \in G \mid \, |\det(g)|=1\} = \{\tau \Id_2, \, \tau M \mid \, |\tau|^2 = 1\}$ is not finite. Still, the same argument as in the real case can be used to see that $H_Y = \{ \Id_2 \}$. Furthermore, Theorem~\ref{thm:WeakCorrespondence} for $\GSL = \{\pm \Id_2, \pm \imag M\}$ yields that, again, $\lambda \Id_2$ and $\lambda M\HT M  =\lambda M\T M$ are the MLEs given $Y$. Consequently, the $H_Y$-action is not transitive.
+	\hfill\exSymbol
+\end{example}
+
+
+The weak correspondence, Theorem~\ref{thm:WeakCorrespondence}, holds in particular for a Gaussian group model $\Mg_G$, if $G$ is closed under non-zero scalar multiples. Thanks to the group structure of $G$, condition~(ii) admits the following equivalent reformulation.
+
+\begin{lemma}\label{lem:ASLforGaussianGroupModels}
+	Let $G \subseteq \GL_m(\RR)$ be a subgroup that is closed under non-zero scalar multiples. Then condition~(ii) from Theorem~\ref{thm:WeakCorrespondence} is satisfied if and only if $G$ contains an orthogonal matrix of determinant $-1$, if it contains a matrix of negative determinant.
+\end{lemma}
+
+\begin{proof}
+	If $G$ only contains matrices of positive determinant, then condition~(ii) is trivially satisfied as we can always choose $o = \Id_m$, compare Remark~\ref{rem:ConditionIIweakCorrespondence}. Thus, assume that $G$ contains a matrix $\hat{g}$ with $\det(\hat{g}) < 0$.
+	
+	If condition~(ii) holds, then there is some orthogonal matrix $o = o(\hat{g})$ such that $\det(o\T \hat{g}) > 0$ and $o\T \hat{g} \in G$. The former together with $\det(\hat{g}) < 0$ yields $\det(o) = -1$, while the latter and the group properties imply $o\T = o\T \hat{g} \hat{g}^{-1} \in G$ and hence $o = (o\T)^{-1} \in G$. 
+	Conversely, if there is some orthogonal $o \in G$ with $\det(o) = -1$, then we have for all $g \in G$ with $\det(g) < 0$ that $\det(o\T g) > 0$ and $o\T g = o^{-1} g \in G$. Therefore, condition~(ii) is satisfied.
+\end{proof}
+
+As a direct consequence of the preceding lemma and Theorem~\ref{thm:WeakCorrespondence} we obtain the following statement.
+
+\begin{theorem}[Weak Correspondence for Gaussian group models]\label{thm:GroupWeakCorrespondence}
+	\ \\
+	Let $G \subseteq \GL_m(\KK)$ be a subgroup closed under non-zero scalar multiples. If $\KK = \RR$ and $G$ contains an element of negative determinant, then additionally assume that there is an orthogonal matrix in $G$ of determinant $-1$.
+	There is a correspondence between stability under $\GSL$ and maximum likelihood estimation in the model $\Mg_G$ given sample matrix $Y \in \KK^{m \times n}$: 
+	$$ \begin{matrix} (a) & Y \text{ unstable}  & \Leftrightarrow & \text{likelihood $\ell_Y$ unbounded from above} \\ 
+		(b) &  Y \text{ semistable} & \Leftrightarrow & \text{likelihood $\ell_Y$ bounded from above} \\ 
+		(c) & Y \text{ polystable}  & \Rightarrow & \text{MLE exists.} \end{matrix} $$
+	The MLEs, if they exist, are the matrices $\lambda h\HT h$, where $h \in \GSL$ is such that $\| h \cdot Y\| > 0$ is minimal in $\GSL \cdot Y$ and $\lambda \in \RR_{>0}$ is the unique global minimum of
+	\[\RR_{>0} \to \RR, \qquad \; x \mapsto \frac{x}{n} \|h \cdot Y\|^2 - m\log(x).\]
+\end{theorem}
+
+We have already seen in Example~\ref{ex:EasyCounterexampleASLpm} that, in general, we cannot drop the additional assumption of Theorem~\ref{thm:GroupWeakCorrespondence} if $\KK=\RR$. In \cite{SiagaPaper} a different, perhaps more interesting example is given to show this fact. 
+In the following we present this example \cite[Example~3.5]{SiagaPaper} in detail. For $M \in \RR^{2 \times 2}$, define
+\begin{equation}\label{eq:AKRSgroupExample3-5}
+	g(M) := \begin{pmatrix} M & & \\ & S_1 M S_1^{-1} & \\ & & S_2 M S_2^{-1}	\end{pmatrix} \text{, where }
+	S_1 = \begin{pmatrix} 1 & 2 \\ 2 & 1 \end{pmatrix}, \,
+	S_2 = \begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix}
+\end{equation}
+and set $G := \left\lbrace \tau g(M) \mid M \in \Orth_2, \tau \in \RR^{\times} \right\rbrace$.
+
+\begin{lemma}\label{lem:AKRSExample3-5}
+	$G$ is a subgroup of $\GL_6(\RR)$, which contains no orthogonal matrix of determinant $-1$.
+\end{lemma}
+
+\begin{proof}
+	First, $G$ is a subgroup, because
+	\[ \big( \tau_1 g(M_1) \big)^{-1} \big( \tau_2 g(M_2) \big) = (\tau_1^{-1} \tau_2) g(M_1\T M_2)  \in G\]
+	for all $\tau_1, \tau_2 \in \RR^{\times}$ and all $M_1, M_2 \in \Orth_2$.
+	
+	Second, for a proof by contradiction assume that there are $\tau \in \RR^{\times}$ and $M \in \Orth_2$ such that $\tau g(M) \in \Orth_6$ and $\det(\tau g(M)) = \tau^6 \det(M)^3 = -1$. Then $| \tau |^6 |\det(M)|^3 = |\tau|^6 = 1$ as $|\det(M)| = 1$. Hence, $\tau \in \{-1, 1\}$ and so $\tau^6 = 1$. Thus, we must have $\det(M) = -1$ and therefore we can write
+	\[ M = \begin{pmatrix}
+		a & b \\ b & -a
+	\end{pmatrix} \text{ for some } a,b \in \RR \text{ with } a^2 + b^2 = 1. \]
+	Since $\tau g(M)$ is orthogonal, we have $\tau^2 g(M)\T g(M) = g(M\T) g(M) = \Id_6$. In particular, for $i=1,2$ we obtain
+	\[ \Id_2 = \big(S_i M S_i^{-1} \big)\T \big(S_i M S_i^{-1} \big) 
+	= \big( S_i^{-1} M S_i \big) \big( S_i M S_i^{-1} \big), \]
+	where we used in th second equality that $S_i$, $S_i^{-1}$ and $M$ are symmetric. If $i=2$, then the above equation specializes to
+	\[ \Id_2 = \begin{pmatrix} a & 2b \\ \nicefrac{1}{2}b & -a \end{pmatrix}
+	\begin{pmatrix} a & \nicefrac{1}{2}b \\ 2b & -a \end{pmatrix}.\]
+	The upper left entry computes as $1 = a^2 + 4 b^2$ and we deduce $b = 0$ using $1 = a^2 + b^2$. Now, for $i=1$ we get
+	\[\Id_2 = \frac{1}{9} \begin{pmatrix} 5a & 4a \\ -4a & -5a \end{pmatrix}
+	\begin{pmatrix} 5a & -4a \\ 4a & -5a \end{pmatrix} \]
+	and the upper right entry is $0 = -(\nicefrac{41}{9}) a^2$, which contradicts $a^2 = 1$.
+\end{proof}
+
+\begin{example}[{\cite[Example~3.5]{SiagaPaper}}] \label{ex:AKRS-Example3-5}
+	Let $G := \left\lbrace \tau g(M) \mid M \in \Orth_2, \tau \in \RR^{\times} \right\rbrace$, where $g(M)$ is defined as in Equation~\eqref{eq:AKRSgroupExample3-5}. Then $G$ is a subgroup of $\GL_6(\RR)$ that contains no orthogonal matrix of determinant $-1$, see Lemma~\ref{lem:AKRSExample3-5}.
+	For the Gaussian group model $\Mg_G$ consider the tuple of four samples given by
+	\[ Y = \begin{bmatrix} 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 \\ 2 & 0 & 0 & 0 \\ 0 & 2 \sqrt{2} & 0 & 0 \\ 0 & 0 & 0 & 2 \sqrt{5} \\ 0 & 0 & \frac{6 \sqrt{5}}{5} & \frac{8 \sqrt{5}}{5} \end{bmatrix}, \quad \text{with} \quad S_Y = \frac{1}{4} \sum_{i=1}^4 Y_i Y_i\T = \begin{bmatrix} 0 & 0 & 0 \\ 0 & S_2 & 0 \\ 0 & 0 & S_1^2 \end{bmatrix} .\]
+	By Equation~\eqref{eq:doubleInf}, the supremum of $\ell_Y$ can be computed as a double infimum. The inner infimum $\inf_{h \in \GSLpm}  \| h \cdot Y \|^2$ can be rewritten as minimizing the trace $\tr(g\T g S_Y)$ over matrices $g \in \GSL^\pm$, by~\eqref{eq:NormTrace}:
+		\begin{align*}
+			\inf_{h \in \GSLpm}  \| h \cdot Y \|^2 = 4 \cdot \inf_{M \in \Orth_2}  \big[ &\tr \left( (S_1 M S_1^{-1})\T (S_1 M S_1^{-1}) S_2 \right) \\
+			&+  \tr \left(( S_2 M S_2^{-1})\T ( S_2 M S_2^{-1}) S_1^2 \right) \big].
+		\end{align*}
+	We can parametrize the $2 \times 2$ special orthogonal matrices by $P$ and the $2 \times 2$ orthogonal matrices of determinant $-1$ by $Q$ where
+	\[ P = \begin{bmatrix} a & b \\ -b & a \end{bmatrix}, \qquad Q = \begin{bmatrix} -a & -b \\ -b & a \end{bmatrix}, \quad \text{with} \quad  a,b \in \RR, \quad \text{and} \quad a^2 + b^2 = 1. \]
+	Then the minimization problems over $\GSL$ and $\GSL^-$ can be rewritten as
+	\[ \inf_{h \in \GSL} \frac{1}{4} \| h \cdot Y \|^2 = \min_{ a^2+b^2=1} \left( 13 a^2 - \frac{44}{3} ab + \frac{419}{12} b^2 \right), \]
+	\[ \inf_{h \in \GSL^-} \frac{1}{4} \| h \cdot Y \|^2 = \min_{ a^2+b^2=1} \left( \frac{71}{3} a^2- \frac{28}{3} ab + \frac{97}{4} b^2 \right) .\]
+	We point out that the minimum is justified by compactness of the unit circle.
+	Note that $0 \leq (a-b)^2$ implies $ab \leq (\nicefrac{1}{2})(a^2 + b^2) = \nicefrac{1}{2}$, equivalently $-ab \geq - \nicefrac{1}{2}$. Thus, substituting $b^2 = 1 - a^2$ in the latter minimum, we see that
+		\begin{align*}
+			\frac{71}{3} a^2 + \frac{97}{4} (1 - a^2) - \frac{28}{3} ab
+			&\geq \frac{97}{4} + \left( \frac{71}{3} - \frac{97}{4} \right) a^2 - \frac{28}{3} \cdot \frac{1}{2} \\
+			&\geq \frac{97}{4} + \left( \frac{71}{3} - \frac{97}{4} \right) - \frac{28}{3} \cdot \frac{1}{2} = 19,
+		\end{align*}
+	where we used $\nicefrac{71}{3} - \nicefrac{97}{4} < 0$ with $a^2 \leq 1$ in the second inequality.
+	In contrast, setting $a = 1$ and $b=0$ in the former minimum gives a value of 13. 
+	Hence, $ \inf_{h \in \GSL} \| h \cdot Y \|^2 < \inf_{h \in \GSL^-} \| h \cdot Y \|^2$. Multiplying $Y$ by a fixed matrix in $\GSL^-$ gives a tuple of samples where the strict inequality is reversed, and the infimum is witnessed \emph{only} at the component $\GSL^-$. Altogether, this example shows that the extra condition for $\KK = \RR$ in Theorem~\ref{thm:GroupWeakCorrespondence}, equivalently condition~(ii) of Theorem~\ref{thm:WeakCorrespondence}, cannot be dropped.
+	\hfill\exSymbol
+\end{example}
+
+
+
+%------ Self-adjoint Zariski closed groups ------------------------
+
+\section{Self-adjoint Zariski closed groups}\label{sec:SelfAdjointMgG}
+
+In this section we study Gaussian group models $\Mg_G$ with Zariski closed and self-adjoint\footnote{We recall that self-adjoint means that for all $g \in G$ one also has $g\HT \in G$.} subgroup $G \subseteq \GL_m(\KK)$. Such models arise naturally from rational representations of reductive groups, compare Remark~\ref{rem:ReductiveToSelfAdjointMgG}.
+We have already seen Gaussian group models with Zariski closed self-adjoint subgroup in Examples~\ref{ex:mUnivariateGaussiansAsMgG}, \ref{ex:GeneralTorusActionMgG}, \ref{ex:MatrixTensorAsMgG} and~\ref{ex:LeftRightMatrixNormal}.
+
+We stress that the assumptions are properties of the parametrizing subgroup, not the model itself.
+For example, the saturated model $\PD_m(\KK)$ is induced by the Zariski closed self-adjoint group $\GL_m(\KK)$. On the other hand, $\PD_m(\KK) = \Mg_{\Bor_m(\KK)}$ and the group $\Bor_m(\KK)$ of invertible upper triangular matrices is not self-adjoint.
+
+Let us start our study with a simple observation. If $G$ is self-adjoint then
+	\[ \Mg_G = \{g\HT g \mid g \in G\} = \{ h h\HT \mid h \in G\} \]
+using the reparametrization $h = g\HT \in G$.
+Statistically this equality means that the set of concentration matrices $\Mg_G$ is equal to the set of covariance matrices of the model $\Mg_G$, compare Equation~\eqref{eq:CovarianceMatricesGaussianGroupModel}.
+
+%statement that $\Mg_G$ is closed; consequence for "extended" MLEs
+%dedicate to discussions with anna, carlos and kathlen
+%note: if G self-adjoint and Zariski closed, then $\Mg_G$ is the set of pd matrices in G
+%show that reductive Gaussian group model is geodesically convex. Dedicate to discussions with Anna and Visu
+%Leave converse as open problem. (I.e., if $\Mcal$ is geodesically convex, does there exist a reductive group $G$ such that $\Mcal = \Mg_G$?); Is it actually an open problem?; mention Ishi here?
+%mention ColeMichaelRafaelAkshay here?; mention \cite{WieselGeodesic} here? (see thresholds for matrix normal) --> no, they rather use geodesic convexity
+
+Next, we reformulate Theorem~\ref{thm:GmodKtotallyGeodesicSymmetric} to illustrate what the assumption ``Zariski closed and self-adjoint'' on $G$ means geometrically for the model $\Mg_G$.
+
+\begin{theorem}\label{thm:MGtotallyGeodsicSymmetric}
+	Let $G \subseteq \GL_m(\KK)$ be a Zariski closed self-adjoint subgroup. Then the Gaussian group model $\Mg_G$ is a totally geodesic submanifold of $\PD_m(\KK)$. Moreover, $\Mg_G$ is a CAT(0)-symmetric space and equal to $G \cap \PD_m(\KK)$. In particular, $\Mg_G$ is Euclidean closed in $\PD_m(\KK)$.
+	
+	Conversely, if $\Mcal \subseteq \PD_m(\KK)$ is a totally geodesic submanifold with $\Id_m \in \Mcal$, then $\Mcal = \Mg_G$ for a Euclidean closed self-adjoint subgroup $G \subseteq \GL_m(\KK)$.
+\end{theorem}
+
+As a consequence of these strong geometric properties and Example~\ref{ex:GeodesicConvexFunctions} the negative of the log-likelihood is a geodesically convex function on $\Mg_G$. This was observed for matrix normal models in \cite{WieselGeodesic}. Geodesic convexity has been used with great benefit for matrix and tensor normal models in \cite{OptimalSampleComplexity}, see Section~\ref{sec:DiscussionGaussian}.
+
+Since $\Mg_G$ is closed in $\PD_m(\KK)$ if $G$ is Zariski closed and self-adjoint, it does not make sense to speak of \emph{extended} MLEs of $\Mg_G$, compare Remark~\ref{rem:ExtendedMLEGaussian}.
+
+The following lemma ensures that the additional assumption for $\KK = \RR$ needed in Theorem~\ref{thm:GroupWeakCorrespondence} is satisfied, if $G \subseteq \GL_m(\RR)$ is Zariski closed and self-adjoint.
+
+\begin{lemma}[{\cite[Lemma~3.8]{SiagaPaper}}] \label{lem:OrthogonalMatrixNegativeDet}
+	Let $G \subseteq \GL_m(\RR)$ be a Zariski closed self-adjoint group, closed under non-zero scalar multiples. If there is an element of $G$ with negative determinant, then $G$ contains an orthogonal matrix of determinant $-1$. In particular, the weak correspondence, Theorem~\ref{thm:WeakCorrespondence} respectively Theorem~\ref{thm:GroupWeakCorrespondence}, holds for $\GSL$.
+\end{lemma}
+
+\begin{proof}
+	Pick $g \in G$ with $\det(g) < 0$. Since $G$ is Zariski closed and self-adjoint, the polar decomposition can be carried out in $G$, by Theorem~\ref{thm:PolarDecomposition}. 
+	In particular, there is an orthogonal $o \in G$ and a positive definite $p \in G$ such that $g = op$. Then $\det(g) < 0$ implies $\det(o) < 0$, i.e., $\det(o) = -1$.
+\end{proof}
+
+In general, the right action of $(\GSL)_Y$ from Proposition~\ref{prop:MLEsStabilizer} on the set of MLEs given $Y$ needs not to be transitive, see Example~\ref{ex:MLEsStabilizer}. However, in the case of self-adjoint groups we have the following sufficient criterion.
+
+\begin{prop}[{\cite[Propositions~3.9 and 3.14]{SiagaPaper}}] \label{prop:MLEsTransitiveStabilizerAction}
+	Let $G \subseteq \GL_m(\KK)$ be a Zariski closed self-adjoint subgroup which is closed under non-zero scalar multiples. Consider the model $\Mg_G$ with tuple of samples $Y \in (\KK^m)^n$. If $\hat{\Psi}$ is an MLE given $Y$, then
+		\begin{equation}\label{eq:MLEsTransitiveStabilizerAction}
+			\{ \text{MLEs given } Y \} = \big\lbrace g\HT \hat{\Psi} g \mid g \in (\GSL)_Y \big\rbrace,
+		\end{equation}
+	i.e., the action of $(\GSL)_Y$ from Proposition~\ref{prop:MLEsStabilizer} on the set of MLEs given $Y$ is transitive.
+\end{prop}
+
+\begin{proof}
+	The weak correspondence, Theorem~\ref{thm:GroupWeakCorrespondence}, holds for $\GSL$ by Lemma~\ref{lem:OrthogonalMatrixNegativeDet}. Hence, $\hat{\Psi} = \lambda \hat{h}\HT \hat{h}$ and any other MLE given $Y$ is of the form $\lambda (h')\HT h'$, where $\lambda > 0$ is uniquely determined and $\hat{h}, h' \in \GSL$ satisfy
+		\begin{equation}\label{eq:TransitiveStabilizerActionCapacityAttained}
+			\| h' \cdot Y \|^2 = \inf_{h \in \GSL} \| h \cdot Y \|^2 = \| \hat{h} \cdot Y \|^2.
+		\end{equation}	
+	$\GSL \subseteq \GL_m(\KK)$ is Zariski closed and self-adjoint, because $G$ is. Moreover, the matrices in $K \cap \GSL$ act isometrically on $\KK^{m \times n}$. Therefore, we can apply Kempf-Ness, Theorem~\ref{thm:KempfNessAKRS}(b), to Equation~\eqref{eq:TransitiveStabilizerActionCapacityAttained} and obtain some $k \in K \cap \GSL$ with $k \cdot (\hat{h} \cdot Y) = h' \cdot Y$. Thus, $g := \hat{h}^{-1} \, k^{-1} \, h' \in (\GSL)_Y$ and using $h' = k \hat{h} g$ we deduce $\lambda (h')\HT h' = g\HT (\lambda \hat{h}\HT \hat{h})g = g\HT \hat{\Psi} g$.
+	%AKRS version: Since $G \subseteq \GL(V)$ is Zariski closed and self-adjoint, $\GSL^+ \subseteq \GL(V)$ is Zariski closed and self-adjoint and so is its diagonal embedding into $\GL(V^n)$. Thus we can apply Kempf-Ness, Theorem~\ref{thm:KempfNess}(b). For the $\GSL^+$ action on $V^n$, there is an orthogonal matrix $o \in \GSL^+$ with $o \cdot (h \cdot Y) = h' \cdot Y$. Hence, $g := h^{-1} \, o^{-1} \, h'$ is in the $\GSL^+$-stabilizer of~$Y$ and using $h' = o h g$ we deduce $\lambda (h')\T h' = g\T (\lambda h\T h)g$.
+\end{proof}
+
+The following statement is implicitly contained in the proof of \cite[Theorems~3.10 and~3.15]{SiagaPaper}. Part~(i) is explicitly stated and proven in \cite[Corollary~2.5]{DMW22TensorNormal}.
+
+\begin{prop} \label{prop:UniqueMLEcompactStabilizer}
+	Let $G \subseteq \GL_m(\KK)$ be a Zariski closed self-adjoint subgroup, which is closed under non-zero scalar multiples. Assume that the tuple of samples $Y \in (\KK^m)^n$ has an MLE in the model $\Mg_G$. Then:
+	\begin{itemize}
+		\item[(i)] If $Y$ has a \emph{unique} MLE, then the stabilizer $(\GSL)_Y$ is compact.
+		
+		\item[(ii)] $Y$ has \emph{either} a unqiue MLE \emph{or} infinitely many MLEs.
+	\end{itemize}
+\end{prop}
+
+\begin{proof}
+	Since $Y$ has an MLE in $\Mg_G$, there is some $h \in \GSL$ such that $h \cdot Y$ is of minimal norm in $\GSL \cdot Y$, by Theorem~\ref{thm:GroupWeakCorrespondence}. Then also $h \cdot Y$ has an MLE in $\Mg_G$ using Proposition~\ref{prop:MLEsViaAction}(ii) and by Equation~\eqref{eq:MLEsViaAction} the set of MLEs given $Y$ has the same cardinality as the set of MLEs given $h \cdot Y$. Moreover, for stabilizers it holds that $(\GSL)_{h \cdot Y} = h(\GSL)_Y h^{-1}$. As conjugation via $h$ is a homeomorphism we deduce that $(\GSL)_Y$ is compact if and only if $(\GSL)_{h \cdot Y}$ is compact. Altogether, we argued that, after replacing $Y$ by $h \cdot Y$, we can assume that $Y$ is of minimal norm in its $\GSL$-orbit.
+	
+	Now, if $Y$ is of minimal norm in $\GSL \cdot Y$, then $\lambda \Id_m$ is an MLE given $Y$ using Theorem~\ref{thm:GroupWeakCorrespondence}.  Proposition~\ref{prop:MLEsTransitiveStabilizerAction} yields that
+		\begin{equation}\label{eq:UniqueMLEcompactStabilizer}
+			\{ \text{MLEs given } Y\} = \{\lambda g\HT g \mid g \in (\GSL)_Y\}.
+		\end{equation}
+	Thus, $\lambda \Id_m$ is the unique MLE given $Y$ if and only if $(\GSL)_Y \subseteq K = \{g \in G \mid g\HT g = \Id_m\}$. 
+	If $(\GSL)_Y \subseteq K$, then $(\GSL)_Y$ is compact as it is Euclidean (even Zariski) closed in the compact group $K$. This shows part~(i).
+	
+	On the other hand, assume there is another MLE $\lambda g\HT g$, $g \in (\GSL)_Y$, with $g\HT g \neq \Id_m$. The positive definite matrix $g\HT g$ admits a decomposition $udu\HT$, where $u,d \in \GL_m(\KK)$ such that $u^{-1} = u\HT$ and $d$ is diagonal with \emph{real positive} entries. At least one of the positive diagonal entries of $d$ is not equal to one, as $g\HT g \neq \Id_m$. This implies that $\{d^N \mid N \in \ZZ\}$ is an infinite cyclic group. Consequently, the set $\{ (g\HT g)^{2N} \mid N \in \ZZ \}$ is infinite. Furthermore, the stabilizer $(\GSL)_Y$ is self-adjoint as $Y$ is of minimal norm in $\GSL \cdot Y$, compare Lemma~\ref{lem:StabilizerSelfAdjoint}. Thus, for any $g \in (\GSL)_Y$ we have $g\HT \in (\GSL)_Y$ and hence $( g\HT g )^N \in (\GSL)_Y$ for all $N \in \ZZ$. Finally, we get infinitely many MLEs 
+		\[ \lambda \big( (g \HT g)^N \big)\HT  (g \HT g)^N = \lambda (g \HT g)^N (g \HT g)^N = \lambda (g \HT g)^{2N}, \quad N \in \ZZ\]
+	by \eqref{eq:UniqueMLEcompactStabilizer}, which ends the proof of part~(ii).
+\end{proof}
+
+We stress the importance of $G$ being self-adjoint to ensure part~(ii) of Proposition~\ref{prop:UniqueMLEcompactStabilizer}. This assumption is needed to conclude that the MLE is unique from the fact that there are finitely many MLEs. Indeed, the following example exhibits a reductive group $G$, closed under non-zero scalar multiples, and a sample $Y$ with a finite number of MLEs in $\Mg_G$, but not a unique MLE.
+
+\begin{example}[{\cite[Example~3.12]{SiagaPaper}}]\label{ex:AKRS-Example3-12}
+	Recall the Gaussian group model $\Mg_G$ from Examples~\ref{ex:EasyCounterexampleASLpm} and \ref{ex:MLEsStabilizer}:
+	\[G := \{ \tau \Id_2,  \tau M \mid \tau \in \KK^{\times} \} \quad \text{ and } \quad M := \begin{pmatrix}
+		\nicefrac{1}{2} & 3 \\ \nicefrac{1}{4} & - \nicefrac{1}{2}
+	\end{pmatrix}. \]
+	Assume we have a single sample $Y = (6, \, 1)\T \in \KK^m$. Remember that we have $\GSLpm = \{\pm \Id_2, \pm M\}$ if $\KK=\RR$ and $\GSLpm = \{\pm \Id_2, \pm \,\imag \Id_2, \pm M, \pm \,\imag M\}$ if $\KK = \CC$, compare Example~\ref{ex:EasyCounterexampleASLpm}.
+	The MLEs of $Y$ are $\lambda h\HT h$, where $\lambda > 0$ is unqiuely determined and $h \in \GSL^\pm$ minimizes the norm $\|h \cdot Y\|$ in $\GSLpm \cdot Y$, by Theorem~\ref{thm:WeakCorrespondence}. Since $M \cdot Y = Y$, we see that all elements in $\GSLpm \cdot Y$ have the same norm and that there are exactly \emph{two} MLEs given $Y$, namely $\lambda \Id_2$ and $\lambda M\HT M = \lambda M\T M$.
+	
+	Note that the group $G$ is reductive: it is the direct product of $\KK^\times$ and the cyclic group $\{ \Id_2, M\}$. Therefore, there is some $a \in \GL_m(\KK)$ such that $a G a^{-1}$ is self-adjoint (with respect to the standard inner product), see Theorem~\ref{thm:ReductiveGroupActionToSelfAdjoint}.
+	Equivalently, there exists an inner product $\langle \cdot, \cdot \rangle$ on $\KK^m$ such that $G$ is self-adjoint with respect to $\langle \cdot, \cdot \rangle$. Hence, Proposition~\ref{prop:UniqueMLEcompactStabilizer} holds for $G$ and $(\KK^m, \langle \cdot, \cdot \rangle)$. In particular, $Y$ has a unique MLE, %\GSLpm is finite and Y non-zero, thus Y has finitely many MLEs by weak correspondence, then apply above prop'n
+	where we point out that the \emph{statistical meaning has changed} as the log-likelihood is now computed with respect to a \emph{different} norm. %TODO take an explicit $a$?
+	This illustrates the general Remarks~\ref{rem:ModelsViaAction} and~\ref{rem:ReductiveToSelfAdjointMgG}.
+	\hfill\exSymbol
+\end{example}
+
+The weak correspondence, Theorem~\ref{thm:GroupWeakCorrespondence}, gives a first dictionary between stability notions of $\GSL$ and ML estimation for the Gaussian group model $\Mg_G$. We can enlarge this dictionary, if the group $G \subseteq \GL_m(\KK)$ is additionally Zariski closed and self-adjoint. If $\KK = \CC$ we obtain a list of \emph{four} equivalences in Theorem~\ref{thm:StrongFullCorrespondence}(a)--(d), which we call the \emph{full correspondence}. If $\KK = \RR$ the converse of Theorem~\ref{thm:StrongFullCorrespondence}(d) does not hold in general, compare Example~\ref{ex:PolystableNotStableUniqueMLE} from the next section, and we speak instead of the \emph{strong correspondence}.\footnote{Like the name \emph{weak correspondence}, the names \emph{strong correspondence} respectively \emph{full correspondence} where coined by Anna Seigal during discussions with Gergely B\'erczi, Eloise Hamilton, Visu Makam and myself.}
+
+\begin{theorem}[{\cite[Theorems~3.10 and~3.15]{SiagaPaper}}] \label{thm:StrongFullCorrespondence}
+	\ \\
+	Let $Y \in (\KK^m)^n$ be a tuple of samples, and $G \subseteq \GL_m(\KK)$ a Zariski closed self-adjoint group that is closed under non-zero scalar multiples. The stability under the action of $\GSL$ on $(\KK^m)^n$ is related to ML estimation for the Gaussian group model $\Mg_G$ as follows.
+	\[ \begin{matrix}
+		(a) & Y \text{ unstable} & \Leftrightarrow & \ell_Y \text{ not bounded from above} \\
+		(b) & Y \text{ semistable} & \Leftrightarrow & \ell_Y \text{  bounded from above} \\ 
+		(c) & Y \text{ polystable} & \Leftrightarrow & \text{MLE exists}	\\
+		(d) & Y \text{ stable} & \Rightarrow & \text{ unique MLE exists} 
+	\end{matrix}
+	\]
+	If $\KK = \CC$, then \emph{equivalence} holds in (d).
+\end{theorem}
+
+\begin{proof}
+	By Lemma~\ref{lem:OrthogonalMatrixNegativeDet} the weak correspondence holds for $\GSL$, see Theorem~\ref{thm:GroupWeakCorrespondence}. Thus, parts~(a), (b) and the forward direction of (c) hold. To prove the converse of~(c), assume that there is an MLE given $Y$. By Theorem~\ref{thm:GroupWeakCorrespondence}, this MLE is of the form $\lambda h\HT h$ for some $h \in \GSL$ such that $\| h \cdot Y \| > 0$ is minimal in $\GSL \cdot Y$. Hence, $h\cdot Y, Y \neq 0$ and Kempf-Ness, Theorem~\ref{thm:KempfNessAKRS}, implies that $\GSL \cdot Y$ is Euclidean closed, i.e., $Y$ is polystable.
+	
+	If $Y$ is stable, then there is at least one MLE given $Y$, by part~(c), and $(\GSL)_Y$ is finite. The latter and Equation~\eqref{eq:MLEsTransitiveStabilizerAction} imply that there are finitely many MLEs given $Y$. Hence, $Y$ has a unique MLE, by Proposition~\ref{prop:UniqueMLEcompactStabilizer}(ii). This shows the implication in (d). Finally, assume $\KK = \CC$ and that there is a unique MLE given~$Y$. By Proposition~\ref{prop:UniqueMLEcompactStabilizer}(i), the stabilizer $(\GSL)_Y \subseteq \CC^{m \times m}$ is compact, but it is also Zariski-closed in $\GL_m(\CC)$ (defined by the equations of $G$ and the equations $g \cdot Y = Y$). Hence, $(\GSL)_Y$ is Zariski closed and compact in $\CC^{m \times m}$, so it must be finite. Furthermore, $Y$ is polystable by part~(c). We conclude that $Y$ is stable, which ends the proof.
+\end{proof}
+
+%remark 3.11 in more detail
+\begin{remark}[based on {\cite[Remark~3.11]{SiagaPaper}}] \label{rem:ChangeGroup}
+	Let $G \subseteq \GL_m(\KK)$ be a Zariski closed self-adjoint group that is closed under non-zero scalar multiples. We argue that the results in Theorems~\ref{thm:GroupWeakCorrespondence} and~\ref{thm:StrongFullCorrespondence}, and in Propositions~\ref{prop:MLEsTransitiveStabilizerAction} and~\ref{prop:UniqueMLEcompactStabilizer} are unchanged if we replace $\GSL$ by its Euclidean identity component $\GSL^\circ$. First, the stability notions under both groups coincide, by Proposition~\ref{prop:GvsIdentityComponent}. Second, by the latter proposition any $h \in \GSL$ is of the form $h = kh'$ for some $k \in K$, $h' \in \GSL^\circ$. Therefore, $\capac_{\GSL} (Y) = \capac_{\GSL^\circ}(Y)$ and as $h\HT h = (h')\HT k\HT k h' = (h')\HT h'$ we do not loose any MLEs (if they exist) when replacing $\GSL$ by $\GSL^\circ$. Third, we can apply Kempf-Ness also to $G^\circ$, compare Theorem~\ref{thm:KempfNessAKRS}, and deduce Proposition~\ref{prop:MLEsTransitiveStabilizerAction} similarly. Finally, one can verify that $(\GSL)_Y$ is compact if and only if $(\GSL^\circ)_Y$ is. Altogether, this shows the claim.
+	
+	In fact, we can also replace $\GSL$ by any Zariski closed self-adjoint subgroup $H$ of $G$ that satisfies $H^\circ = \GSL^\circ$, because we can repeat the above argument for $H$ and $H^\circ = \GSL^\circ$. We may not have such choices for groups that are not Zariski closed and self-adjoint, see Examples~\ref{ex:EasyCounterexampleASLpm} and~\ref{ex:AKRS-Example3-5}.
+	\hfill\remSymbol	
+\end{remark}
+
+We illustrate how Theorem~\ref{thm:StrongFullCorrespondence} can be used to recover standard knowledge on the saturated Gaussian model $\PD_m(\KK)$ from Example~\ref{ex:FullGaussianModel}.
+
+\begin{example}\label{ex:FullModelSelfAdjoint}
+	The group $G = \GL_m(\KK)$ is Zariski closed, self-adjoint and closed under non-zero scalar multiples. Therefore, we can use Theorem~\ref{thm:StrongFullCorrespondence} to study ML estimation for the saturated model $\Mg_G = \PD_m(\KK)$. We have already studied the action of $\GSL = \SL_m(\KK)$ on $\KK^{m \times n}$ via left multiplication in Example~\ref{ex:SLactionOnKmTimesn}. There we have seen that any $Y$ is unstable if $n < m$. Thus, for all $Y$ the log-likelihood $\ell_{Y}$ is not bounded from above if $n <m$, by Theorem~\ref{thm:StrongFullCorrespondence}(a). On the other hand, if $n \geq m$ then $Y$ is stable if and only if $Y$ has full row rank, and it is unstable otherwise. Thus, for $n \geq m$ almost all $Y$ are stable and have a unique MLE by Theorem~\ref{thm:StrongFullCorrespondence}(d). Altogether, this recovers the results from Example~\ref{ex:FullGaussianModel} on ML thresholds:
+		\[ \mlt_b(\Mg_G) = \mlt_e(\Mg_G) = \mlt_u(\Mg_G) = m. \]
+	Now, let $n \geq m$. The above shows that there exists an MLE given $Y$ (which is then unique) if and only if $Y$ has full row rank. The latter is equivalent to the sample covariance matrix
+		\[ S_Y = \frac{1}{n} \sum_{i=1}^n Y_i Y_i\HT = \frac{1}{n} Y Y\HT \in \KK^{m \times m} \]
+	being invertible. Remember from Example~\ref{ex:FullGaussianModel} that the MLE given $Y$, if it exists, is $S_Y^{-1}$. We deduce this from the weak correspondence, Theorem~\ref{thm:GroupWeakCorrespondence}.
+	For this, fix a sample matrix $Y$ such that $S_Y$ is invertible.
+	Recall from Example~\ref{ex:MinimumForLeftMult} that for $M := YY\HT = n S_Y$ and $h := \det(M)^{1/(2m)} M^{-1/2} \in \SL_m(\KK)$ we have
+		\[ \gamma := \capac_{\SL_m(\KK)} (Y) = \|h \cdot Y\|^2 = m \det(M)^{1/m} . \]
+	Therefore, Theorem~\ref{thm:GroupWeakCorrespondence} yields that $\lambda h\HT h$ is the MLE given $Y$ where $\lambda$ minimizes $x \mapsto \frac{\gamma}{n} x - m \log(x)$. Lemma~\ref{lem:ForWeakCorrespondence}(ii) shows that $\lambda = mn/\gamma$ and hence
+	\[ \lambda h\HT h = \frac{mn}{m \det(M)^{1/m}} \det(M)^{1/m} M^{-1} 
+	= n (n S_Y)^{-1} = S_Y^{-1}  \]
+	is the MLE given $Y$.
+	\hfill\exSymbol
+\end{example}
+
+
+
+
+\subsection{Algorithmic Implications} \label{subsec:AlgorithmsSelfAdjoint}
+
+In the following we discuss algorithmic consequences of Theorem~\ref{thm:StrongFullCorrespondence}.
+Scaling algorithms are iterative algorithms existing both in statistics and in invariant theory. We already discussed scaling algorithms for computational invariant theory in detail, compare Section~\ref{sec:ScalingAlgorithms}. In statistics one usually refers to scaling algorithms as iterative proportional scaling (IPS)\footnote{also called \emph{iterative proportional fitting (IPF)}}.
+
+In Section~\ref{sec:ScalingLogLinear}, we drew a connection between norm minimization in invariant theory and IPS for log-linear models, also see Figure~\ref{fig:DiscreteAlgorithms}. The starting point of this figure is Sinkhorn scaling, an alternating minimization method. On the statistical side, it can be seen as an instance of IPS for the independence model, which generalizes to IPS for any log-linear model. On the invariant theory side it generalizes to norm minimization under a torus action.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{tikzpicture}[
+		roundnode/.style={ellipse, draw=black, thick, minimum size=10mm},
+		squarednode/.style={rectangle, draw=black, thick, minimum size=7mm},
+		description/.style={rectangle, thick, minimum size=5mm},
+		]
+		%Nodes
+		\node[roundnode] (sl){$\GL_{m_1} \times \GL_{m_2}$};
+		\node[roundnode] (g)[right=3.5cm of sl]{$G$};
+		\node[squarednode] (operator)[above=of sl] {operator scaling};
+		\node[squarednode] (flip) [below =of sl] {flip-flop algorithm};
+		\node[squarednode] (null) [above=of g] {$\qquad$norm minimization$\qquad$};
+		\node[squarednode] (ips) [below=of g] {IPS for Gaussian group models};
+		\node[description] (left) [above=0.3cm of operator] {Left-right action};
+		\node[description] (torus) [above=0.3cm of null] {General group action};
+		\node[description] (inv) [left=0.3cm of operator] {Invariant Theory:};
+		\node[description] (stat) [left=0.3cm of flip] {Statistics:};
+		
+		%Lines
+		\draw[thick] (sl.north) -- (operator.south);
+		\draw[thick] (sl.south) -- (flip.north);
+		\draw[thick] (g.south) -- (ips.north);
+		\draw[thick] (g.north) -- (null.south);
+		\draw[<->, dashed, thick] (flip.north east) to[bend right] (operator.south east);
+		\draw[->, thick] (operator.east) -- (null.west);
+		\draw[->, thick] (flip.east) -- (ips.west);
+	\end{tikzpicture}
+	
+	\caption{{\cite[Figure~1]{SiagaPaper}} Overview of different scaling algorithms.  For the invariant theory algorithms, we use matrices of determinant one, e.g. $\SL_{m_1} \times \SL_{m_2} \subseteq \GL_{m_1} 
+		\times \GL_{m_2}$.}
+	\label{fig:GaussianAlgorithms}
+\end{figure}
+
+A Gaussian analogue of Figure~\ref{fig:DiscreteAlgorithms} is given in Figure~\ref{fig:GaussianAlgorithms}. Namely, the idea of Sinkhorn scaling generalizes to operator scaling (Algorithm~\ref{algo:OperatorScaling}, \cite{gurvits2004classical, garg2016deterministic}) from invariant theory respectively to the flip-flop algorithm (Algorithm~\ref{algo:flipflop}, \cite{dutilleul1999mle, lu2005likelihood}); see the left of Figure~\ref{fig:GaussianAlgorithms}. In Subsection~\ref{subsec:FlipFlopVsOperatorScaling} below we show that these methods are essentially equivalent. Furthermore, the flip-flop algorithm can be thought of as an instance of IPS~\cite{IPFienberg,GaussianIPF}.
+
+For complex Gaussian group models $\Mg_G$ with $G \subseteq \GL_m(\CC)$ Zariski closed and self-adjoint, we can use the geodesically convex first and second order methods from \cite{GradflowArXiv} to solve Norm Minimization~\ref{comp:NormMinim} respectively the Scaling Problem~\ref{comp:Scaling}.\footnote{Note that \cite{GradflowArXiv} requires that $G$ is Zariski closed and self-adjoint. Moreover, without this assumption we do not have a moment map and hence cannot consider the scaling problem.}
+These algorithms can be thought of as generalizations of operator scaling. Altogether, the above discussion and the comparison of Figures~\ref{fig:DiscreteAlgorithms} and~\ref{fig:GaussianAlgorithms} motivates to regard these geodesically convex methods as IPS for Gaussian group models (for $G$ Zariski closed and self-adjoint).
+
+
+\begin{remark}[Algorithms for real Gaussian group models] \label{rem:GradflowForMLestimation}
+	 In invariant theory scaling algorithms are usually designed over the complex numbers and they minimize over the complex orbit. However, often each update is defined over $\RR$ if the input is real, and hence these can also be used for real Gaussian group models with $G$ being Zariski closed and self-adjoint. This crucially uses that in this situation the capacity over $\RR$ equals the one over $\CC$, compare Proposition~\ref{prop:RealVsComplexCapacity}.
+	 
+	 For example, the alternating minimization method for operator and tensor scaling from \cite{burgisser2017alternating} always stays over $\RR$ if the input is real. The same applies to the first order method from \cite{GradflowArXiv}.
+	 \hfill\remSymbol
+\end{remark}
+%somewhere a remark about algorithms from peter avi 3 that can be used in the setting of Zariski closed self-adjoint groups
+%somewhere place the figure from the introduction of GaussianPaper
+%somewhere mention the nice list of applications of the dictionary
+
+%The connection between norm minimization in invariant theory and IPS in statistics is discussed for torus actions and discrete models in our companion paper~\cite{DiscretePaper}.
+%There, \cite[Figure~4]{DiscretePaper} (Figure~\ref{fig:DiscreteAlgorithms}) gives the analogue of Figure~\ref{fig:GaussianAlgorithms} for the setting of a discrete model and a torus action (rather than a Gaussian model and a general group action). The starting point of both Figures is Sinkhorn scaling~\cite{sinkhornClassical1964}, an alternating method that involves the left-right action of a product of two tori. The alternating idea from Sinkhorn's scaling generalizes to products of groups, e.g. to operator scaling and the flip-flop algorithm in Figure~\ref{fig:GaussianAlgorithms}.
+%
+%They are characterized by update steps, which are given by a group action in many instances.
+%For matrix normal models, we show the equivalence of two alternating algorithms: 
+%operator scaling from invariant theory for null cone membership testing \cite{gurvits2004classical, garg2016deterministic}, and the flip-flop algorithm from statistics for maximum likelihood estimation \cite{dutilleul1999mle, lu2005likelihood}; see the left of Figure~\ref{fig:GaussianAlgorithms} and Subsection~\ref{subsec:FlipFlopVsOperatorScaling}.
+%This equivalence enables us to obtain a 
+%complexity analysis for the flip-flop algorithm (see Theorem~\ref{thm:FlipFlopComplexity}) by directly adapting the result for the corresponding null cone membership problem from~\cite[Theorem~1.1]{burgisser2017alternating}.
+%
+%We now describe how this can be extended to more general scaling algorithms, see the right hand side of Figure~\ref{fig:GaussianAlgorithms}.
+%The flip-flop algorithm can be thought of as an instance of {\em iterative proportional scaling (IPS)} (or iterative proportional fitting (IPF)), a family of methods to find the MLE in a statistical model~\cite{IPFienberg,GaussianIPF}.
+%For Gaussian group models, 
+%we can find an MLE via the geodesically convex optimization approaches from~\cite{GradflowArXiv} that minimize the norm over an orbit.
+%These algorithms can be thought of as generalizations of operator scaling. We therefore regard them as IPS for Gaussian group models.
+%Properties (such as complexity or efficiency) of scaling algorithms for testing stability translate, under our correspondence, to properties of the corresponding IPS algorithm for finding the MLE.
+
+
+
+
+
+%------ Applications to Matrix Normal Models ------------------------
+
+\section{Applications to Matrix Normal Models}\label{sec:MatrixNormalModels}
+
+\index{matrix normal model|(}
+
+In this section we illustrate how to apply the theory from Section~\ref{sec:SelfAdjointMgG} to study matrix normal models.
+Remember that a matrix normal model is a sub-model of $\PD_{m_1 m_2}(\KK)$ whose concentration matrices factor as a Kronecker product
+	\[ \MTK(m_1, m_2) = \left\lbrace \Psi_1 \otimes \Psi_2 \mid \Psi_j \in \PD_{m_j}(\KK) \right\rbrace \, . \]
+Moreover, recall from Example~\ref{ex:LeftRightMatrixNormal} that the log-likelihood~\eqref{eq:GaussianLogLikelihood} computes as
+\begin{equation} \label{eq:MatrixNormalLikelihood} 
+	\ell_Y(\Psi_1 \otimes \Psi_2) =  \, m_2 \log \det (\Psi_1) +  \, m_1 \log \det (\Psi_2)
+	- \frac{1}{n} \tr \left( \Psi_1 \sum_{i=1}^n Y_i \Psi_2\T Y_i\HT \right).
+\end{equation}
+An MLE is a concentration matrix $\hat{\Psi}_1 \otimes \hat{\Psi}_2 \in \MTK(m_1, m_2)$ that maximizes the log-likelihood function.
+
+\subsection{Relating norm minimization to ML estimation}
+In the following we study matrix normal models using the left-right action of $\GL_{m_1}(\KK) \times \GL_{m_2}(\KK)$ on $(\KK^{m_1 \times m_2})^n$. Remember that the action\footnote{We note that the transposes in \eqref{eq:LeftRightAction} are also used in the complex case to ensure an \emph{algebraic} action, compare Example~\ref{ex:LeftRightMatrixNormal}.} is given by
+	\begin{equation}\label{eq:LeftRightAction}
+		g \cdot Y := \big( g_1 Y_1 g_2\T, \ldots, g_1 Y_n g_2\T \big),
+	\end{equation}
+where $g = (g_1, g_2) \in \GL_{m_1}(\KK) \times \GL_{m_2}(\KK)$ and $Y = (Y_1, \ldots, Y_n) \in (\KK^{m_1 \times m_2})^n$.
+We have seen in Example~\ref{ex:LeftRightMatrixNormal} that for $n=1$ this algebraic action, after appropriate identification,
+induces the rational  representation
+\[\varrho \colon \GL_{m_1}(\KK) \times \GL_{m_2}(\KK) \to \GL_{m_1 m_2}(\KK), \quad
+(g_1, g_2) \mapsto g_1 \otimes g_2 .\]
+Hence, for $G := \varrho \big( \GL_{m_1}(\KK) \times \GL_{m_2}(\KK) \big)$ we obtain $\Mg_G = \MTK(m_1, m_2)$, the matrix normal model.
+The subgroup $G \subseteq \GL_{m_1 m_2}(\KK)$ is Zariski closed,\footnote{This is even true over $\RR$: if $g_j \in \GL_{m_j}(\CC)$ such that $g_1 \otimes g_2 \in \GL_{m_1 m_2}(\RR)$, then there exist $h_j \in \RR^{m_j \times m_j}$ with $h_1 \otimes h_2 = g_1 \otimes g_2$. The latter uses that Segre embeddings are surjective on $\RR$-points. Now, $0 \neq \det(g_1 \otimes g_2) = \det(h_1 \otimes h_2) = (\det h_1)^{m_2} (\det h_2)^{m_1}$ yields $\det(h_j) \neq 0$.}
+self-adjoint and closed under non-zero scalar multiples.
+Thus, the results from Section~\ref{sec:SelfAdjointMgG} apply to the action of~$\GSL$.  However, it is possible and more convenient to directly work with the left-right action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$.
+The following theorem makes this precise.
+
+\begin{theorem}[Strong/Full Correspondence, {\cite[Theorem~4.1]{SiagaPaper}}]\label{thm:bigTheoremMatrixNormal}
+	\ \\
+	Let $Y \in (\KK^{m_1 \times m_2})^n$ be a matrix tuple.
+	The supremum of the log-likelihood $\ell_Y$ in~\eqref{eq:MatrixNormalLikelihood} over $\MTK(m_1, m_2)$ is given by the double infimum
+	\begin{equation} \label{eq:MatrixNormalDoubleInf}
+		-\inf_{x \in \RR_{>0} } \left( \frac{x}{n} \left( \inf_{h \in \SL_{m_1}(\KK) \times \SL_{m_2}(\KK)} \| h \cdot Y \|^2 \right) -  m_1 m_2 \log (x) \right) .
+	\end{equation}  
+	The MLEs given $Y$, if they exist, are the matrices of the form $\lambda h_1\HT h_1 \otimes h_2\HT h_2$, where $h = (h_1,h_2)$ minimizes $\| h \cdot Y \|$ under the left-right action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$, and $\lambda \in \RR_{>0}$ is the unique value that minimizes the outer infimum. 
+	
+	If $\lambda h_1\HT h_1 \otimes h_2\HT h_2$ is an MLE, then every $(g_1,g_2)$ in the $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$ stabilizer of $Y$ yields an MLE via
+		\[ (g_1 \otimes g_2)\HT \big( \lambda h_1\HT h_1 \otimes h_2\HT h_2 \big) (g_1 \otimes g_2) =
+		\lambda \big( g_1\HT h_1\HT h_1 g_1 \big) \otimes \big( g_2\HT h_2\HT h_2 g_2 \big) \]
+	and, conversely, every MLE given $Y$ is of this form.
+	
+	The stability under the left-right action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$ is related to ML estimation via:
+	\[ \begin{matrix} 
+		(a) & Y \text{ unstable} & \Leftrightarrow & \ell_Y \text{ not bounded from above} \\
+		(b) & Y \text{ semistable} & \Leftrightarrow & \ell_Y \text{ bounded from above} \\ 
+		(c) & Y \text{ polystable} & \Leftrightarrow & \text{MLE exists}
+		\\
+		(d) & Y \text{ stable} & \Rightarrow & \text{MLE exists  uniquely}
+	\end{matrix}
+	\]
+	If $\KK = \CC$, then equivalence holds in (d).
+\end{theorem}
+
+\begin{proof}
+	The proof uses the notation introduced above. Since $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$ is Euclidean connected, also 
+	$H := \varrho(\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)) \subseteq G$ is Euclidean connected. In fact, it is the Euclidean identity component of $\GSL$: for $\KK = \CC$ the group $H$ is Zariski closed by Proposition~\ref{prop:ZClosedAlgebraicImage}, and one verifies $H = \GSL$. If $\KK = \RR$, one may have $H \varsubsetneq \GSL$,\footnote{This happens, e.g., if $m_1 = m_2 = 2$: one verifies that $\diag(-1,1) \otimes \diag(-1,1) \in \GSL \backslash H$.}
+	but still Corollary~\ref{cor:ImageRealPoints} applies and yields $H = \GSL^\circ$.\footnote{The corresponding proof in \cite{SiagaPaper} states that $H$ is Zariski closed over $\RR$. This might not be true, given Example~\ref{ex:BorelRealPoints} and the fact that we may have $H \varsubsetneq \GSL$ for $\KK = \RR$. Therefore, we adjusted the argument.}
+	Thus Theorem~\ref{thm:GroupWeakCorrespondence}, Proposition~\ref{prop:MLEsTransitiveStabilizerAction} and Theorem~\ref{thm:StrongFullCorrespondence} apply to $H$ as well, by Remark~\ref{rem:ChangeGroup}.
+	Furthermore, when restricted to $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$ the kernel of $\varrho$ is finite. Hence, the stability notions in Definition~\ref{defn:StabilityGroupTopological}(a)--(d) coincide for $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$ and $H$, compare Remark~\ref{rem:StabilityGroupVsImageUnderRep}. Thus, we can consider $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$ instead of its image $H$ under $\varrho$.
+\end{proof}
+
+\begin{remark}\label{rem:CorrespondenceTensorNormal}
+	Example~\ref{ex:MatrixTensorAsMgG} shows that the natural action of $\GL_{m_1}(\KK) \times \cdots \times \GL_{m_d}(\KK)$ on $\KK^{m_1} \otimes \cdots \otimes \KK^{m_d}$ gives the tensor normal model $\MTK(m_1, \ldots, m_d)$. Analogous arguments as for matrix normal models show that a similar version of Theorem~\ref{thm:bigTheoremMatrixNormal} for $\MTK(m_1, \ldots, m_d)$ holds via restricting the natural action on tensors to $\SL_{m_1}(\KK) \times \cdots \times \SL_{m_d}(\KK)$.
+	\hfill\remSymbol
+\end{remark}
+
+Over the complex numbers, the converse of Theorem~\ref{thm:bigTheoremMatrixNormal}(d) also holds. However, over the reals there exist matrix tuples $Y$ with a unique MLE but an infinite stabilizer, as the following example shows.
+
+
+\begin{example}[{\cite[Example~4.2]{SiagaPaper}}]  	\label{ex:PolystableNotStableUniqueMLE}
+	Set $m_1 = m_2 = n = 2$ and take $Y \in (\RR^{2 \times 2})^2$, where
+	\begin{equation*}
+		Y_1 = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix} , \quad
+		Y_2 = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}.
+	\end{equation*}
+	We prove that over the reals the MLE given $Y$ is unique although the stabilizer of $Y$ is infinite. In contrast, $Y$ has infinitely many MLEs for the complex matrix normal model.
+	
+	First, we show that $Y$ is polystable under the left-right action of $\SL_2(\KK) \times \SL_2(\KK)$, where $\KK \in \{\RR, \CC\}$. Note that any matrix in $\SL_2(\KK)$ has Frobenius norm at least $\sqrt{2}$. Indeed, if $\sigma_1$ and $\sigma_2$ are the singular values of $g \in \SL_2(\KK)$, then $\| g \|^2 = \sigma_1^2 + \sigma_2^2$, where $\sigma_1 \sigma_2 = 1$. By the arithmetic mean - geometric mean inequality, we have $\| g \|^2 \geq 2$. Therefore, $Y_1$ and $Y_2$ have minimal Frobenius norm in $\SL_2(\KK)$ and thus $Y$ is of minimal norm in its orbit. By Kempf-Ness, Theorem~\ref{thm:KempfNessAKRS}(d), the matrix tuple $Y$ is polystable and hence an MLE given $Y$ exists.
+	
+	Next we compute the stabilizer of $Y$. It consists of matrices $(g_1,g_2) \in \SL_2(\KK) \times \SL_2(\KK)$ with $g_1 Y_i g_2\T = Y_i$. For $Y_1$, this gives $g_1 g_2\T = \Id_2$, i.e., $g_2\T = g_1^{-1}$.  From $Y_2$, we obtain $g_1 Y_2 = Y_2 g_1$ and writing
+		\begin{align*}
+			g_1 = \begin{pmatrix} a & b\\ c & d \end{pmatrix}
+			\quad \text{ we get } \quad
+			g_1 Y_2 = \begin{pmatrix} b & -a\\ d & -c \end{pmatrix} = \begin{pmatrix} -c & -d\\ a & b \end{pmatrix} = Y_2 g_1 .
+		\end{align*}
+	We deduce $a = d$, $b = -c$ and $\det(g_1) = 1 = a^2 + b^2$. This proves $g_1 \in \SO_2(\KK)$ and hence $g_2 = g_1^{-\mathsf{T}} = g_1$. Thus, the stabilizer of $Y$ is contained in the infinite set $\lbrace (g,g) \mid g \in \SO_2(\KK) \rbrace$. In fact, we have equality as $\SO_2(\KK)$ is commutative and $Y_1,Y_2 \in \SO_2(\KK)$.
+	
+	Since $Y$ is of minimal norm in its orbit, we use Theorem~\ref{thm:bigTheoremMatrixNormal} to conclude that $\lambda \Id_2 \otimes \Id_2$ is an MLE. 
+	For $\KK = \RR$, transpose and Hermitian transpose agree. Thus, any other MLE is given as $\lambda g\T \Id_2 g \otimes g\T \Id_2 g$ by some $g \in \SO_2(\RR)$, where we used the description of the stabilizer of $Y$. Since $g\T g = \Id_2$ we see that $Y$ has unique MLE $\lambda \Id_2 \otimes \Id_2$. Note that the stabilizer $\lbrace (g,g) \mid g \in \SO_2(\RR) \rbrace$ of $Y$ is indeed compact as predicted by Proposition~\ref{prop:UniqueMLEcompactStabilizer}.
+	
+	For $\KK = \CC$, the MLEs involve $g\HT g$ rather than $g\T g$, hence from the complex stabilizer $\lbrace (g,g) \mid g \in \SO_2(\CC) \rbrace$ we obtain infinitely many MLEs.
+	\hfill\exSymbol
+\end{example}
+
+The next example shows that all stability conditions in Theorem~\ref{thm:bigTheoremMatrixNormal}(a)--(d) can occur.
+
+\begin{example}[{\cite[Example~4.3]{SiagaPaper}}]
+	We set $m_1=m_2=2$, and study stability under $\SL_2(\KK) \times \SL_2(\KK)$ on $(\KK^{2 \times 2})^n$. We use the matrices
+	\begin{equation*}
+		Y_1 = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}, \quad
+		Y_2 = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}, \quad
+		Y_3 = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}, \quad
+		Y_4 = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}.
+	\end{equation*}
+	\begin{itemize}
+		\item[(a)] The matrix $Y_4$ is unstable and the matrix tuple $(Y_4,Y_4)$ is unstable as well.
+		
+		\item[(b)] The orbit of $(Y_1,Y_4)$ is contained in $\lbrace (g,M) \mid g \in \SL_2(\KK), \, M \neq 0 \rbrace$. In particular, $(Y_1,Y_4)$ is semistable as $\SL_2(\KK)$ is Euclidean closed. Moreover, for any $g \in \SL_2(\KK)$ and $M \in \KK^{2 \times 2} \setminus \lbrace 0 \rbrace$ we have
+		\begin{equation*}
+			\| (g,M) \|^2 = \| g \|^2 + \| M \|^2 \geq 2 + \| M \|^2 > 2, 
+		\end{equation*}
+		where we used $\|g\|^2 \geq 2$, see Example~\ref{ex:PolystableNotStableUniqueMLE}. On the other hand, we have
+		\begin{equation*}
+			\left( \begin{pmatrix} \varepsilon & 0 \\ 0 & \varepsilon^{-1} \end{pmatrix},
+			\begin{pmatrix} \varepsilon^{-1} & 0 \\ 0 & \varepsilon \end{pmatrix} \right) \cdot (Y_1,Y_4) 
+			= \left( \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix},
+			\begin{pmatrix} 0 & \varepsilon^2 \\ 0 & 0 \end{pmatrix}\right),
+		\end{equation*}
+		which tends to $(Y_1,0)$ as $\varepsilon \to 0$. Since $\| (Y_1,0) \|^2 = 2$ the capacity of $(Y_1,Y_4)$ is not attained by an element in the orbit of $(Y_1,Y_4)$, and $Y$ is not polystable.
+		
+		\item[(c)] The matrix $Y_1 = \Id_2$ is polystable by Kempf-Ness, Theorem~\ref{thm:KempfNessAKRS}(d), as it is an $\SL_2(\KK)$ matrix of minimal norm. An MLE is given by $\lambda \Id_2 \otimes \Id_2$, where $\lambda$ is the minimizer of the outer infimum in \eqref{eq:MatrixNormalDoubleInf}. Furthermore, $Y_1$ is not stable, because its stabilizer is $\lbrace (g,g^{-\mathsf{T}}) \mid g \in  \SL_2(\KK) \rbrace$. There are infinitely many MLEs given $Y$ of the form $\lambda g\T g \otimes g^{-1} g^{-\mathsf{T}}$ for $g \in \SL_2(\KK)$.
+		
+		\item[(d)] We show that $Y = (Y_1,Y_2,Y_3)$ is stable. First, any tuple $(M_1,M_2,M_3)$ in the orbit of $Y$ satisfies $M_1,M_2 \in \SL_2(\KK)$ and $\det(M_3) = -1$. Any $2 \times 2$ matrix of determinant $\pm 1$ has Frobenius norm at least $\sqrt{2}$, by the same argument as in Example~\ref{ex:PolystableNotStableUniqueMLE}. Therefore, $Y$ is of minimal norm in its orbit, and hence polystable by Theorem~\ref{thm:KempfNessAKRS}(d). It remains to show that the stabilizer of $Y$ is finite. The discussion from Example~\ref{ex:PolystableNotStableUniqueMLE} ensures that the stabilizer of $Y$ is contained in $ \lbrace (g,g) \mid g \in \SO_2(\KK) \rbrace$. Given $g \in \SO_2(\KK)$, the condition $g Y_3 g\T = Y_3$ is equivalent to $g Y_3 = Y_3 g$. There exist $a, b \in \KK$ with $a^2 + b^2 = 1$ such that
+			\begin{align*}
+				g = \begin{pmatrix} a & b\\ -b & a \end{pmatrix}
+				\quad \text{ and we compute } \quad
+				g Y_3 = \begin{pmatrix} b & a\\ a & -b \end{pmatrix} = \begin{pmatrix} -b & a\\ a & b \end{pmatrix} = Y_3 g.
+			\end{align*}
+		Therefore, $b = -b$ which implies $b=0$ and $a^2 = 1$. We see that $g Y_3 = Y_3 g$ for $g \in \SO_2(\KK)$ holds if and only if $g = \pm \Id_2$. Therefore, the stabilizer of $Y$ is the finite set $\lbrace (\Id_2,\Id_2) , (-\Id_2,-\Id_2) \rbrace$. Altogether, $Y$ is stable and there is a unique MLE given $Y$, namely $\lambda' \Id_2 \otimes \Id_2$ where $\lambda' > 0$ is the unique minimizer of the outer infimum in \eqref{eq:MatrixNormalDoubleInf}.
+		\hfill\exSymbol
+	\end{itemize}
+\end{example}
+
+
+
+\subsection{Boundedness of the likelihood via semistability} \label{subsec:MatrixNormalBoundedness}
+
+This subsection\footnote{Like the whole Section~\ref{sec:MatrixNormalModels} also this subsection closely follows the presentation in \cite[Section~4]{SiagaPaper}. However, while \cite[Subsection~4.2]{SiagaPaper} states all results only for $\KK = \RR$ they are also valid over $\CC$. Therefore, the statements and proofs are accordingly adjusted to $\KK \in \{\RR, \CC\}$.}
+illustrates how the dictionary between ML estimation and stability notions can be used to gain new insights and to recover known results on the statistical side. More specifically, we use the equivalence of a bounded likelihood with the semistability of a matrix tuple under the left-right action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$, Theorem~\ref{thm:bigTheoremMatrixNormal}(b), to obtain bounds on the ML threshold $\mlt_b(\MTK(m_1,m_2))$. The upper bound from Corollary~\ref{cor:newMLEbound} was new as it appeared, while Corollaries~\ref{cor:knownMLEbound}, \ref{cor:newMLEboundWeaker} and \ref{cor:divisible} recover known results from the literature. All these bounds are consequences of Theorems~\ref{thm:nullconeLeftRight} and \ref{thm:nullconeFills}, which are proved by using results from \cite{BurginDraisma} on the complex null cone under the left-right action.
+
+It is important to point out that the presented results are outdated: Derksen and Makam used Theorem~\ref{thm:bigTheoremMatrixNormal} with representation theory of quivers to determine all ML thresholds for $\MTK(m_1,m_2)$ \cite{DM21MatrixNormal}. We state their main result in Theorem~\ref{thm:MatrixNormalThresholdsDM21}. This was further generalized to determining all ML thresholds of tensor normal models in \cite{DMW22TensorNormal}. Still, this subsection may serve the reader as a first introduction before entering the general concepts in \cite{DM21MatrixNormal, DMW22TensorNormal}.
+
+\begin{remark}\label{rem:DualityMatrixNormal}
+	Note that $Y = (Y_1,\ldots,Y_n) \in (\KK^{m_1 \times m_2})^n$ is unstable under the left-right action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$ if and only if $Y\HT := (Y_1\HT, \ldots, Y_n\HT) \in (\KK^{m_2 \times m_1})^n$ is unstable under the left-right action of $\SL_{m_2}(\KK) \times \SL_{m_1}(\KK)$. Equivalently, $\ell_Y$ is not bounded from above if and only if $\ell_{Y\HT}$ is not bounded from above.
+	Therefore, $\mlt_b(\MTK(m_1,m_2)) = \mlt_b(\MTK(m_2,m_1))$ and we may assume that $m_1 \geq m_2$.
+	\hfill\remSymbol
+\end{remark}
+
+The following theorem gives a characterization of the matrix tuples with unbounded log-likelihood.
+It has been derived for $\KK = \RR$ in~\cite[Theorems 3.1(i) and 3.3(i)]{DrtonKurikiHoff} using a different method. 
+
+\begin{theorem}[{\cite[Theorem~4.4]{SiagaPaper}}]
+	\label{thm:nullconeLeftRight}
+	Consider the matrix normal model $\MTK(m_1,m_2)$ with tuple of samples $Y \in (\KK^{m_1 \times m_2})^n$.
+	Then $\ell_Y$ is not bounded from above if and only if
+	there exist subspaces $V_1 \subseteq \KK^{m_1}$ and $V_2 \subseteq \KK^{m_2}$ with
+	$m_1 \dim_{\KK} V_2 > m_2 \dim_{\KK} V_1$
+	such that
+	$Y_i V_2 \subseteq V_1$ for all $i = 1, \ldots, n$.
+\end{theorem}
+
+\begin{proof}	
+	The log-likelihood $\ell_Y$ is bounded from above if and only if $Y$ is \emph{not} in the null cone $\Ncal_\KK$ under the left-right action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$, by Theorem~\ref{thm:bigTheoremMatrixNormal}(b). Thus, for $\KK = \CC$ the statement follows from \cite[Theorem 2.1]{BurginDraisma} respectively Proposition~\ref{prop:KingSemistable}.
+	
+	It remains to prove the case $\KK = \RR$, so let $Y \in (\RR^{m_1 \times m_2})^n$. Then $Y \notin \Ncal_{\RR}$ if and only if it is not in the complex null cone $\Ncal_{\CC}$, by Proposition~\ref{prop:RealVsComplexCapacity}.
+	The latter is equivalent to the existence of subspaces $W_1 \subseteq \CC^{m_1}$ and $W_2 \subseteq \CC^{m_2}$ with $m_1 \dim_\CC W_2 > m_2 \dim_\CC W_1$ such that $Y_i W_2 \subseteq W_1$ for all $i=1,\ldots,n$, by \cite[Theorem 2.1]{BurginDraisma} (respectively Proposition~\ref{prop:KingSemistable}). 
+	This is the same condition as in the statement, except with \emph{complex} subspaces. 
+	The real condition implies the complex one: if $V_j \subseteq \RR^{m_j}$ are real subspaces as in the statement, then $W_j := V_j \oplus \imag V_j \subseteq \CC^{m_j}$ satisfy the complex conditions.
+	We show the reverse implication following an argument thanks to Jan Draisma.
+	
+	Given complex subspaces $W_1 \subseteq \CC^{m_1}$ and $W_2 \subseteq \CC^{m_2}$ as above. Set $V_j := W_j \cap \RR^{m_j}$ for $j = 1,2$. Then also $\imag V_j \subseteq W_j$, where $\imag$ is the imaginary unit. Furthermore, let $V_j'$ be the image of the $\RR$-linear map $f_j \colon W_j \to \RR^{m_j}$ that sends a complex vector to its real part. Of course, we have $\imag V_j \subseteq \ker(f_j)$. Conversely, any $w \in \ker(f_j)$ is of the form $\imag v$, where $v \in \RR^{m_j}$ but also $-\imag w = v \in W_j$. Therefore, $v \in V_j$ and this shows $\ker(f_j) = \imag V_j$.
+	The latter implies
+		\[ 2 \dim_\CC W_j = \dim_\RR W_j = \dim_\RR V_j + \dim_\RR V'_j . \]
+	In particular, we have $m_1 \dim_\RR V_2 > m_2 \dim_\RR V_1$ or $m_1 \dim_\RR V'_2 > m_2 \dim_\RR V'_1$.
+	Since $Y \in (\RR^{m_1 \times m_2})^n$ and $Y_i W_2 \subseteq W_1$, both inclusions $Y_i V_2 \subseteq V_1$ and $Y_i V'_2 \subseteq V'_1$ hold for all $i=1, \ldots, n$. Hence, $(V_1, V_2)$ or $(V'_1, V'_2)$ are real subspaces  as in the statement.
+\end{proof}
+
+As a consequence we obtain a lower bound on $\mlt_b ( \MTK(m_1,m_2) )$, which also follows from \cite[Lemma 1.2]{DrtonKurikiHoff}. 
+
+\begin{cor}[{\cite[Corollary~4.5]{SiagaPaper}}]
+	\label{cor:knownMLEbound}
+	If $n < \frac{m_1}{m_2}$, then the log-likelihood function $\ell_Y$ is unbounded from above for every tuple of samples $Y \in (\KK^{m_1 \times m_2})^n$.
+	In particular,
+		\[ \mlt_b \big( \MTK(m_1,m_2) \big) \geq \left\lceil \frac{m_1}{m_2} \right\rceil . \]
+\end{cor}
+
+\begin{proof}
+	For any one-dimensional subspace $V_2 \subseteq \KK^{m_2}$,
+	the dimension of $V_1 := \sum_{i=1}^n Y_i V_2$ is at most $n$.
+	If $n < \frac{m_1}{m_2}$, Theorem~\ref{thm:nullconeLeftRight} implies that the log-likelihood $\ell_Y$ is unbounded.
+\end{proof}
+
+
+To prove further statistical consequences we introduce the cut-and-paste rank from~\cite[Definition 2.2]{BurginDraisma}.\footnote{In \cite{BurginDraisma} the cut-and-paste rank is defined over $\CC$. For statistical models over the reals it is more natural to define it over $\RR$. Actually, both concepts agree, see Remark~\ref{rem:RealVsComplexCPrank}.}
+
+\begin{defn}
+	\label{def:cprank}
+	Let $\KK \in \{\RR, \CC\}$.
+	The \emph{cut-and-paste rank} $\cp^{(n)}_{\KK}(a,b,c,d)$ over $\KK$ of a tuple of positive integers $a$, $b$, $c$, $d$ and $n$ is the maximum rank all $ab \times cd$ matrices of the form $\sum_{i = 1}^n X_i \otimes Y_i$, where $X_i \in \KK^{c \times a}$ and $Y_i \in \KK^{d \times b}$.\\
+	By the upcoming remark the cut-and-paste rank does not depend on $\KK$ and we therefore drop the index $\KK$.
+	\hfill\defnSymbol
+\end{defn}
+
+\begin{remark}[{\cite[Remark~4.7]{SiagaPaper}}]\label{rem:RealVsComplexCPrank}
+	We have $\cp^{(n)}_{\RR}(a,b,c,d) \leq \cp^{(n)}_{\CC}(a,b,c,d)$
+	and equality holds as follows. The condition for the rank of the complex matrix $\sum_{i = 1}^n X_i \otimes Y_i$ to drop is given by minors. Thus, $\cp^{(n)}_{\CC}(a,b,c,d)$ is witnessed on a Zariski-open subset of $W := (\CC^{c\times a})^n \times (\CC^{d\times b})^n$ and hence witnessed by some element in $(\RR^{c\times a})^n \times (\RR^{d\times b})^n$, as the latter is Zariski-dense in $W$.
+	\hfill\remSymbol
+\end{remark}
+
+We use the cut-and-paste rank to state in Theorem~\ref{thm:nullconeFills} a necessary and sufficient condition for $\ell_Y$ to be unbounded from above for every tuple of samples $Y \in (\KK^{m_1 \times m_2})^n$; or equivalently, for $\Ncal_\KK = (\KK^{m_1 \times m_2})^n$, where $\Ncal_\KK$ is the null cone under the left-right action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$. Note that if $\Ncal_\KK$ does not fill the irreducible variety $(\KK^{m_1 \times m_2})^n$, then $\Ncal_\KK$ must have positive codimension and hence has Lebesgue measure zero.
+Consequently, $\ell_Y$ is \emph{either} not bounded from above for every $Y \in (\KK^{m_1 \times m_2})^n$ \emph{or} it is bounded for almost all~$Y$.
+Therefore, Theorem~\ref{thm:nullconeFills} solves in principle the problem of determining $\mlt_b \big( \MTK(m_1,m_2) \big)$, although in terms of the cut-and-paste rank.\footnote{At the time the first preprint of \cite{SiagaPaper} appeared this gave a statistical motivation to study the cut-and-paste rank. However, Theorem~\ref{thm:bigTheoremMatrixNormal} quickly led to a full determination of all ML thresholds of $\MTK(m_1,m_2)$ by Derksen and Makam \cite[Theorem~1.3]{DM21MatrixNormal}; see Theorem~\ref{thm:MatrixNormalThresholdsDM21}. Thus, their result may now in turn be used to understand the cut-and-paste rank.}
+
+Recall that we can assume that $m_1 \geq m_2$, by Remark~\ref{rem:DualityMatrixNormal}. Moreover, since Corollary~\ref{cor:knownMLEbound} shows that the likelihood is unbounded for $m_2 n < m_1$, it suffices to restrict to the range $m_2 \leq m_1 \leq n m_2$.
+
+\begin{theorem}[{\cite[Theorem~4.8]{SiagaPaper}}]
+	\label{thm:nullconeFills}
+	Let $0 < m_2 \leq m_1 \leq n m_2$ and consider the matrix normal model $\MTK(m_1,m_2)$.
+	The log-likelihood $\ell_Y$ is unbounded from above for \emph{every} tuple of samples $Y \in (\KK^{m_1 \times m_2})^n$
+	if and only if there exists $k \in \{ 1, \ldots, m_2\}$ such that $l = \lceil \frac{m_1}{m_2} k \rceil - 1$ satisfies both
+	\begin{align*}
+		m_1-l \leq n(m_2-k) \quad &\text{ and}   \\
+		\cp^{(n)}(a,b,c,d) = cd, \quad  &\text{ where} \quad
+		(a,b,c,d) = (m_2-k,k,m_1-l,nk-l).
+	\end{align*}
+\end{theorem}
+
+\begin{proof}
+	Let $\mathcal{N}_{\KK}$ be the null cone under the left-right action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$ on $(\KK^{m_1 \times m_2})^n$, where $\KK \in \{ \RR, \CC\}$.
+	By Theorem~\ref{thm:bigTheoremMatrixNormal}(a), $\ell_Y$ is unbounded from above for every tuple of samples $Y \in (\KK^{m_1 \times m_2})^n$ if and only if $\mathcal{N}_{\KK} = (\KK^{m_1 \times m_2})^n$.
+	Moreover, $\mathcal{N}_{\CC} = (\CC^{m_1 \times m_2})^n$ if and only if $\mathcal{N}_{\RR} = (\RR^{m_1 \times m_2})^n$.
+	It therefore suffices to characterize when $\mathcal{N}_{\CC} = (\CC^{m_1 \times m_2})^n$.
+	
+	For this, define for natural numbers $k$ and $l$
+	{\small \begin{equation*}
+		Q_{k,l} := \left\lbrace (Y_1, \ldots, Y_n) \in (\CC^{m_1 \times m_2})^n \mid 
+		\exists V \subseteq \CC^{m_2}: 
+		\dim_{\CC} V = k,
+		\dim_{\CC} \left( \sum_{i=1}^n Y_i V \right) \leq l
+		\right\rbrace.
+	\end{equation*}}The null cone $\mathcal{N}_{\CC}$ is the union of the $Q_{k,l}$ over $1 \leq k \leq m_2$ and $0 \leq l < \frac{m_1}{m_2} k$, 
+	by \cite[Theorem~2.1]{BurginDraisma}. We observe that for fixed $k$ the algebraic sets $Q_{k,l}$ become larger as $l$ increases. Hence, it suffices to consider if any of the $Q_{k,l}$ fills $(\CC^{m_1 \times m_2})^n$ as $k$ ranges over $1 \leq k \leq m_2$, where the corresponding $l$ is the largest integer strictly smaller than $\frac{m_1}{m_2}k$, i.e., $l = \lceil \frac{m_1}{m_2} k \rceil - 1$.
+	
+	The assumption $m_1 \leq nm_2$ yields $l < nk$. Therefore, \cite[Proposition 2.4]{BurginDraisma} shows that
+	\begin{align*}
+		\dim_{\CC} Q_{k,l} = n m_1 m_2 - \left( (m_1-l)(kn-l)- \cp^{(n)}(a,b,\tilde{c},d)  \right),
+	\end{align*}    
+	where $a = m_2 - k$, $b=k$, $\tilde{c} = \min \{ m_1 - l, n (m_2-k) \}$ and $d = kn-l$. Thus, $Q_{k,l}$ equals $(\CC^{m_1 \times m_2})^n$ if and only if    
+	\begin{equation*}
+		\cp^{(n)}(a,b,\tilde{c},d) = (m_1-l)(kn-l).
+	\end{equation*}
+	Finally, the latter equation is equivalent to
+	\begin{equation*}
+		m_1 - l \leq n (m_2-k) \quad \text{ and } \quad \cp^{(n)}(a,b,\tilde{c},d) = \tilde{c}d,
+	\end{equation*}
+	since $\tilde{c} = \min \{ m_1 - l, n (m_2-k) \}$, $d = kn-l \geq 1$ and $\cp^{(n)}(a,b,\tilde{c},d) \leq \tilde{c}d$.
+\end{proof}
+
+We use the above theorem to give an upper bound for $\mlt_b\big( \MTK(m_1,m_2) \big)$, which was new at its time.
+
+\begin{cor}[{\cite[Corollary~4.9]{SiagaPaper}}]
+	\label{cor:newMLEbound}
+	Let $0 < m_2 \leq m_1$.  If 
+	\begin{equation}
+		\label{eq:newBound}
+		n > \max_{1\leq k \leq m_2} \left(\frac{l}{k} + \frac{m_2-k}{m_1 - l}\right), \quad \text{ where } l = \left\lceil \frac{m_1}{m_2} k \right\rceil - 1,
+	\end{equation}
+	then $\ell_Y$ is bounded from above for almost all $Y \in (\KK^{m_1 \times m_2})^n$. In other words,
+		\[ \mlt_b \big( \MTK(m_1,m_2) \big) \leq \left\lfloor \max \limits_{1\leq k \leq m_2} \left(\frac{l}{k} + \frac{m_2-k}{m_1 - l}\right) \right\rfloor +1 . \]
+\end{cor}
+
+\begin{proof}
+	First, we observe that \eqref{eq:newBound} with $k=m_2$ yields
+	$n > \frac{m_1-1}{m_2}$. 
+	The latter is equivalent to $nm_2 \geq m_1$, so we are in the setting of Theorem~\ref{thm:nullconeFills}.
+	Using the notation in that theorem, we see that~\eqref{eq:newBound} is equivalent to every $k \in \{1, \ldots, m_2 \}$ satisfying
+	$cd > ab$.
+	In particular, for every such $k$ we have
+	$\cp^{(n)}(a,b,c,d) \leq ab < cd$.
+	By Theorem~\ref{thm:nullconeFills}, the log-likelihood $\ell_Y$ cannot be unbounded from above for every tuple $Y$ and hence $\ell_Y$ is bounded from above for almost all $Y$.
+\end{proof}
+
+We obtain two further upper bounds which are known in the statistics literature, compare \cite[Proposition~1.3, Theorem~1.4]{DrtonKurikiHoff}.
+
+\begin{cor}[{\cite[Corollary~4.10]{SiagaPaper}}]
+	\label{cor:newMLEboundWeaker}
+	It holds that
+		\[ \mlt_b \big( \MTK(m_1,m_2) \big) \leq \left\lceil \frac{m_1}{m_2} + \frac{m_2}{m_1} \right\rceil .\]
+\end{cor}
+
+\begin{proof}
+	For every $k \in \{1, \ldots, m_2 \}$ we have $l < \frac{m_1k}{m_2}$, which implies that
+	\begin{equation*}
+		\frac{m_1}{m_2} + \frac{m_2}{m_1} > 
+		\frac{l}{k} + \frac{m_2-k}{m_1-l}.
+	\end{equation*}
+	Thus, the assertion follows from Corollary~\ref{cor:newMLEbound}.
+\end{proof}
+
+\begin{cor}[{\cite[Corollary~4.11]{SiagaPaper}}]
+	\label{cor:divisible}
+	If $m_2$ divides $m_1$, then
+		\[ \mlt_b \big( \MTK(m_1,m_2) \big) = \frac{m_1}{m_2} . \]
+\end{cor}
+
+\begin{proof}
+	If $n < \frac{m_1}{m_2}$, the log-likelihood is always unbounded from above by Corollary~\ref{cor:knownMLEbound}.
+	So we write $m_1 = \gamma m_2$ and assume $n \geq \gamma$.
+	For every $k \in \{1, \ldots, m_2 \}$, 
+	using the notation from Theorem~\ref{thm:nullconeFills}, we see that $l = \gamma k -1$ and $a < c$.
+	If $n > \gamma$, we also have that $b < d$, so
+	$\cp^{(n)}(a,b,c,d) \leq ab < cd$.
+	If $n=\gamma$, then $m_1 - l > n(m_2-k)$.
+	In either case, one of the two conditions in Theorem~\ref{thm:nullconeFills} is not satisfied, so $\ell_Y$ is bounded from above for almost all $Y$.
+\end{proof}
+
+%todo evtl delete the table, and only refer to Siaga paper for it? --> rather change description of table
+
+\begin{table}[h!tb]
+	\begin{scriptsize}
+		\begin{minipage}[t]{.33\linewidth}
+			\centering
+			\begin{tabular}[t]{ !{\vrule width 1pt} c  c | c  c  c  c !{\vrule width 1pt}} \Xhline{1pt}
+				$m
+				_1$ & $m_2$ & $L$ & $\mlt_b$  & $\alpha$  & $U$\\ 
+				\hline 2 & 2 & 1 & 1 & 1 & 2 \\
+				\hdashline
+				3 & 2 & 2 & 2 & 2 & 3 \\
+				3 & 3 & 1 & 1 & 2 & 2  \\
+				\hdashline
+				4 & 2 & 2 & 2 & 2 & 3 \\
+				4 & 3 & 2 & 2 & 2 & 3 \\
+				4 & 4 & 1 & 1 & 2 & 2 \\
+				\hdashline
+				5 & 2 & 3 & 3 & 3 & 3 \\
+				5 & 3 & 2&  3&  3&  3\\
+				5 & 4 &  2& 2 & 2 & 3 \\
+				5 & 5 & 1 & 1 & 2 & 2 \\
+				\hdashline
+				6 & 2 & 3 &3  & 3 & 4 \\
+				6 & 3 & 2 & 2 & 2 & 3 \\
+				6 & 4 & 2 & 2 & 2 & 3 \\
+				6 & 5 & 2 & 2 & 2 & 3 \\
+				6 & 6 & 1 & 1 & 2 & 2 \\
+				\Xhline{1pt}
+			\end{tabular}
+		\end{minipage} \begin{minipage}[t]{.33\linewidth}
+			\centering
+			\begin{tabular}[t]{ !{\vrule width 1pt} c  c | c  c  c  c !{\vrule width 1pt}} \Xhline{1pt}
+				$m
+				_1$ & $m_2$ & $L$ & $\mlt_b$  & $\alpha$  & $U$\\ 
+				\hline 
+				7 & 2 & 4 & 4 & 4  & 4 \\
+				7 & 3 & 3 & 3 & 3 & 3 \\
+				7 & 4& 2 &  3&  3&  3\\
+				7 & 5 & 2 & 3 & 3 & 3 \\
+				7 & 6 & 2 & 2 & 2 & 3 \\
+				7 & 7 & 1 & 1 & 2 & 2 \\
+				\hdashline
+				8 & 2 & 4 & 4 & 4 & 5 \\
+				8 & 3 & 3 & 3 & 3 & 4 \\
+				8 & 4 & 2 & 2 & 3 & 3 \\
+				8 & 5 & 2 & 3 & 3 & 3 \\
+				8 & 6 & 2 & 2 & 2 & 3 \\
+				8 & 7 & 2 & 2 & 2 & 3 \\
+				8 & 8 & 1 & 1 & 2 & 2 \\
+				\hdashline 9 & 2 & 5 & 5 & 5 & 5  \\
+				9 & 3 & 3 & 3 & 3 & 4 \\
+				\Xhline{1pt}
+			\end{tabular}
+		\end{minipage}%
+		\begin{minipage}[t]{.33\linewidth}
+			\centering
+			\begin{tabular}[t]{  !{\vrule width 1pt} c  c | c c  c  c  !{\vrule width 1pt}} \Xhline{1pt}  $m
+				_1$ & $m_2$ & $L$ & $\mlt_b$  & $\alpha$  & $U$\\ 	
+				\hline 
+				
+				9 & 4 & 3 & 3 & 3 & 3 \\
+				9 & 5 & 2 & 3 & 3 & 3 \\
+				9 & 6 & 2 & 2 & 2 & 3 \\
+				9 & 7 & 2 & 3 & 3 & 3 \\
+				9 & 8 & 2 & 2 & 2 & 3 \\
+				9 & 9 & 1 & 1 & 2 & 2 \\
+				\hdashline 10 & 2 & 5 & 5 & 5 & 6  \\
+				10 & 3 & 4 & 4 & 4 & 4 \\
+				10 & 4 & 3 & 3 & 3 & 3 \\
+				10 & 5 & 2 & 2 & 3 & 3 \\
+				10 & 6 & 2 & 3 & 3 & 3 \\
+				10 & 7 & 2 & 3 & 3 & 3 \\
+				10 & 8 & 2 & 2 & 2 & 3 \\
+				10 & 9 & 2 & 2 & 2 & 3 \\
+				10 & 10 & 1 & 1 &2 & 2 \\
+				\Xhline{1pt} \end{tabular}
+		\end{minipage}
+	\end{scriptsize}
+	\caption{\label{tab:mlt}{\cite[Table~1]{SiagaPaper}} Bounds for the maximum likelihood threshold $\mlt_b$.
+		$L = \lceil \frac{m_1}{m_2} \rceil$ is the lower-bound from Corollary~\ref{cor:knownMLEbound}, $U=\lceil \frac{m_1}{m_2} + \frac{m_2}{m_1} \rceil$ is the upper bound from Corollary~\ref{cor:newMLEboundWeaker}, and $\alpha$ is the upper bound from Corollary~\ref{cor:newMLEbound}.}
+\end{table}
+
+In Table \ref{tab:mlt} we list the maximum likelihood threshold $\mlt_b$ for boundedness  of the log-likelihood for small values of $m_1, m_2$, and compare with the bounds discussed above.\footnote{This comparison represents the status when the first preprint of \cite{SiagaPaper} appeared in March 2020. Now, all values of $\mlt_b$ in Table~\ref{tab:mlt} are determined by \cite[Theorem~1.3]{DM21MatrixNormal}, which we state in Theorem~\ref{thm:MatrixNormalThresholdsDM21}.}
+We observe that there are cases where our upper bound 
+\[\alpha = \left\lfloor \max \limits_{1\leq k \leq m_2} \left(\frac{l}{k} + \frac{m_2-k}{m_1 - l}\right) \right\rfloor +1, \quad \text{ where } l = \left\lceil \frac{m_1}{m_2} k \right\rceil - 1,
+\]
+is strictly better than the simple upper bound $U =\lceil \frac{m_1}{m_2} + \frac{m_2}{m_1} \rceil$, e.g.,  when $(m_1,m_2)=(3,2)$. 
+In most cases our bound $\alpha$ matches the lower bound $L=\lceil \frac{m_1}{m_2} \rceil$, so that we can determine $\mlt_b$.
+In addition, when $m_2 | m_1$, one can use Corollary \ref{cor:divisible} to determine $\mlt_b$ even if the bounds $L$ and $\alpha$ do not coincide, such as in $(m_1,m_2)=(8,4)$ or in the square cases $m_1=m_2$. The rest of the values of $\mlt_b$ can be filled from \cite[Table~1]{DrtonKurikiHoff}. 
+We highlight the case $(m_1, m_2) = (8,3)$:
+the maximum likelihood threshold $\mlt_b = 3$ was computed in~\cite{DrtonKurikiHoff} via Gr\"obner bases, 
+but it is not covered by the general bounds in~\cite{DrtonKurikiHoff}.
+Nevertheless, our bound $\alpha$ determines this case.
+
+
+\subsection{Uniqueness of the MLE via stability}
+
+In this short subsection we compare conditions for a stable $Y \in (\KK^{m_1 \times m_2})^n$ under left-right action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$ with conditions for existence of a unique MLE given $Y$ in the matrix normal model $\MT_{\KK}(m_1,m_2)$.
+
+Example~\ref{ex:PolystableNotStableUniqueMLE} shows that for $\KK = \RR$  existence of a unique MLE given $Y$ in $\MT_{\RR}(m_1,m_2)$ is not equivalent to $Y$ being stable.
+However, such an equivalence holds in the complex setting $\KK = \CC$, by  Theorem~\ref{thm:bigTheoremMatrixNormal}.
+Hence, for the complex model $\MT_{\CC}(m_1,m_2)$ we obtain conditions for unique existence of an MLE given $Y \in (\CC^{m_1 \times m_2})^n$ from characterizing when $Y$ is stable under the left-right action.
+Characterizing this stability is a special case of the setting studied in~\cite{King}, compare Section~\ref{sec:King}. Combining Theorem~\ref{thm:KingStability} and Theorem~\ref{thm:bigTheoremMatrixNormal}(d) directly gives the following.
+
+\begin{theorem}[{\cite[Theorem~4.12]{SiagaPaper}}]
+	\label{thm:ComplexMatrixNormalKing}
+	Consider the left-right action of $\SL_{m_1}(\CC) \times \SL_{m_2}(\CC)$ on $(\CC^{m_1 \times m_2})^n$,
+	and a tuple $Y \in (\CC^{m_1 \times m_2})^n$ of $n$ samples for the complex matrix normal model $\MT_{\CC}(m_1,m_2)$.
+	The following are equivalent:
+	\begin{itemize}
+		\item[(a)] there exists a unique MLE given $Y$;
+		\item[(b)] the matrix tuple $Y$ is stable; 
+		\item[(c)] the matrix $(Y_1 | \ldots | Y_n) \in \CC^{m_1 \times n m_2}$ has rank $m_1$, and
+		$
+		m_2 \dim V_1 > m_1 \dim V_2
+		$
+		holds for all subspaces  $V_1 \subseteq \CC^{m_1}$, $\lbrace 0 \rbrace \subsetneq V_2 \subsetneq \CC^{m_2}$ that satisfy $Y_i V_2 \subseteq V_1$ for all $i=1,\ldots,n$.
+	\end{itemize}
+\end{theorem}
+
+We note the similarity with the conditions that characterize semistability in Theorem~\ref{thm:nullconeLeftRight}; see also Proposition~\ref{prop:KingSemistable}.
+However, while Theorem~\ref{thm:nullconeLeftRight} holds both over $\RR$ and $\CC$, the same cannot be true for Theorem~\ref{thm:ComplexMatrixNormalKing} by Example~\ref{ex:PolystableNotStableUniqueMLE}.
+In fact, the real analogue of Theorem~\ref{thm:ComplexMatrixNormalKing}(c) characterizes  existence of a unique MLE for the real matrix normal model $\MT_{\RR}(m_1,m_2)$, see \cite[Theorems~3.1(ii) and 3.3(ii)]{DrtonKurikiHoff}.
+
+
+
+\subsection{Operator Scaling and Flip-Flop Algorithm}\label{subsec:FlipFlopVsOperatorScaling}
+
+In this subsection, we illustrate the algorithmic consequences of the connection between invariant theory and maximum likelihood estimation.
+We present the flip-flop algorithm for ML estimation that is well-known in statistics, and connect it to Algorithm~\ref{algo:OperatorScaling} for operator scaling in invariant theory.
+The connection allows us to give a complexity analysis of the flip-flop algorithm in Theorem~\ref{thm:FlipFlopComplexity}.
+
+It is noteworthy to mention that the similarities between operator scaling and the flip-flop algorithm started and stimulated the work on \cite{SiagaPaper}. The study first led to Theorem~\ref{thm:bigTheoremMatrixNormal}, which was then generalized to the setting of Gaussian group models.
+
+\subsubsection*{Comparing Operator Scaling and the Flip-Flop Algorithm}
+Operator scaling, Algorithm~\ref{algo:OperatorScaling}, solves the Scaling Problem~\ref{comp:Scaling} for the left-right action of $\SL_{m_1}(\CC) \times \SL_{m_2}(\CC)$ on $(\CC^{m_1 \times m_2})^n$, compare Section~\ref{sec:ScalingAlgorithms}.
+The method was generalized to tuples of tensors in \cite[Algorithm~1]{burgisser2017alternating}. 
+
+The \emph{flip-flop algorithm}~\cite{dutilleul1999mle,lu2005likelihood, werner2008onEstimation}\index{flip-flop algorithm}, see the bottom left of Figure~\ref{fig:GaussianAlgorithms}, is an alternating maximization procedure to find an MLE in a matrix normal model $\MTK(m_1,m_2)$.
+It can be thought of as a Gaussian version of IPS for matrix normal models, since one alternately updates the estimates in each marginal.
+If we consider $\Psi_2 \in \PD_{m_2}(\KK)$ to be fixed, the log-likelihood in Equation~\eqref{eq:MatrixNormalLikelihood} becomes, up to constants,
+\begin{equation*}
+	m_2 \left[ \log \det(\Psi_1) - \tr \left( 
+	\Psi_1 \cdot \frac{1}{nm_2} \sum_{i=1}^n Y_i \Psi_2\T Y_i\HT \right) \right].
+\end{equation*}
+Maximizing the latter with respect to $\Psi_1$ reduces to the case of a standard multivariate Gaussian model as in~\eqref{eq:GaussianLogLikelihood}.
+The unique maximizer over $\PD_{m_1}(\KK)$, if it exists, is the inverse of the matrix $\frac{1}{nm_2} \sum_{i=1}^n Y_i \Psi_2\T Y_i\HT$, compare Example~\ref{ex:FullGaussianModel}.
+In the same way, we can fix $\Psi_1$ and use $\det(\Psi_2) = \det(\Psi_2\T)$ to maximize the log-likelihood with respect to $\Psi_2\T$. Iterating these two steps gives Algorithm~\ref{algo:flipflop}.
+
+\begin{algorithm}
+	\caption{Flip-flop\index{flip-flop algorithm} {\cite[Algorithm~4.1]{SiagaPaper}}} \label{algo:flipflop}
+		\Input{$Y_1, \ldots, Y_n \in \KK^{m_1 \times m_2}$, a number of iterations $N \in \ZZ_{>0}$.}
+		\Output{an approximation of an MLE, if it exists.}
+		\SetAlgoLined
+		\BlankLine
+		Initialize $\Psi_2 := \Id_{m_2}$\;
+		\For{$k=1$ \KwTo $N$}{
+			the following pair of updates
+			\begin{equation}
+				\label{eq:updateMatrixNormal}
+				\begin{split}
+					\Psi_1 &\gets \left( \frac{1}{nm_2} \sum_{i=1}^n Y_i \Psi_2\T Y_i\HT \right)^{-1} \\
+					\Psi_2 &\gets \left( \frac{1}{nm_1} \sum_{i=1}^n Y_i\HT \Psi_1 Y_i \right)^{-\mathsf{T}}.
+				\end{split}
+			\end{equation}
+		}
+		\Return{$\Psi_1 \otimes \Psi_2$.}
+\end{algorithm}
+
+We now compare operator scaling, Algorithm~\ref{algo:OperatorScaling}, with the flip-flop algorithm.
+First, note that operator scaling restricts to matrices of determinant one, in order to stay in the $\SL_{m_1}(\CC) \times \SL_{m_2}(\CC)$-orbit of $Y$. In comparison, Algorithm~\ref{algo:flipflop} has constants chosen to minimize the outer infimum in Equation~\eqref{eq:MatrixNormalDoubleInf}. In the following we argue that, via the correspondence\footnote{Remember that $g \in G = \GL_{m_1}(\KK) \times \GL_{m_2}(\KK)$ gives $(g_1\HT g_1) \otimes (g_2\HT g_2) \in \Mg_{G} = \MTK(m_1,m_2)$, see Example~\ref{ex:LeftRightMatrixNormal}.}
+$g_j\HT g_j \leftrightarrow \Psi_j$, operator scaling is the same procedure as the flip-flop algorithm, up to scalar factors.\footnote{This is similar to classical matrix scaling and its invariant theoretic appearance, compare the extended example in Section~\ref{sec:CompProblems}.}
+
+We exemplify this for updating $g_2$ respectively $\Psi_2$. Given $g$ and $Y$, and ignoring the determinant one rescaling, we set $g_2^{\new} := \varrho^{-1/2} g_2$, where
+	\[ \varrho_2 := \left( \sum_{i=1}^n \big( g_1 Y_i g_2\T \big)\HT \big( g_1 Y_i g_2\T \big) \right)\T = g_2 \left( \sum_{i=1}^n Y_i\HT g_1\HT g_1 Y_i \right)\T g_2\HT \]
+is defined as in Algorithm~\ref{algo:OperatorScaling}. We compute
+	\[ (g_2^{\new})\HT g_2^{\new} = g_2\HT \varrho^{-1} g_2 = \left( \sum_{i=1}^n Y_i\HT g_1\HT g_1 Y_i \right)^{-\mathsf{T}}
+	\longleftrightarrow \left( \sum_{i=1}^n Y_i\HT \Psi_1 Y_i \right)^{-\mathsf{T}} , \]
+which indeed corresponds, up to scalar factors, to $\Psi_2^{\new}$, compare Equation~\eqref{eq:updateMatrixNormal}. A similar computation holds for $g_1$ and $\Psi_1$.
+
+Conversely, the square-root $\Psi_j^{1/2} =: \hat{g}_j$ satisfies $\hat{g}_j\HT \hat{g}_j = \Psi_j = g_j\HT g_j$ and hence $\hat{g}_j$ only differs by a unitary matrix from $g_j$. Therefore, $\| \hat{g} \cdot Y\| = \|g \cdot Y\|$ and $\| \mu_G(\hat{g} \cdot Y)\| = \|\mu_{G}(g \cdot Y)\|$.
+Altogether, Algorithms~\ref{algo:OperatorScaling} and~\ref{algo:flipflop} are, up to rescaling, essentially the same.
+
+Although operator scaling is defined over $\CC$, when restricting to real inputs it only involves computations over the reals, compare Algorithm~\ref{algo:OperatorScaling}. This allows the computation of MLEs (if they exist) in $\MT_{\RR}(m_1, m_2)$ via \eqref{eq:MatrixNormalDoubleInf}, since the capacity of a real matrix tuple is the same under the action of $\SL_{m_1}(\RR) \times \SL_{m_2}(\RR)$ as under the action of $\SL_{m_1}(\CC) \times \SL_{m_2}(\CC)$, see Proposition~\ref{prop:RealVsComplexCapacity}.
+
+
+\subsubsection*{Convergence}
+
+Due to the above comparison of the flip-flop algorithm with operator scaling, we can analyse the convergence behaviour of the former.
+If an update step in Algorithm~\ref{algo:flipflop} cannot be computed because one of the matrices in~\eqref{eq:updateMatrixNormal} cannot be inverted, then the matrix tuple $Y \in (\KK^{m_1 \times m_2})^n$ is unstable under the action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$. This implies that the log-likelihood $\ell_Y$ is unbounded, by Theorem~\ref{thm:bigTheoremMatrixNormal}(a).
+Otherwise, the sequence of terms
+	\[	\Big\| \Big( \det(\Psi_1)^{\nicefrac{-1}{(2m_1)}} \Psi_1^{\nicefrac{1}{2}}, \:
+		\det(\Psi_2)^{\nicefrac{-1}{(2m_2)}} \Psi_2^{\nicefrac{1}{2}} \Big) \cdot Y \Big\|^2 \]
+converges. If the limit is zero, then the log-likelihood $\ell_Y$ is unbounded.
+
+Otherwise, the limit is a positive number and $Y$ is semistable. Here, two possibilities can arise.
+First, if $Y$ is polystable then the minimal norm is attained at an element of the group $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$, and the flip-flop algorithm converges to an MLE, using the fact that the constants in the flip-flop algorithm minimize the outer infimum in~\eqref{eq:MatrixNormalDoubleInf}.
+Second, if $Y$ is semistable but not polystable then the flip-flop algorithm diverges by the following remark.
+
+\begin{remark}[{\cite[Remark~4.14]{SiagaPaper}}] \label{rem:noExtendedMLE}
+	If $Y \in (\KK^{m_1 \times m_2})^n$ is semistable but not polystable under the left-right action of $\SL_{m_1}(\KK) \times \SL_{m_2}(\KK)$, then the likelihood $L_Y$ (equivalently the log-likelihood $\ell_Y$) is bounded from above, but does not attain its supremum. In this case, any sequence $\Psi_N := (\Psi_{1,N} \otimes \Psi_{2,N})$ of concentration matrices with
+	\begin{align*}
+		\lim_{N \to \infty} L_Y(\Psi_{1,N} \otimes \Psi_{2,N}) = \sup L_Y > 0
+	\end{align*}
+	diverges by the following. Assume a limit $\Psi_{\infty}$ exists. If $\Psi_{\infty} \in \PD_{m_1 m_2}(\KK)$ then $\Psi_{\infty} \in \MTK(m_1,m_2)$ as the latter is Euclidean closed in $\PD_{m_1 m_2}(\KK)$, by Theorem~\ref{thm:MGtotallyGeodsicSymmetric}. This contradicts the supremum of $L_Y$ not being attained. On the other hand, if $\Psi_{\infty} \notin \PD_{m_1 m_2}(\KK)$ then it is rank-deficient positive semidefinite, so $\det(\Psi_\infty)=0$ and \eqref{eq:LikelihoodGaussian} yield the contradiction $\sup L_Y = L_Y(\Psi_{\infty}) = 0$.
+	\hfill\remSymbol
+\end{remark}
+
+
+\subsubsection*{Complexity}
+
+As a direct consequence of the above comparison and convergence analysis, the complexity analysis of operator scaling carries over to the flip-flop algorithm.
+We adapt~\cite[Theorem~1.1]{burgisser2017alternating} to our notation to derive the following.
+
+\begin{theorem}[{\cite[Theorem~4.15]{SiagaPaper}}] \label{thm:FlipFlopComplexity}
+	Let $\varepsilon > 0$ and let $Y \in (\ZZ^{m_1 \times m_2})^n$ with matrix entries of bit size bounded by $b$. After $\poly(nm_1m_2, b, \nicefrac{1}{\varepsilon})$ many steps, the flip-flop algorithm either identifies that the log-likelihood $\ell_Y$ is unbounded or finds $(\Psi_1, \Psi_2) \in \PD_{m_1}(\KK) \times \PD_{m_2}(\KK)$ such that the matrix tuple $Y' := \big( \det(\Psi_1)^{\nicefrac{-1}{(2m_1)}} \Psi_1^{\nicefrac{1}{2}}, \det(\Psi_2)^{\nicefrac{-1}{(2m_1)}} \Psi_2^{\nicefrac{1}{2}} \big) \cdot Y$ satisfies $\|\mu_{G}(Y')\| \leq \veps$, where $\mu_G$ is as in Equation~\eqref{eq:MomentMapLeftRight}.
+\end{theorem}
+
+If $\ell_Y$ is bounded from above, taking the limit $\varepsilon \to 0$ in Theorem~\ref{thm:FlipFlopComplexity} gives rise to two possibilities. Either the MLE exists and is the limit of the $\Psi_1 \otimes \Psi_2$ as $\varepsilon \to 0$, or the sequence $\Psi_1 \otimes \Psi_2$ diverges as $\varepsilon \to 0$, by Remark~\ref{rem:noExtendedMLE}.
+Thus, in the latter scenario there is no meaningful notion of an approximate MLE.
+
+\subsubsection*{Outlook}
+Remember that \cite[Algorithm~1]{burgisser2017alternating} generalizes operator scaling to scale tensors of format $m_1 \times \cdots \times m_d$ under the action of $\SL_{m_1}(\CC) \times \cdots \times \SL_{m_d}(\CC)$. Thus, it can be used for ML estimation in (real and complex) tensor normal models.
+Similarly to the above, \cite[Algorithm~1]{burgisser2017alternating} corresponds to the flip-flop algorithm for tensor normal models, see e.g., \cite[Algorithm~2]{OptimalSampleComplexity}.
+The latter algorithm satisfies the following. If $Y$ is a tuple of i.i.d. $d$-tensor samples from the distribution given by $\Psi \in \MT_{\RR}(m_1,\ldots,m_d)$, then the flip-flop algorithm converges linearly with high probability to $\Psi$, \cite[Theorems~2.9 and~2.10]{OptimalSampleComplexity}.
+
+Finally, we stress again that the geodesic convex methods in~\cite{GradflowArXiv} can be used for ML estimation in Gaussian group models $\Mg_G$ where $G$ is Zariski closed and self-adjoint, compare Subsection~\ref{subsec:AlgorithmsSelfAdjoint} and the right hand side of Figure~\ref{fig:GaussianAlgorithms}.
+
+
+\index{matrix normal model|)}
+
+
+%------ TDAG models as Gaussian group models ------------------------
+
+\section{TDAG models as Gaussian group models}\label{sec:TDAGs}
+
+
+In this section we revisit Gaussian graphical models given by a directed acyclic graph (DAG) $\Gcal$, see Definition~\ref{defn:DAGmodel}. The section is mainly based on \cite[Section~5]{SiagaPaper}, but also presents further results and knowledge from \cite{RDAG}.
+We focus on the following subclass of DAGs.
+
+\begin{defn}\label{defn:TransitiveDAG}
+	A DAG $\mathcal{G}$ is called \emph{transitive}\index{directed acyclic graph!transitive} if whenever $k \to j$ and $j \to i$ in $\Gcal$ then also $k \to i$ in $\Gcal$. We usually abbreviate transitive DAG to TDAG\index{TDAG| see {directed acyclic graph, transitive} }.
+	\hfill\defnSymbol
+\end{defn}
+
+First, we connect DAG models to the setting of Gaussian models via symmetrization by defining a natural set $\AG \subseteq \GL_m(\KK)$ such that $\MGar = \Mg_{\AG}$. Afterwards, we characterize when $\AG$ is a subgroup of $\GL_m(\KK)$. It turns out that this is the case if and only if $\Gcal$ is transitive. Therefore, TDAG models are naturally Gaussian group models. However, the group $\AG$ is usually not self-adjoint. Still, we can deduce the full correspondence for TDAG models, Theorem~\ref{thm:FullCorrespondenceTDAG}, and the $\GSL$-stabilizer of a sample matrix $Y$ is proven to be in bijection with the MLEs given $Y$, compare Proposition~\ref{prop:StabilizerMLEsTDAG}. Finally, we briefly study which undirected Gaussian graphical models from Example~\ref{ex:UndirectedGraphicalModelIntro} arise as Gaussian group models.
+
+
+\medskip
+
+In the following the vertex set $I$ of $\Gcal$ is always $[m] = \{1,2,\ldots,m\}$. Recall from Definition~\ref{defn:DAGmodel} that a DAG model $\MGar$ is given by a linear structural equation~\eqref{eq:DAGLinearEquation}. Thus, $\MGar$ is the set of all concentration matrices of the form
+	\[(\Id_m - \Lambda)\HT \Omega^{-1} (\Id_m - \Lambda),\]
+where $\Omega \in \PD_m(\KK)$ is diagonal and $\lambda_{ij}=0$ whenever $j \not\to i$ in $\Gcal$, compare Equation~\eqref{eq:DAGmodelConcentration}. By acyclicity, we can and will assume that $j > i$ whenever $j \to i$ in $\Gcal$, so $\Lambda$ is strictly upper triangular, see Remark~\ref{rem:ParentsOlderThanChildren}.
+
+Now, we put DAG models into the context of Gaussian models via symmetrization. Given a DAG $\Gcal$, we define the set of upper triangular matrices
+\begin{equation}
+	\label{eq:defnAG} %formerly known as eq:GG
+	\AG = \{ a \in \GL_m(\KK) \mid a_{ij}=0 \text{ for } i \neq j \text{ with } j \not \to i \text{ in }  \Gcal \} .
+\end{equation}
+
+
+\begin{lemma}[{\cite[Lemma~2.9]{RDAG}}]
+	\label{lem:DAGmodelEqualsMgAG}
+	Let $\Gcal$ be a DAG. The corresponding model $\MGar$ is the Gaussian model given by $\AG$: $\MGar = \Mg_{\AG}$.
+\end{lemma}
+
+\begin{proof}
+	Let $\Psi = (\Id_m - \Lambda)\HT \Omega^{-1} (\Id_m - \Lambda) \in \MGar$, where $\Lambda$ and $\Omega$ are as above, and set
+	$a := \Omega^{-1/2} (\Id_m - \Lambda)$. By construction, $\Psi = a\HT a$ and if $i \neq j$ with $j \not \to i$ in $\Gcal$, then $\lambda_{ij} = 0$ and therefore $a_{ij} = -\omega_{ii}^{-1/2} \lambda_{ij} = 0$. This shows  $\MGar \subseteq \Mg_{\AG}$.
+	
+	Conversely, let $\Psi = b\HT b$ for some $b \in \AG$ and set $k_{ii} := \overline{b_{ii}} \, |b_{ii}|^{-1}$ for $i \in [m]$. The latter defines a diagonal matrix $k$ such that $k\HT k = \Id_m$ and $a := kb$ has positive diagonal entries $a_{ii} = |b_{ii}|$. We have $a\HT a = b\HT b = \Psi$ and, as multiplication with $k$ preserves the support, $a \in \AG$. 
+	Now, consider the positive-definite diagonal matrix $D := \diag( a_{11}^2, \ldots, a_{mm}^2 )$ and the unipotent upper triangular matrix $U := \diag( a_{11}^{-1}, \ldots, a_{mm}^{-1} ) a$. Then $U\HT D U = \Psi$, so $\Psi$ is of the form $(\Id_m - \Lambda)\HT \Omega^{-1} (\Id_m - \Lambda)$ for $\Omega = D^{-1}$ and strictly upper triangular $\Lambda = \Id_m - U$. It remains to show that $\Lambda_{ij} = 0$ whenever $i \neq j$ such that $j \not \to i$ in $\Gcal$. For such $i,j$ we have $a_{ij} = 0$ since $a \in \AG$ and hence $\Lambda_{ij} = a_{ii}^{-1} a_{ij} = 0$. 
+\end{proof}
+
+Given the previous lemma it is natural to ask when $\AG$ is a group, so that $\Mg_{\AG}$ is a Gaussian group model.
+To prove that transitivity is a necessary and sufficient condition we use the following lemma.
+
+\begin{lemma}[{\cite[Lemma~B.1]{RDAG}}]\label{lem:GroupOnlyMultiplication}
+	Let $\Aset = L \cap \GL_m(\KK)$, where $L$ is a $\KK$-linear subspace of $\KK^{m \times m}$, and assume $\Id_m \in \Aset$. Then $\Aset$ is a subgroup of $\GL_m(\KK)$ if and only if it is closed under multiplication.
+\end{lemma}
+
+\begin{proof}
+	A group is closed under multiplication. Conversely, if $\Aset$ is closed under multiplication, we have to show that it is also closed under inverses. For a matrix $a \in \Aset$ let $f_a(t) = t^m + c_1 t^{m-1} + \dots + c_m \in \KK[t]$ be its characteristic polynomial. We know $c_m \neq 0$ because $c_m$ is, up to sign, the determinant of $a$.
+	Using the theorem of Cayley-Hamilton we deduce $-c_m^{-1}(a^{m-1} + c_1 a^{m-2} + \dots + c_{m-1} \Id_m) a = \Id_m$, so
+		\begin{align*}
+			a^{-1} = - \frac{1}{c_m} \big( a^{m-1} + c_1 a^{m-2} + \dots + c_{m-1} \Id_m \big).
+		\end{align*}
+	By assumption, $\Id_m \in L$ and, as $\Aset$ is closed under multiplication, $a^k \in \Aset \subseteq L$ for all $k \geq 1$. Since $L$ is a $\KK$-vector space, we have $a^{-1} \in L$ and hence $a^{-1} \in \Aset$.
+\end{proof}
+
+
+%note: proof changed in comparison to AKRS
+%also statement slightly changes equality of \MGar and \Mg_\AG proven above
+\begin{prop}[{\cite[Proposition~5.1]{SiagaPaper}}]\label{prop:TDAGgroup}
+	Let $\Gcal$ be a DAG.
+	The set of matrices $\AG \subseteq \GL_m(\KK)$ is a group if and only if $\Gcal$ is transitive, i.e., a TDAG.
+\end{prop}
+
+\begin{proof}
+	If $\Gcal$ is not transitive, then there exist pairwise distinct indices $i,j,k \in [m]$ such that $j\to i$ and $k\to j$, but $k \not \to i$. Take the matrices $g = \Id_m + E_{ij}$ (with ones on the diagonal and at the $(i,j)$ entry, and zero elsewhere) and $h = \Id_m + E_{jk}$.
+	We have $g, h \in \AG$, but $gh \notin \AG$ as $(gh)_{ik}=1$. Therefore, $\AG$ is not a group. 
+	
+	Conversely, assume that $\Gcal$ is transitive. Note that any invertible diagonal matrix, in particular the identity $\Id_m$, is contained in $\AG$. Thus, it suffices to show that $\AG$ is closed under multiplication, by Lemma~\ref{lem:GroupOnlyMultiplication}. Let $g,h \in \AG$ and consider $i \neq j$ such that $j \not\to i$. We need to prove that $(gh)_{ij} = 0$ to ensure $gh \in \AG$. Using $g_{ij} = h_{ij} = 0$ (as $j \not\to i$) we obtain
+		\[ (gh)_{ij} = \sum_{k \in [m]} g_{ik} h_{kj} = \sum_{k \in [m] \backslash \{i,j\}} g_{ik} h_{kj} . \]
+	Since $\Gcal$ is transitive we cannot have $g_{ik} \neq 0$ and $h_{kj} \neq 0$ for some $k \in [m] \backslash \{i,j\}$; otherwise $k \to i$ and $j \to k$ would yield $j \to i$, a contradiction. Hence, $(gh)_{ij} = 0$ which ends the proof.
+\end{proof}
+
+\begin{example}[{\cite[Example~5.2]{SiagaPaper}}]\label{ex:path1}
+	Let $\mathcal{G}$ be the TDAG
+	\begin{tikzcd}[cramped, sep=small]
+		1 & 3 \ar[l] \ar[r] & 2.
+	\end{tikzcd}
+	The corresponding group $G := \AG \subseteq \GL_3(\KK)$ consists of invertible matrices $g$ of the form
+	\[g = \begin{pmatrix} * & 0 & * \\ 0 & * & * \\ 0 & 0 & * \end{pmatrix}.
+	\]
+	By Proposition~\ref{prop:TDAGgroup}, we have that the Gaussian graphical model $\MGar$ is $\Mg_G$ and one computes that
+	\begin{equation*}
+		\Mg_G = \big\{ g\HT g \mid g \in G \big\} = \big\{ \Psi \in \PD_3(\KK) \mid \psi_{12}=\psi_{21}=0 \big\}.
+	\end{equation*}
+	is a $5$-dimensional linear slice of $\PD_3(\KK)$.
+	\hfill\exSymbol
+\end{example}
+
+
+Given a TDAG $\Gcal$, Proposition~\ref{prop:TDAGgroup} puts us into the setting of Gaussian group models. 
+The group $G := \AG$ is Zariski closed but in general \emph{not} self-adjoint as it is upper triangular. 
+Hence, we cannot apply the results from Section~\ref{sec:SelfAdjointMgG}. However, we can prove the full correspondence for TDAG models differently. We start with the following observation.
+
+\begin{remark}[Weak Correspondence for TDAG models] \label{rem:WeakCorrespondenceTDAG}
+	\ \\
+	For a TDAG $\Gcal$ the group $G := \AG \subseteq \GL_m(\KK)$ is closed under non-zero scalar multiples and contains the orthogonal matrix $\diag(-1,1,\ldots,1)$ of determinant~$-1$. Thus, the weak correspondence via the action of $\GSL$, see Theorem~\ref{thm:GroupWeakCorrespondence} respectively Theorem~\ref{thm:WeakCorrespondence}, holds for the TDAG model $\MGar = \Mg_{G}$.
+	\hfill\remSymbol
+\end{remark}
+
+Next, we give equivalences between stability notions under $\GSL$ and the linear (in)dependence conditions on the rows of $Y \in \KK^{m \times n}$ encountered in Theorem~\ref{thm:LinearIndependenceDAG}. For this, recall that $Y^{(i)}$ is the $i^{th}$ row of $Y$ and, by convention, the linear hull of the empty set is the zero vector space. The following statement will be generalized in Theorem~\ref{thm:RDAGStabilityVsLinDependence}.
+
+\begin{theorem} \label{thm:StabilityLinearIndepTDAG}
+	Let $\Gcal$ be a TDAG with group $G := \AG \subseteq \GL_m(\KK)$. For $Y \in \KK^{m \times n}$, stability under $\GSL$ relates to linear independence conditions:
+	\[ \begin{matrix} \text{(a)} & Y \text{ unstable}  & \Leftrightarrow & \exists \, i \in [m] \colon &  Y^{(i)} \in \Span \big\lbrace Y^{(j)} : j \in \pa(i)  \big\rbrace \\[3pt]
+		\text{(b)} & Y \text{ polystable}  & \Leftrightarrow & \forall \, i \in [m] \colon &  Y^{(i)} \notin \Span \big\lbrace Y^{(j)} : j \in \pa(i)  \big\rbrace \\[3pt]
+		\text{(c)} & Y \text{ stable} & \Leftrightarrow & \forall \, i \in [m] \colon & Y^{(i \cup \pa(i))} \text{ has full row rank} . \\ \end{matrix} \] 
+	In particular, $Y$ is semistable if and only if it is polystable.
+\end{theorem}
+
+\begin{proof}
+	First, assume there is some vertex $i \in [m]$ such that the row $Y^{(i)}$ is a $\KK$-linear combination of its parent rows:
+		\[ Y^{(i)} = \sum_{j \in \pa(i)} \lambda_j Y^{(j)} \]
+	Then the $i^{th}$ row of $g \cdot Y$ is zero, where $g \in \GSL$ has diagonal entries equal one and the only non-zero off-diagonal entries are $g_{ij} = - \lambda_j$, $j \in \pa(i)$. For $\veps > 0$, let $g_{\veps}$ be the diagonal matrix with entries $g_{\veps})_{ii} = \veps^{-m+1}$ and $(g_\veps)_{kk} = \veps$, $k \neq i$. By construction, $g_\veps \in \GSL$ and $g_{\veps} g \cdot Y \to 0$ for $\veps \to 0$, so $Y$ is $\GSL$-unstable.
+	
+	Conversely, assume that $ Y^{(i)} \notin \Span \big\lbrace Y^{(j)} : j \in \pa(i)  \big\rbrace$ for all vertices $i \in [m]$. Then $Y \neq 0$ and we will show that the $\GSL$-orbit of $Y$ is Euclidean closed, i.e., $Y$ is $\GSL$-polystable. By Lemma~\ref{lem:PopovForReal}, it suffices to prove that $\GSL \cdot Y$ is Zariski closed for $\KK = \CC$ and we show that via Popov's Criterion from Section~\ref{sec:Popov}. Fix some vertex $i \in [m]$, set $\beta := |\pa(i)|$ and, for convenience, let $(e_0,e_1,\ldots,e_\beta)$ be the ordered standard basis of $\CC^{\beta +1}$. The assumption $Y^{(i)} \notin \Span \big\lbrace Y^{(j)} : j \in \pa(i)  \big\rbrace$ yields for $Y^{(i \cup \pa(i))} \in \CC^{(\beta + 1) \times n}$ that 
+		\[ \ker \left( \big( Y^{i \cup \pa(i)} \big)\HT \right) \subseteq \Span \{ e_1, e_2 \ldots, e_{\beta} \} \subseteq \CC^{\beta + 1} .\]
+	Hence, $e_0$ is in the orthogonal complement of $\ker \big( (Y^{i \cup \pa(i)})\HT \big)$, which is equal to the image of $Y^{(i \cup \pa(i))}$. Thus, there is some $w \in \CC^n$ with $Y^{(i \cup \pa(i))} w = e_0$. Let $p_1 < \ldots < p_{\beta}$ be the parents of $i$ and set $p_0 := i$. In the following we use the language of Section~\ref{sec:Popov} with respect to the action of $\GSL$ on $\CC^{m \times n}$. In particular, the $x_{i,j} \in \CC[\GSL]$ for $i,j \in [m]$ denote the coordinate functions on $\GSL$ and $T = \ST_m(\CC)$.
+	Using $Y^{(i \cup \pa(i))} w = e_0$ we compute %todo: can this be rewritten; stress that e_0 refers to i-th row
+		\begin{align*}
+			x_{i,i} &= \begin{pmatrix} x_{i,i} & x_{i,p_1} & x_{i,p_2} & \ldots & x_{s, p_{\beta}} \end{pmatrix} \big( Y^{(i \cup \pa(i))} w \big) \\
+			&= \sum_{k=0}^\beta \sum_{l=1}^n x_{i, p_k} Y_{p_k, l} \, w_l =  \sum_{l=1}^n w_l \: \sum_{k=0}^\beta x_{i,p_k} Y_{p_k, l}
+			= \sum_{l=1}^n w_l \: \sum_{j=1}^m Y_{j,l} x_{i,j} ,
+		\end{align*}
+	where we used in the final equality that $x_{i,j} = 0$ if $j \notin \{i\} \cup \pa(i)$.
+	By Equation~\eqref{eq:PopovRY}, this shows that $x_{i,i} \in R_Y$ for all $i \in [m]$ and hence we have
+		\[ \forall \, (d_1,\ldots,d_m)\in \ZZ_{\geq 0}^m \colon \qquad  \prod_{i \in [m]} x_{i,i}^{d_i} \in R_Y .\]
+	The latter exhaust all characters of $T = \ST_m(\CC)$ thanks to the fact that $\prod_{i \in [m]} x_{i,i}$ is the trivial character.
+	We conclude $\Xfrak_{\GSL \cdot Y} = \Xfrak(T)$ which is a group. Therefore, the orbit $\GSL \cdot Y$ is Zariski closed by Popov's Criterion (Theorem~\ref{thm:PopovCriterion}).
+	
+	Since the right hand side of (a) and (b) are opposites of each other and polystable implies semistable (the opposite of unstable), we have proven the equivalences in (a) and~(b).
+	
+	To prove part~(c) it suffices, by part~(b), to show that a polystable $Y$ has finite $\GSL$ stabilizer if and only if for all $i \in [m]$ the parent rows $Y^{(j)}$, $j \in \pa(i)$ are linearly independent. Let $Y$ be polystable. A matrix $g \in \GSL$ is in the stabilizer of $Y$, i.e., $gY = Y$, if and only if for all $i \in [m]$
+		\begin{equation}\label{eq:StabilityLinearIndepTDAG}
+			(gY)^{(i)} = g_{ii} Y^{(i)} + \sum_{j \in \pa(i)} g_{ij} Y^{(j)} = Y^{(i)}.
+		\end{equation}
+	Since $Y^{(i)}$ is not in the linear span of its parent rows, Equation~\eqref{eq:StabilityLinearIndepTDAG} implies that $g_{ii} = 1$ and $\sum_{j \in \pa(i)} g_{ij} Y^{(j)} = 0$. If $Y^{(j)}$, $j \in \pa(i)$ are linearly independent, then \eqref{eq:StabilityLinearIndepTDAG} has exactly one solution, namely $g_{ii} = 1$ and $g_{ij} = 0$ for all $j \in \pa(i)$. Thus, if for all $i \in [m]$ the $Y^{(j)}$, $j \in \pa(i)$ are linearly independent, then $(\GSL)_Y = \{\Id_m \}$ is trivial and $Y$ is stable.
+	On the other hand, if there is some $i \in [m]$ such that $Y^{(j)}$, $j \in \pa(i)$ are linearly dependent, then Equation~\eqref{eq:StabilityLinearIndepTDAG} has infinitely many solutions. Each solution $g_{ii} = 1$ and $g_{ij}$, $j \in \pa(i)$ of \eqref{eq:StabilityLinearIndepTDAG} gives rise to a unipotent matrix $g \in (\GSL)_Y$ by setting all other off-diagonal entries of $g$ to zero. Therefore, $(\GSL)_Y$ is infinite and $Y$ is not stable.
+\end{proof}
+
+Parts~(a) and~(b) of Theorem~\ref{thm:StabilityLinearIndepTDAG} constitute \cite[Theorem~5.3]{SiagaPaper}, which is proven in \cite{SiagaPaper} more ad-hoc and without using Popov's Criterion.\footnote{We presented the proof of Theorem~\ref{thm:StabilityLinearIndepTDAG} via Popov's Criterion to advertise this algebraic tool for testing polystability. We remark that generalizing this proof led to the concept of augmented sample matrices $M_{Y,s}$, compare Section~\ref{sec:RDAGsGaussianGroupModels} and Lemma~\ref{lem:PopovRDAG}. The matrices $M_{Y,s}$ are indispensable for several main results of Chapter~\ref{ch:RDAGs}.}
+These parts in combination with the weak correspondence, Theorem~\ref{thm:GroupWeakCorrespondence}, prove
+	\[ \mlt_b(\MGar) = \mlt_e(\MGar) = 1 + \max_{i \in [m]} |\pa(i)| .\]
+This is \cite[Corollary~5.5]{SiagaPaper} and recovers parts of the known Corollary~\ref{cor:MLthresholdsDAG} for \emph{transitive} DAGs \emph{without} using Theorem~\ref{thm:LinearIndependenceDAG}.
+
+Now, combining Theorem~\ref{thm:LinearIndependenceDAG} and Theorem~\ref{thm:StabilityLinearIndepTDAG} directly gives the full correspondence for TDAG models, which will be generalized to so-called RDAG models in Theorem~\ref{thm:RDAGstabilityVsMLE}.
+
+%following theorem merges results of AKRS and RDAG paper
+\begin{theorem}[Full Correspondence for TDAGs] \label{thm:FullCorrespondenceTDAG}
+	Let $\Gcal$ be a TDAG with group $G := \AG \subseteq \GL_m(\KK)$. Consider the TDAG model $\MGar = \Mg_G$ with tuple of samples $Y \in \KK^{m \times n}$.
+	Stability under the action of $\GSL$ is related to ML estimation as follows.
+	\[ \begin{matrix}
+		(a) & Y \text{ unstable} & \Leftrightarrow & \ell_Y \text{ not bounded from above} \\
+		(b) & Y \text{ semistable} & \Leftrightarrow & \ell_Y \text{  bounded from above} \\ 
+		(c) & Y \text{ polystable} & \Leftrightarrow & \text{MLE exists}	\\
+		(d) & Y \text{ stable} & \Leftrightarrow & \text{ unique MLE exists} 
+	\end{matrix}\]
+\end{theorem}
+
+We point out that the equivalence in part~(d) also holds for $\KK = \RR$, which is not the case in the self-adjoint situation, compare Theorem~\ref{thm:StrongFullCorrespondence}.
+
+Remember that the $\GSL$-stabilizer of $Y$ acts from the right on the set of MLEs given $Y$, compare Proposition~\ref{prop:MLEsStabilizer}. In the self-adjoint situation this action is transitive (Proposition~\ref{prop:MLEsTransitiveStabilizerAction}). This can be further strengthened for TDAG models as follows.
+
+\begin{prop}\label{prop:StabilizerMLEsTDAG}
+	Let $\Gcal$ be a TDAG with group $G := \AG \subseteq \GL_m(\KK)$. Consider the TDAG model $\Mg_G$ and assume $Y \in \KK^{m \times n}$ has an MLE $\hat{\Psi} \in \Mg_G$. Then the group action of $(\GSL)_Y$ on the the set of MLEs given $Y$ from Proposition~\ref{prop:MLEsStabilizer} is free and transitive. In other words, we have a bijection
+	\begin{align*}
+		(\GSL)_Y \to \{ \text{MLEs given } Y\} , \quad g \mapsto g\HT \hat{\Psi} g.
+	\end{align*}
+\end{prop}
+
+A proof is omitted as the statement is a special case of Proposition~\ref{prop:StabilizerMLEsGroupRDAG}, which is proven in Section~\ref{sec:RDAGsGaussianGroupModels}.
+
+\begin{example}[Saturated model as a TDAG model]\label{ex:FullModelAsTDAG}
+	Remember that the saturated Gaussian model $\Mcal = \PD_m(\KK)$ arises as the Gaussian group model $\Mg_{\GL_m(\KK)}$, studied in Example~\ref{ex:FullModelSelfAdjoint}. However, it is also induced by the group $\Bor_m(\KK)$ of upper invertible matrices: $\Mg_{\Bor_m(\KK)} = \PD_m(\KK)$. This is the Gaussian group model given by the ``full'' TDAG, i.e., the TDAG on vertex set $[m]$ that contains a directed edge $i \leftarrow j$ whenever $i < j$.
+	
+	An interesting distinction between these two viewpoints arises for the action of the stabilizer $(\GSL)_Y$ on the set of MLEs given $Y \in Y \in \KK^{m \times n}$, Proposition~\ref{prop:MLEsStabilizer}. For $G = \GL_m(\KK)$ we have a transitive action by \ref{prop:MLEsTransitiveStabilizerAction} that is in general not free. In contrast, Proposition~\ref{prop:StabilizerMLEsTDAG} for TDAGs gives a transitive \emph{and free} action for $G = \Bor_m(\KK)$. Hence, the restriction to upper triangular matrices excludes possible redundancies, i.e., distinct stabilizer elements giving the same MLE.
+	
+	The (T)DAG perspective recovers classical knowledge as given in Example~\ref{ex:FullGaussianModel}.
+	Since vertex $1$ has all other $m-1$ vertices as parents, Corollary~\ref{cor:MLthresholdsDAG} yields the known value for the ML thresholds:
+		\[ \mlt_b \big( \PD_m(\KK) \big) = \mlt_e \big( \PD_m(\KK) \big) = \mlt_u \big( \PD_m(\KK) \big) . \]
+	Moreover, we have $Y^{1 \cup \pa(1)} = Y$ and hence Theorem~\ref{thm:LinearIndependenceDAG}(c) shows that there is a unique MLE if and only if $Y$ has full row rank. Otherwise, the log-likelihood $\ell_Y$ is not bounded from above, by Theorem~\ref{thm:LinearIndependenceDAG}(a).
+	\hfill\exSymbol
+\end{example}
+
+\begin{example}[based on{\cite[Example~5.8]{SiagaPaper}}] \label{ex:TDAGnullconeNotZariskiClosed}
+	\ \\
+	Let $\Gcal$ be the TDAG
+	\begin{tikzcd}[cramped, sep=small]
+		\; 2 \ar[r] & 1 & 3 \ar[l]
+	\end{tikzcd}. The corresponding group $G := \AG \subseteq \GL_3(\KK)$ consists of invertible matrices of the form
+	\[ g = \begin{pmatrix} * & * & * \\ 0 & * & 0 \\ 0 & 0 & * \end{pmatrix}.
+	\]
+	We know from Corollary~\ref{cor:MLthresholdsDAG} that $\mlt_e(\MGar) = 2 + 1 = 3$ as vertex $1$ has two parents.
+	A sample matrix $Y \in \KK^{m \times n}$ is $\GSL$-polystable if and only if $Y^{(2)}, Y^{(3)} \neq 0$ and $Y^{(1)}$ is not in the linear span of $Y^{(2)}$ and $Y^{(3)}$, compare Theorem~\ref{thm:StabilityLinearIndepTDAG}. Otherwise, it is unstable. Furthermore, $Y$ is stable if and only if it has full row rank, since $Y^{(1 \cup \pa(1))} = Y$.
+	
+	Let $n=2$ and consider the sample matrix
+	\[ Y = \begin{pmatrix} 0 & 1  \\ 1 & 0 \\ 1 & 0 \end{pmatrix} . \]
+	It is polystable and hence there exists an MLE given $Y$. One can check that $Y$ is of minimal norm in its $\GSL$-orbit. Therefore, $2 \Id_3$ is an MLE given $Y$ using Theorem~\ref{thm:GroupWeakCorrespondence} and that $\lambda = 2$ minimizes $x \mapsto \frac{3}{2} x - 3 \log(x)$, see Lemma~\ref{lem:ForWeakCorrespondence}(ii).
+	Moreover, the $\GSL$-stabilizer of $Y$ is in bijection with the set of MLEs given $Y$, by Proposition~\ref{prop:StabilizerMLEsTDAG}. We have
+	\[ 
+	(\GSL)_Y = \left\lbrace \begin{pmatrix} 1 & t & -t \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix} \colon t \in \KK \right\rbrace
+	\text{, thus} \;
+	\left\lbrace 2 \begin{pmatrix} 1 & t & -t \\ \overline{t} & |t|^2 + 1 & - |t|^2 \\ - \overline{t} & - |t|^2 & |t|^2 + 1 \end{pmatrix} \colon t \in \KK \right\rbrace
+	 \]
+	is the set of MLEs given $Y$. Hence, there are infinitely many MLEs given $Y$.
+	\hfill\exSymbol
+\end{example}
+
+The next proposition gives a precise criterion when the null cone under the $\GSL$ action, i.e., the set of sample matrices $Y \in \KK^{m \times n}$ for which $\ell_Y$ is not bounded from above, is Zariski closed. This extends and clarifies \cite[Corollary~5.7]{SiagaPaper}, which is Proposition~\ref{prop:TDAGnullcone}(ii).
+
+For this, we use the notion of an unshielded collider from Definition~\ref{defn:UnshieldedCollider}. Furthermore, the \emph{length} %todo or "depth" is the common terminology
+\index{length of a directed acyclic graph} $l(\Gcal)$ of a DAG $\Gcal$ is the number of arrows in a maximal directed path in $\Gcal$. Note that $l(\Gcal) \leq m-1$ and if $\Gcal$ is transitive then actually $\, l(\Gcal) \leq \max_{i \in [m]} |\pa(i)| < \mlt_e(\MGar)$.
+
+\begin{prop}\label{prop:TDAGnullcone}
+	Let $\Gcal$ be a TDAG with group $G := \AG \subseteq \GL_m(\KK)$ and consider the action of $\GSL$ on $\KK^{m \times n}$ via left multiplication.
+		\begin{itemize}
+			\item[(i)] If $n < \mlt_e(\MGar)$, then the Zariski closure of the null cone is $\KK^{m \times n}$. The null cone is Zariski closed, i.e., equal to $\KK^{m \times n}$, if and only if $n \leq l(\Gcal)$.
+						
+			\item[(ii)] If $n \geq \mlt_e(\MGar)$, then the irreducible components of the Zariski closure of the null cone are determinantal varieties:
+			each component is defined by the maximal minors of the submatrix $Y^{(s \cup \pa(s))}$, where $s$ is a childless vertex.
+			The null cone is Zariski closed if and only if $\Gcal$ has no unshielded colliders.
+		\end{itemize}
+\end{prop}
+
+\begin{proof}
+		First, let $n < \mlt_b(\MGar) = \mlt_e(\MGar)$. By Theorem~\ref{thm:FullCorrespondenceTDAG}(a) almost all $Y$ are $\GSL$-unstable, so the null cone is Zariski dense in $\KK^{m \times n}$. This shows the first part of (i). Now, additionally assume $n \leq l := l(\Gcal)$. There is some directed path
+			\begin{center}
+				\begin{tikzcd}
+					p_0 & p_1 \ar[l] & p_2 \ar[l] & \cdots \ar[l] & p_l \ar[l]
+				\end{tikzcd}
+			\end{center}
+		in $\Gcal$. The transitivity of $\Gcal$ implies that $p_{j+1}, \ldots, p_l$ are parents of $p_j$ for all $j = 0,1,\ldots,l$. Now, for any $Y \in \KK^{m \times n}$ the row vectors $Y^{(p_j)} \in \KK^{1 \times n}$, $j =0,1,\ldots,l$ are linearly dependent as $n < l + 1$. Therefore, there is some non-trivial linear combination $\sum_j \lambda_j Y^{(p_j)} = 0$ and for the minimal $k$ such that $\lambda_k \neq 0$ we see that $Y^{(p_k)}$ is a linear combination of (some of) its parent rows. Hence, $Y$ is $\GSL$-unstable by Theorem~\ref{thm:StabilityLinearIndepTDAG}(a).
+		
+		Conversely, if $n > l = l(\Gcal)$, then we construct a polystable $Y$ as follows. Fix linear independent row vectors $r_0, r_1, \ldots, r_l \in \KK^{1 \times n}$ using $n \geq l+1$ and denote by $l(i)$ the length of a longest path in $\Gcal$ starting at $i$. Then $0 \leq l(i) \leq l$, $l(i) = 0$ if and only if vertex $i$ is childless, and if $p \to i$ then $l(i) < l(p)$. Now, define $Y \in \KK^{m \times n}$ by setting $Y^{(i)} := r_{l(i)}$ for all $i \in [m]$. By construction, the parent rows of $Y^{(i)} = r_{l(i)}$ are all contained in $\{ r_{l(i) +1}, \ldots, r_{l(\Gcal)}\}$. Thus, $Y^{(i)}$ is not in the linear span of its parent rows and hence $Y$ is polystable.
+		
+		To prove (ii), assume that $n \geq \mlt_e(\MGar) = 1 + \max_{i \in [m]} | \pa(i) |$. The null-cone is the finite union of all
+			\[ \mathcal{L}(i) := \left\lbrace Y \in \KK^{m \times n} \mid Y^{(i)} \in \Span \{Y^{(j)} \mid j \in \pa(i)\} \right\rbrace \]
+		where $i \in [m]$. Taking the Zariski closure commutes with finite unions, hence the Zariski closure of the null cone is the finite union of $\overline{\mathcal{L}(i)}^{Z}$. Since $n \geq 1 + \max_{i \in [m]} | \pa(i) |$, the closure $\overline{\mathcal{L}(i)}^{Z}$ can be described via the the maximal minors of the matrix $Y^{(i \cup \pa(i))}$. %todo add a reference
+		Thus, the Zariski closure of the null cone actually contains all matrices that are \emph{not} stable, see Theorem~\ref{thm:StabilityLinearIndepTDAG}(c).
+		If a vertex $i$ has child $c$, then by transitivity all parents of $i$ are also parents of $c$. Hence, $Y^{(i \cup \pa(i))}$ is a submatrix of $Y^{(c \cup \pa(c))}$ and so $\overline{\mathcal{L}(i)}^{Z} \subseteq \overline{\mathcal{L}(c)}^{Z}$. This shows the first part of (ii).
+		
+		Recall from Remark~\ref{rem:ParentsOlderThanChildren} that we assume $i < j$ whenever $i \leftarrow j$ in $\Gcal$. Assume $\Gcal$ has no unshielded colliders. Let $Y$ be a matrix in the Zariski closure of the null cone. Then there is some vertex $i = p_0 \in [m]$ such that $Y \in \overline{\mathcal{L}(i)}^{Z}$, i.e., there is a non-trivial linear combination $\sum_{j=0}^s \lambda_j Y^{(p_j)} = 0$, where $p_1,\ldots, p_s$ are the parents of $i = p_0$. Let $k$ be the smallest integer with $\lambda_k \neq 0$. Then $Y^{(p_k)}$ is in the linear span of $Y^{(p_{k+1})}, \ldots, Y^{(p_s)}$. If $p_t$ for some $t \in \{k+1,\ldots,s\}$ would not be a parent of $p_k$, then necessarily $k>0$ (i.e., $p_k \neq i$) and so $\Gcal$ would have the unshielded collider $p_t \to i \leftarrow p_k$; a contradiction. Therefore, $Y^{(p_k)}$ is in the linear span of its parent rows and hence $Y$ is unstable. Thus, the null cone is Zariski closed.
+		
+		On the other hand, assume $\Gcal$ has an unshielded collider $j \to i \leftarrow k$ where $j < k$. If $i$ has several pairs of parents that give an unshielded collider, then consider a pair $j < k$ where $k$ is maximal. This ensures that any parent $p$ of $k$ is also a parent of $j$ as follows. We have $p > k > j$, so in particular $j \not\to p$. By transitivity $p \to k$ and $k \to i$ show that $p$ is a parent of $i$. Thus, $p$ must be a parent of $j$ as otherwise $j \to i \leftarrow p$ would be an unshielded collider with $p > k$, which contradicts the maximality of $k$. With this we construct a matrix $Y$ which is not in the null cone but in its Zariski closure. Each row of $Y$, except for the $k^{th}$ row, is chosen such that it is not in the linear span of its parent rows. This is possible as $n \geq \mlt_e(\MGar)$. In particular, the row $Y^{(j)}$ is not in the linear span of its parent rows, which include the parent rows of $Y^{(k)}$ by the above argument. Thus, setting $Y^{(k)} := Y^{(j)}$ ensures that $Y$ is polystable by Theorem~\ref{thm:StabilityLinearIndepTDAG}(b). Moreover, the parent rows $Y^{(j)}$ and $Y^{(k)}$ of $Y^{(i)}$ are linearly dependent, so $Y$ is contained in $\overline{\mathcal{L}(i)}^{Z}$ and hence in the Zariski closure of the null cone.
+\end{proof}
+
+Let us illustrate the previous proposition in an example.
+
+\begin{example}\label{ex:TDAGnullcone}
+	Let $m = 4$ and consider the TDAG $\Gcal$ given by
+		\begin{center}
+			\begin{tikzcd}
+				3 \ar[r] \ar[rd] & 2 \ar[d] & 4 \ar[l] \ar[dl] \\
+				& 1 &
+			\end{tikzcd}
+		\end{center}
+	We have $l(\Gcal) = 2$ and $\mlt_e(\MGar) = 4$, as vertex $1$ has three parents. Denote the corresponding group by $G := \AG$ and consider the usual $\GSL$ action on the sample space $\KK^{4 \times n}$.
+	
+	For sample size $n=1,2 $ the null cone equals $\KK^{4 \times n}$, by Proposition~\ref{prop:TDAGnullcone}(i). Alternatively, this can be checked via Theorem~\ref{thm:StabilityLinearIndepTDAG}(a) by case distinction.
+	
+	If $n=3 < \mlt_e(\MGar)$, then the null cone is only Zariski dense in $\KK^{4 \times 3}$ as $3 = n > l(\Gcal) = 2$. For example, the sample matrix
+		\begin{equation}\label{eq:TDAGnullcone}
+			\begin{pmatrix}
+				1 & 0 & 0  \\
+				0 & 1 & 0  \\
+				0 & 0 & 1  \\
+				0 & 0 & 1 
+			\end{pmatrix}
+		\end{equation}
+	is polystable and was constructed using $l(1)=0$, $l(2) =1$, $l(3)=l(4)=2$ and the recipe from the proof of Proposition~\ref{prop:TDAGnullcone}.
+	
+	If $n= \mlt_e(\MGar) = 4$, the Zariski closure of the null cone has one irreducible component given by the sink $1$, see Proposition~\ref{prop:TDAGnullcone}(ii). Since $Y^{(1 \cup \pa(1))} = Y$ has exactly one maximal minor, the Zariski closure of the null cone is the set of singular matrices $\{Y \in \KK^{4 \times 4} \mid \det(Y) = 0\}$. Furthermore, $\Gcal$ has the unshielded collider $3 \to 2 \leftarrow 4$, so the null cone is not Zariski closed. Indeed, if we append a zero column to the matrix from Equation~\eqref{eq:TDAGnullcone}, then we obtain a polystable $Y'$ that is singular.
+	\hfill\exSymbol
+\end{example}
+
+%todo point out that this very short.
+Finally, we describe the implications of the above results for undirected Gaussian graphical models from Example ~\ref{ex:UndirectedGraphicalModelIntro}, see also \cite[Chapter 13]{SullivantBook}. Remember that a Gaussian graphical model on an \emph{undirected} graph $\Gcal$ is given by all concentration matrices $\Psi$ such that $\Psi_{ij}=0$ whenever the edge
+\begin{tikzcd}[cramped, sep=small]
+	i \ar[r, no head] & j
+\end{tikzcd}
+is missing from $\Gcal$. A natural question is to determine which undirected Gaussian graphical models are Gaussian group models, i.e., of the form $\Mg_G$ for some group $G \subseteq \GL_m(\KK)$. For instance, note that the undirected model corresponding to 
+\begin{tikzcd}[cramped, sep=small]
+	1 \ar[r, no head] & 2 \ar[r, no head] & 3
+\end{tikzcd}
+is the same as the directed model from Example \ref{ex:path1}. We argue that any undirected model that is a Gaussian group model is covered by TDAGs.
+
+First, note that the directed model of any TDAG without unshielded colliders equals the undirected model of its underlying undirected graph, see Theorem~\ref{thm:DAGCONeqChapter6}
+or \cite[Theorem~3.1]{andersson1997markov}.
+Conversely, a necessary condition for an undirected graphical model to be a Gaussian group model can be obtained from \cite[Theorem 2.2]{letac2007wishart}: an undirected Gaussian graphical model is a transformation family\footnote{Recall that any Gaussian group model is a transformation family, compare Remark~\ref{rem:TransitiveActionOnMgG}(a).} if and only if the graph $\Gcal$ has neither $4$-cycles nor $4$-chains as induced subgraphs. There are two consequences of these conditions. One is that there is a way to \emph{direct} the edges in $\Gcal$ so that there are no unshielded colliders.
+The other consequence is that this can be done in such a way so that the undirected model coincides with the directed model $\MGar$, and the directed graph must be a TDAG, see page 7 of the supplementary material of \cite{draisma2013groups}.
+In summary, we have the following equivalence.
+
+\begin{remark}[{\cite[Remark~5.9]{SiagaPaper}}]
+	\label{rem:undirectedGraphs}
+	The undirected graphical models that are Gaussian group models are the TDAG models without unshielded colliders. 
+	They are exactly those models 
+	whose sets of tuples of $n$ samples with unbounded likelihood are Zariski closed for all $n \geq \mlt_e$,
+	by Proposition~\ref{prop:TDAGnullcone}.
+	\hfill\remSymbol
+\end{remark}
+
+
+\section{Discussion and Outlook}\label{sec:DiscussionGaussian}
+
+TODO
+
+%todo short intro
+
+
+
+%------ The case of subgroups of the special linear group ------------------------
+
+%\subsection*{Subgroups of the special linear group}
+%describe how the main theorems change, if we consider (reductive) groups $G \subseteq \SL_m$ ?
+
+
+%------ Further Literature ------------------------
+
+\subsection*{Related Literature}
+
+In the following we comment on literature related to this chapter respectively to \cite{SiagaPaper}. We start with works that are contained in this thesis.
+
+The companion paper \cite{DiscretePaper}, presented in Chapter~\ref{ch:LogLinearModels}, can be seen as a discrete counterpart of \cite{SiagaPaper}. We discuss similarities and differences between the Gaussian setting and the discrete setting of log-linear models in a separate subsection below.
+
+The theory of Gaussian group models and its relation to TDAG models (Section~\ref{sec:TDAGs}) stimulated further research on directed Gaussian graphical models \cite{RDAG}. We present this work in detail in Chapter~\ref{ch:RDAGs}.
+
+\bigskip
+
+Now, we focus on papers that are not co-authored by the author of this thesis.
+Recently, there has been a flurry of new results on ML estimation of matrix and tensor normal models.
+For matrix normal models, the paper \cite{DrtonKurikiHoff} gave new characterizations of ML estimation and new bounds on ML thresholds. In Section~\ref{sec:MatrixNormalModels} we compared some of their results to those from \cite{SiagaPaper}.
+
+\medskip
+
+All ML thresholds for matrix normal models have been completely characterized in \cite{DM21MatrixNormal}, by crucially using the relations between invariant theory and ML estimation presented in Section~\ref{sec:SelfAdjointMgG}. Derksen and Makam translate the problem of computing ML thresholds via the dictionary from Theorem~\ref{thm:bigTheoremMatrixNormal} to generic semi/poly/stability and use invariant theory for representations of the $n$-Kronecker quiver; see Example~\ref{ex:QuiverRep} for the $n$-Kronecker quiver.
+
+At first glance, the solution via invariant theory, a completely different mathematical area, is certainly surprising and might seem unnatural. A posteriori, the proof through invariant theory adjusts this first impression.
+As pointed out in \cite[Section~1.3]{DM21MatrixNormal}, there is a very interesting change of viewpoint thanks to the invariant theory perspective. Consider the matrix normal model $\MTK(m_1, m_2)$. From a statistical point of view, when studying ML thresholds it is natural to fix the dimensions $m_1$ and $m_2$, and to let the sample size $n$ vary. Then the behaviour of ML estimation seems to be rather ``wild'', i.e., it is difficult to spot a pattern; compare \cite{DrtonKurikiHoff, DM21MatrixNormal}.
+On the other hand, the representation theory of the $n$-Kronecker quiver highly depends on the number $n$ of arrows.\footnote{Indeed, for $n=1$ the quiver is \emph{of finite representation type}, for $n=2$ the quiver is \emph{tame} while for $n=3$ it is so-called \emph{wild}. We refer to \cite{DerksenWeymanBook} for details.}
+Thus, through the lens of invariant theory, when studying generic semi/poly/stability it is natural to fix $n$ and let the dimensions $m_1$ and $m_2$ vary. This viewpoint unravels the seemingly wild behaviour and yields a clear picture!
+For illustration and convenience of the reader, we state the main result here.
+
+%todo refer to this whenever citing DM21
+\begin{theorem}[ML thresholds for matrix normal model, {\cite[Theorem~1.3]{DM21MatrixNormal}}] \label{thm:MatrixNormalThresholdsDM21}
+	Consider the matrix normal model $\MTK(m_1,m_2)$, where $\KK \in \{\RR, \CC\}$. Let $d$ be the greatest common divisor of $m_1$ and $m_2$. Set $r:= (m_1^2 + m_2^2 - d^2)/(m_1 m_2)$. Then the ML thresholds for $\MTK(m_1,m_2)$ satisfy $\mlt_b = \mlt_e$, and existence and uniqueness threshold are given as follows:
+	\begin{enumerate}\itemsep 0pt
+		\item If $m_1 = m_2 = 1$, then $\mlt_e = \mlt_u = 1$.
+		
+		\item If $m_1 = m_2 > 1$, then $\mlt_e = 1$ and $\mlt_u = 3$.
+		
+		\item If $m_1 \neq m_2$ and $r \in \ZZ$, then $\mlt_e = r$. If $d=1$, then $\mlt_u = r$, and if $d>1$, then $\mlt_u = r+1$.
+		
+		\item If $m_1 \neq m_2$ and $r \notin \ZZ$, then $\mlt_e = \mlt_u = \Big\lceil \frac{m_1^2 + m_2^2}{m_1 m_2} \Big\rceil$.
+	\end{enumerate}
+\end{theorem}
+
+Only shortly afterwards, the strong/full correspondence in Theorem~\ref{thm:StrongFullCorrespondence} even led to a full determination of ML thresholds for tensor normal models \cite{DMW22TensorNormal}. There, the authors use that the Castling transform on tensors preserves generic semi/poly/stability \cite[Section~3]{DMW22TensorNormal}. The main result \cite[Theorem~1.1]{DMW22TensorNormal} contains Theorem~\ref{thm:MatrixNormalThresholdsDM21} as a special case.
+
+\medskip
+
+Remember that $\Mg_G$ for a Zariski closed self-adjoint group $G$ is a totally geodesic submanifold of $\PD_m(\KK)$, Theorem~\ref{thm:MGtotallyGeodsicSymmetric}, and that the log-likelihood is a geodesically convex function on $\Mg_G$. This has been observed for matrix normal models in \cite{WieselGeodesic}. Geodesic convexity has been applied in \cite{DrtonKurikiHoff, OptimalSampleComplexity}. Actually, in \cite{OptimalSampleComplexity} it is a crucial tool to study (near) optimal sample complexity of matrix and tensor normal models. The main result for tensor normal models is \cite[Theorem~2.4]{OptimalSampleComplexity}, which can be strengthened for matrix normal models \cite[Theorem~2.7]{OptimalSampleComplexity}. Moreover, the flip-flop algorithm is shown to efficiently compute the MLE with high probability, \cite[Theorems~2.9 and~2.10]{OptimalSampleComplexity}. Theorem~\ref{thm:MGtotallyGeodsicSymmetric} and the outlined algorithmic consequences in Subsection~\ref{subsec:AlgorithmsSelfAdjoint} raise the following questions on generalizing the studies of \cite{OptimalSampleComplexity}.
+
+\begin{problem} \label{Prob:OptimalSampleComplexity}
+	Let $G \subseteq \GL_m(\KK)$ be a Zariski closed self-adjoint group and consider the Gaussian group model $\Mg_G$. Can one, similarly to \cite{OptimalSampleComplexity}, characterize (near) optimal sample complexity of $\Mg_G$ using geodesic convexity? Moreover, do the first and/or second order method from \cite{GradflowArXiv} yield, with high probability, an efficient computation of the MLE?
+\end{problem}
+
+
+Now, we turn from geodesic convexity to Gaussian group models that are convex in the usual Euclidean sense. Such models are studied in \cite{ishi2021Convex}. A complete characterization of Euclidean convex Gaussian group models is provided in \cite[Proposition~2 and Theorem~2]{ishi2021Convex}. Invariant theory is an important proof ingredient; more precisely, Vinberg theory (see \cite[Section~3.7]{Wallach}) is applied. Furthermore, the uniqueness threshold $\mlt_u$ is computed \cite[Theorem~4]{ishi2021Convex}. It is also shown that, if there exists a unique MLE, then the MLE is a rational function in the samples \cite[Theorem~3]{ishi2021Convex}.
+ 
+In Section~\ref{sec:MatrixNormalModels} we studied ML estimation for matrix normal models via operator scaling (i.e., the left-right action). We remark that operator scaling was also used in \cite{franks2020rigorous} to study a different estimator from statistics: Tyler's M estimator for elliptical distributions. The authors prove results on the sample complexity \cite[Theorems~1.1 and~1.2]{franks2020rigorous} of the estimator and they show that Tyler's iterative procedure converges quickly with high probability \cite[Theorem~1.3]{franks2020rigorous}.
+
+
+
+
+
+
+%------ Comparison with log-linear models ------------------------
+\subsection*{Comparison with log-linear models}
+
+We highlight similarities and differences between the multivariate Gaussian setting from~\cite{SiagaPaper} studied in this chapter and the discrete setting of log-linear models from \cite{DiscretePaper} presented in Chapter~\ref{ch:LogLinearModels}. This is based on \cite[Section~6]{DiscretePaper}.
+We start by comparing the two statistical settings.
+
+In the discrete setting, a model is given as a subset of the $(m-1)$-dimensional probability simplex $\Delta_{m-1} \subseteq \RR^m$. In comparison, in the multivariate Gaussian setting, a model is given by a set of concentration matrices in the cone of positive definite matrices $\PD_m(\KK)$.
+For a discrete model $\Mcal \subseteq \Delta_{m-1}$ the data/sufficient statistics is a vector of counts $u \in \ZZ^m_{\geq 0}$ with $u_+ = n$ the total numbers of observations. The log-likelihood given $u$ at $p \in \mathcal{M}$ is $\sum_{j=1}^m u_j \log(p_j)$, see \eqref{eq:LikelihoodDiscreteAndLog}. In comparison, for a Gaussian model the data is a tuple of samples $Y \in (\KK^m)^n$, the sample covariance matrix $S_Y = \frac{1}{n} \sum_{i=1}^n Y_i Y_i\HT$ provides a sufficient statistics and the log-likelihood at $Y$ is given by
+$\log \det (\Psi) - \tr (\Psi S_Y)$, see \eqref{eq:GaussianLogLikelihood}.
+
+\paragraph{Stability.}
+In both settings we link notions of stability under a group action to ML estimation in statistical models: for log-linear models in Theorem~\ref{thm:MLEpolystableTorus} and for Gaussian group models in, e.g., Theorems~\ref{thm:GroupWeakCorrespondence} and~\ref{thm:StrongFullCorrespondence}. However, a main difference is where the dependence on the data enters. For log-linear models we consider an action of $\GT_d(\CC)$ on $\CC^m$ which \emph{depends on the data}, and we always study stability of the all-ones vector $\ones_m$. In contrast, for a Gaussian group model $\Mg_G$, where $G \subseteq \GL_m(\KK)$, we always use the action of $G$ on the sample space $(\KK^m)^n$ via left-multiplication, while we consider stability notions \emph{for the observed data}, i.e., the tuple of samples.
+
+For log-linear models, the log-likelihood is always bounded from above and the all-ones vector cannot be unstable. In contrast, in the Gaussian setting a tuple of samples is unstable if and only if the log-likelihood is not bounded from above. 
+In both cases, semistability is equivalent to the log-likelihood being bounded from above and polystability is equivalent to the existence of an MLE. In the log-linear case, the MLE is unique if it exists, while for Gaussian group models there may be infinitely many.
+In fact, the existence of a unique MLE for Gaussian group models often relates to stability of a tuple of samples, see Theorems~\ref{thm:StrongFullCorrespondence} and~\ref{thm:FullCorrespondenceTDAG}.
+In contrast, for log-linear models the all-ones vector is never stable.
+
+\paragraph{MLE computation.}
+An important similarity between the log-linear and Gaussian settings is that norm minimizers under the respective group actions give an MLE (if it exists), see Theorem~\ref{thm:MLEviaMomentMapLogLinear} and Theorem~\ref{thm:GroupWeakCorrespondence}.
+For log-linear models, we compute real MLEs from complex torus orbits.
+For Gaussian group models, we  compute the MLE over $\KK \in \{ \RR, \CC \}$ from orbits over the same field $\KK$.
+If the all-ones vector is semistable but not polystable, 
+Theorem~\ref{thm:MLEviaMomentMapLogLinear} yields the extended MLE.
+However, in the Gaussian case, if a tuple of samples $Y$ is semistable but not polystable there is usually no meaningful notion of extended MLE, compare Remark~\ref{rem:ExtendedMLEGaussian}.
+
+
+\paragraph{Scaling.}
+From the point of view of scaling algorithms, Sinkhorn's algorithm is  a common origin to both the log-linear and the Gaussian settings. As we described in Section~\ref{sec:ScalingLogLinear}, Sinkhorn scaling to target marginals is iterative proportional scaling (IPS) for the independence model and this extends to IPS for a general log-linear model. On the Gaussian side, Sinkhorn scaling generalizes to alternating minimization procedures for computing MLEs of matrix normal models and tensor normal models.
+This algorithm is used both in invariant theory for norm minimization and in statistics to compute the MLE, compare Subsection~\ref{subsec:FlipFlopVsOperatorScaling}.
+
+Since norm minimizers yield an MLE in both settings, one can use scaling algorithms from invariant theory to approximate an MLE; compare right hand side of Figures~\ref{fig:DiscreteAlgorithms} and~\ref{fig:GaussianAlgorithms}. Remember that the above discussion naturally motivates to regard geodesic convex methods for Norm Minimization~\ref{comp:NormMinim} and the Scaling Problem~\ref{comp:Scaling}
+as IPS for Gaussian group models $\Mg_G$ with Zariski closed self-adjoint group $G$, compare Subsection~\ref{subsec:AlgorithmsSelfAdjoint}.
+
+
+\paragraph{Exponential Families and Transformation Families.}
+We conclude by pointing out the following with respect to exponential families and transformation families, compare Definition~\ref{defn:TransformationFamily}.\footnote{\cite[Section~6]{DiscretePaper} imprecisely states that ``log-linear models and the Gaussian group models [...] are examples of exponential transformation families''. The paragraph clarifies this.}
+Remember that log-linear models are discrete regular exponential families \cite[Section~6.2]{SullivantBook}. However, in general they are not transformation families: the group of bijections on the sample space $[m]$ is finite and hence cannot act transitively on an infinite log-linear model.
+
+Gaussian group models are examples of transformation families, compare Remark~\ref{rem:TransitiveActionOnMgG}, and they are \emph{sub}models of the saturated Gaussian model, which is a Gaussian regular exponential family \cite[Section~6.3]{SullivantBook}. In general, a Gaussian group model itself cannot be a regular exponential family. Otherwise an MLE would be unique if it exists \cite[Corollary~7.3.8]{SullivantBook}, but this is usually not the case, compare Proposition~\ref{prop:UniqueMLEcompactStabilizer} or Proposition~\ref{prop:StabilizerMLEsTDAG}.
+
+Despite the mentioned differences between the discrete and Gaussian setting, it is interesting and natural to ask the following.
+
+\begin{problem}\label{prob:UnifyingConcept}
+Is there a unifying concept that links invariant theory to maximum likelihood estimation, e.g., in the context of (sub)models of exponential families? Or in the context of transformation families?
+
+More specifically, is there a unifying theory that covers Chapters~\ref{ch:LogLinearModels} and~\ref{ch:GaussianGroupModels} at the same time?\footnote{Admittedly, an affirmative answer to this specific question does not seem very likely to the author, given the mentioned differences.}
+\end{problem}
+
+
+% log-linear models are discrete regular exponential families
+%Gaussian group models are transformation models; and they are submodels of the saturated Gaussian model, which is an exponential family
+
+%log-linear models are not transformation families; the space of bijections on the sample space $[m]$ is a finite group; hence it cannot act transitively on the log-linear model
+%a Gaussian group model, even if G is Zariski closed and self-adjoint, are in general not regular exponential families (otherwise an MLE would be unique if it exists; Sullivant Corollary 7.3.8); e.g., MLE does not have to be unique in matrix normal models
+
+%end copy paste from Discrete Paper
+
+
+\index{Gaussian group model|)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
